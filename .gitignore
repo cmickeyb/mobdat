@@ -1,0 +1,5 @@
+tripinfo.xml
+*.pyc
+*.out
+*.net.xml
+build
