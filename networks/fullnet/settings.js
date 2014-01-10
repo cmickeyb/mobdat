@@ -28,7 +28,8 @@
         "VelocityDelta" : 0.1,
         "AccelerationDelta" : 0.05,
         "EndPoint" : "http://127.0.0.1:7060/Dispatcher/",
-        "Scene" : "Scratch 00"
+        "Scene" : "Scratch 00",
+        "Binary" : true
     },
     
     "SumoConnector" :

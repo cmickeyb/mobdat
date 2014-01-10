@@ -60,7 +60,7 @@ ExitFlag = 0
 class OpenSimUpdateThread(threading.Thread) :
 
     # -----------------------------------------------------------------
-    def __init__(self, workq, endpoint, capability, scene, vmap) :
+    def __init__(self, workq, endpoint, capability, scene, vmap, binary = False) :
         threading.Thread.__init__(self)
 
         self.TotalUpdates = 0
@@ -69,12 +69,14 @@ class OpenSimUpdateThread(threading.Thread) :
         self.Capability = capability
         self.Scene = scene
         self.Vehicles = vmap
+        self.Binary = binary
 
         logfile = 'log%d' % (random.randint(0,1000))
         self.OpenSimConnector = OpenSimRemoteControl.OpenSimRemoteControl(self.EndPoint, request = 'async', logfile = logfile)
         # self.OpenSimConnector = OpenSimRemoteControl.OpenSimRemoteControl(self.EndPoint, request = 'sync')
         self.OpenSimConnector.Capability = self.Capability
         self.OpenSimConnector.Scene = self.Scene
+        self.OpenSimConnector.Binary = self.Binary
 
     # -----------------------------------------------------------------
     def run(self) :
@@ -202,6 +204,7 @@ class OpenSimConnector :
         self.EndPoint = settings["OpenSimConnector"]["EndPoint"]
         self.AsyncEndPoint = settings["OpenSimConnector"]["AsyncEndPoint"]
         self.Scene = settings["OpenSimConnector"]["Scene"]
+        self.Binary = settings["OpenSimConnector"].get("Binary",False)
 
         self.OpenSimConnector = OpenSimRemoteControl.OpenSimRemoteControl(self.EndPoint)
         self.OpenSimConnector.Capability = self.Capability
@@ -219,7 +222,7 @@ class OpenSimConnector :
         self.UpdateThreads = []
         self.UpdateThreadCount = settings["OpenSimConnector"].get("UpdateThreadCount",2)
         for count in range(self.UpdateThreadCount) :
-            thread = OpenSimUpdateThread(self.WorkQ, self.EndPoint, self.Capability, self.Scene, self.Vehicles)
+            thread = OpenSimUpdateThread(self.WorkQ, self.EndPoint, self.Capability, self.Scene, self.Vehicles, self.Binary)
             thread.start()
             self.UpdateThreads.append(thread)
 
