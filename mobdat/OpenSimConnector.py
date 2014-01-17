@@ -165,16 +165,18 @@ class OpenSimVehicle :
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class OpenSimConnector :
+class OpenSimConnector(EventHandler) :
 
     # -----------------------------------------------------------------
-    def __init__(self, evhandler, settings) :
+    def __init__(self, evrouter, settings) :
         """Initialize the OpenSimConnector by creating the opensim remote control handlers.
 
         Keyword arguments:
         evhandler -- the initialized event handler, EventRegistry type
         settings -- dictionary of settings from the configuration file
         """
+
+        EventHandler.__init__(self, evrouter)
 
         # Get the world size
         wsize =  settings["OpenSimConnector"]["WorldSize"]
@@ -206,26 +208,8 @@ class OpenSimConnector :
         self.Scene = settings["OpenSimConnector"]["Scene"]
         self.Binary = settings["OpenSimConnector"].get("Binary",False)
 
-        self.OpenSimConnector = OpenSimRemoteControl.OpenSimRemoteControl(self.EndPoint)
-        self.OpenSimConnector.Capability = self.Capability
-        self.OpenSimConnector.Scene = self.Scene
-
-        # Connect to the event registry
-        self.EventHandler = evhandler
-        self.EventHandler.SubscribeEvent(EventTypes.EventCreateObject, self.HandleCreateObjectEvent)
-        self.EventHandler.SubscribeEvent(EventTypes.EventDeleteObject, self.HandleDeleteObjectEvent)
-        self.EventHandler.SubscribeEvent(EventTypes.EventObjectDynamics, self.HandleObjectDynamicsEvent)
-        self.EventHandler.SubscribeEvent(EventTypes.TimerEvent, self.SimulationStep)
-
-        # Start the worker threads
-        self.WorkQ = Queue.Queue(0)
-        self.UpdateThreads = []
-        self.UpdateThreadCount = settings["OpenSimConnector"].get("UpdateThreadCount",2)
-        for count in range(self.UpdateThreadCount) :
-            thread = OpenSimUpdateThread(self.WorkQ, self.EndPoint, self.Capability, self.Scene, self.Vehicles, self.Binary)
-            thread.start()
-            self.UpdateThreads.append(thread)
-
+        self.CurrentStep = 0
+        self.CurrentTime = 0
 
     # -----------------------------------------------------------------
     def HandleCreateObjectEvent(self,event) :
@@ -312,14 +296,8 @@ class OpenSimConnector :
         return True
 
     # -----------------------------------------------------------------
-    def SimulationStart(self) :
-        self.CurrentStep = 0
-        self.CurrentTime = 0
-        return True
-
-    # -----------------------------------------------------------------
     # Returns True if the simulation can continue
-    def SimulationStep(self, event) :
+    def HandleTimerEvent(self, event) :
         self.CurrentStep = event.CurrentStep
         self.CurrentTime = event.CurrentTime
         
@@ -329,7 +307,7 @@ class OpenSimConnector :
         #     self.WorkQ.join()
 
     # -----------------------------------------------------------------
-    def SimulationStop(self) :
+    def HandleShutdownEvent(self) :
         # print 'waiting for update thread to terminate'
         for count in range(self.UpdateThreadCount) :
             self.WorkQ.put(None)
@@ -337,8 +315,37 @@ class OpenSimConnector :
         for count in range(self.UpdateThreadCount) :
             self.UpdateThreads[count].join()
 
+        # clean up all the outstanding vehicles
+        for vehicle in self.Vechicles.itervalues() :
+            self.OpenSimConnector.DeleteObject(vehicle)
+
         print 'Create/delete messages sent to OpenSim: %d' % (self.OpenSimConnector.MessagesSent)
         print '%d vehicles interpolated correctly' % (self.Interpolated)
         return True
 
+
+    # -----------------------------------------------------------------
+    def SimulationStart(self) :
+        self.OpenSimConnector = OpenSimRemoteControl.OpenSimRemoteControl(self.EndPoint)
+        self.OpenSimConnector.Capability = self.Capability
+        self.OpenSimConnector.Scene = self.Scene
+
+        # Connect to the event registry
+        self.SubscribeEvent(EventTypes.EventCreateObject, self.HandleCreateObjectEvent)
+        self.SubscribeEvent(EventTypes.EventDeleteObject, self.HandleDeleteObjectEvent)
+        self.SubscribeEvent(EventTypes.EventObjectDynamics, self.HandleObjectDynamicsEvent)
+        self.SubscribeEvent(EventTypes.TimerEvent, self.HandleTimerEvent)
+        self.SubscribeEvent(EventTypes.ShutdownEvent, self.HandleShutdownEvent)
+
+        # Start the worker threads
+        self.WorkQ = Queue.Queue(0)
+        self.UpdateThreads = []
+        self.UpdateThreadCount = settings["OpenSimConnector"].get("UpdateThreadCount",2)
+        for count in range(self.UpdateThreadCount) :
+            thread = OpenSimUpdateThread(self.WorkQ, self.EndPoint, self.Capability, self.Scene, self.Vehicles, self.Binary)
+            thread.start()
+            self.UpdateThreads.append(thread)
+
+        # all set... time to get to work!
+        self.HandleEvents()
 

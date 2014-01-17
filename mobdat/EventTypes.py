@@ -49,6 +49,30 @@ import ValueTypes
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+class SubscribeEvent :
+    # -----------------------------------------------------------------
+    def __init__(self, handler, evtype)
+        self.Handler = handler
+        self.EventType = evtype
+
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+class UnsubscribeEvent :
+    # -----------------------------------------------------------------
+    def __init__(self, handler, evtype)
+        self.Handler = handler
+        self.EventType = evtype
+
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+class ShutdownEvent :
+    # -----------------------------------------------------------------
+    def __init__(self, currentStep, currentTime)
+        self.CurrentStep = currentStep
+        self.CurrentTime = currentTime
+
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class TimerEvent :
     # -----------------------------------------------------------------
     def __init__(self, currentStep, currentTime) :

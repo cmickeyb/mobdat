@@ -29,7 +29,7 @@ LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
 
-@file    EventRegistry.py
+@file    EventRouter.py
 @author  Mic Bowman
 @date    2013-12-03
 
@@ -45,46 +45,71 @@ sys.path.append(os.path.join(os.environ.get("OPENSIM","/share/opensim"),"lib","p
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
+from multiprocessing import Process, Queue
 import EventTypes
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class EventRegistry :
-
+class EventRouter :
     # -----------------------------------------------------------------
     def __init__(self) :
-        self.HandlerRegistry = {}
+        self.RouterQueue = Queue()
+        self.RouterRegistry = {}
+        self.Subscriptions = {}
 
     # -----------------------------------------------------------------
-    def PublishEvent(self, event) :
-        evtype = event.__class__
-        while evtype :
-            # print "PublishEvent: " + evtype.__name__ + " for " + str(event)
-            if evtype in self.HandlerRegistry :
-                for handler in self.HandlerRegistry[evtype] :
-                    handler(event)
-                    # try :
-                    #     handler(event)
-                    # except AttributeError as detail :
-                    #     print "Attribute error in event handler: ", detail
-                    # except NameError as detail :
-                    #     print "Name error in event handler: ", detail
-                    # except TypeError as detail :
-                    #     print "Type error in event handler: ", detail
-                    # except :
-                    #     print "Unexpected error in event handler:", sys.exc_info()[0]
-
-            bases = evtype.__bases__
-            evtype = bases[0] if bases else None
-
-        # else :
-        #     event.Dump()
+    def RegisterHandler(self, handler, queue) :
+        self.RouterRegistry[handler] = queue
+    
+    # -----------------------------------------------------------------
+    def RouteEvents(self) :
+        self.RouteEventsLoop()
 
     # -----------------------------------------------------------------
-    def SubscribeEvent(self, evtype, evhandler) :
+    def RouteEventsLoop(self) :
+        while True :
+            event = self.RouterQueue.get()
+            evtype = event.__class__
+
+            if evtype == EventTypes.SubscribeEvent :
+                self.HandleSubscribeEvent(event)
+                continue
+
+            if evtype == EventTypes.UnsubscribeEvent :
+                self.HandleUnsubscribeEvent(event)
+                continue
+
+            self.RouteEvent(evtype, event)
+
+            if evtype == EventTypes.ShutdownEvent :
+                return
+
+    # -----------------------------------------------------------------
+    def RouteEvent(self, evtype, event) :
+        # print "PublishEvent: " + evtype.__name__ + " for " + str(event)
+        if evtype in self.Subscriptions :
+            for queue in self.Subscriptions[evtype] :
+                queue.put(event)
+
+        bases = evtype.__bases__
+        if bases :
+            self.RouteEvent(bases[0], event)
+
+    # -----------------------------------------------------------------
+    def HandleSubscribeEvent(self, event) :
         # print "SubscribeEvent: " + evtype.__name__
-        if not evtype in self.HandlerRegistry :
-            self.HandlerRegistry[evtype] = []
+        if event.Handler in self.RouterRegistry :
+            queue = self.RouterRegistry[event.Handler]
+            if not event.EventType in self.Subscriptions :
+                self.Subscriptions[event.EventType] = []
+            if not queue in 
+            self.Subscriptions[event.EventType].append(queue)
 
-        self.HandlerRegistry[evtype].append(evhandler)
-
+    # -----------------------------------------------------------------
+    def HandleUnsubscribeEvent(self, event) :
+        # print "UnsubscribeEvent: " + evtype.__name__
+        if event.Handler in self.RouterRegistry :
+            queue = self.RouterRegistry[event.Handler]
+            if event.EventType in self.Subscriptions :
+                self.Subscriptions[event.EventType].remove(queue)
+    
