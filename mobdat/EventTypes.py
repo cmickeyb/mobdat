@@ -51,7 +51,7 @@ import ValueTypes
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class SubscribeEvent :
     # -----------------------------------------------------------------
-    def __init__(self, handler, evtype)
+    def __init__(self, handler, evtype) :
         self.Handler = handler
         self.EventType = evtype
 
@@ -59,7 +59,7 @@ class SubscribeEvent :
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class UnsubscribeEvent :
     # -----------------------------------------------------------------
-    def __init__(self, handler, evtype)
+    def __init__(self, handler, evtype) :
         self.Handler = handler
         self.EventType = evtype
 
@@ -67,9 +67,8 @@ class UnsubscribeEvent :
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class ShutdownEvent :
     # -----------------------------------------------------------------
-    def __init__(self, currentStep, currentTime)
-        self.CurrentStep = currentStep
-        self.CurrentTime = currentTime
+    def __init__(self, router) :
+        self.RouterShutdown = router
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

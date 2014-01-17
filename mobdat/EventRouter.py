@@ -79,10 +79,11 @@ class EventRouter :
                 self.HandleUnsubscribeEvent(event)
                 continue
 
+            if evtype == EventTypes.ShutdownEvent and event.RouterShutdown :
+                return
+
             self.RouteEvent(evtype, event)
 
-            if evtype == EventTypes.ShutdownEvent :
-                return
 
     # -----------------------------------------------------------------
     def RouteEvent(self, evtype, event) :
@@ -102,7 +103,7 @@ class EventRouter :
             queue = self.RouterRegistry[event.Handler]
             if not event.EventType in self.Subscriptions :
                 self.Subscriptions[event.EventType] = []
-            if not queue in 
+
             self.Subscriptions[event.EventType].append(queue)
 
     # -----------------------------------------------------------------

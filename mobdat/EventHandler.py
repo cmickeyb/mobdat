@@ -47,6 +47,7 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "
 
 from multiprocessing import Process, Queue
 import EventTypes
+import random
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -76,11 +77,11 @@ class EventHandler :
     # -----------------------------------------------------------------
     def HandleEvents(self) :
         # subscribe to the shutdown event
-        event = EventTypes.SubscribeEvent(self.HandlerID, EventTypes.ShutdownEvent)
-        self.RouterQueue.put(event)
+        # event = EventTypes.SubscribeEvent(self.HandlerID, EventTypes.ShutdownEvent)
+        # self.RouterQueue.put(event)
 
         # save this so we can add handlers later
-        self.HandlerRegistry[EventTypes.ShutdownEvent] = []
+        # self.HandlerRegistry[EventTypes.ShutdownEvent] = []
 
         # now go process events
         self.HandleEventsLoop()
@@ -100,4 +101,10 @@ class EventHandler :
     def HandleEvent(self, evtype, event) :
         if evtype in self.HandlerRegistry :
             for handler in self.HandlerRegistry[evtype] :
-                handler(event)
+                try :
+                    handler(event)
+                except :
+                    exctype, value =  sys.exc_info()[:2]
+                    warnings.warn('[EventHandler %s] handler failed with exception type %s; %s' %  (self.HandlerID, exctype, str(value)))
+
+                    

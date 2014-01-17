@@ -56,11 +56,11 @@ import math
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class SumoConnector(EventHandler) :
+class SumoConnector(EventHandler.EventHandler) :
 
     # -----------------------------------------------------------------
     def __init__(self, evrouter, settings) :
-        EventHandler.__init__(self, evrouter)
+        EventHandler.EventHandler.__init__(self, evrouter)
 
         # the sumo time scale is 1sec per iteration so we need to scale
         # to the 100ms target for our iteration time, this probably 
@@ -71,7 +71,7 @@ class SumoConnector(EventHandler) :
         self.Port = settings["SumoConnector"]["SumoPort"]
         self.TrafficLights = {}
 
-        self.DumpCount = 0
+        self.DumpCount = 50
         self.EdgesPerIteration = 25
 
         self.VelocityFudgeFactor = settings["SumoConnector"].get("VelocityFudgeFactor",0.90)
@@ -178,12 +178,6 @@ class SumoConnector(EventHandler) :
             event = EventTypes.EventObjectDynamics(v, pos, ang, vel)
             self.PublishEvent(event)
 
-        if self.DumpCount == 0 :
-            print '%d vehicles in the scene at step %d with timescale %f' % (traci.vehicle.getIDCount(), currentStep, self.TimeScale)
-            self.DumpCount = 50
-
-        self.DumpCount = self.DumpCount - 1
-
     # -----------------------------------------------------------------
     # def HandleRerouteVehicle(self, event) :
     #     traci.vehicle.rerouteTraveltime(str(event.ObjectIdentity))
@@ -233,20 +227,28 @@ class SumoConnector(EventHandler) :
 
         self._RecomputeRoutes()
 
+        if (event.CurrentStep % self.DumpCount) == 0 :
+            print '%d vehicles in the scene at step %d with timescale %f' % (traci.vehicle.getIDCount(), currentStep, self.TimeScale)
+
         return True
 
     # -----------------------------------------------------------------
     def HandleShutdownEvent(self, event) :
-        # idlist = traci.vehicle.getIDList()
-        # for v in idlist : 
-        #     traci.vehicle.remove(v)
-        #     event = EventTypes.EventDeleteObject(v)
-        #     self.PublishEvent(event)
+        try :
+            print '[SumoConnector] shut down'
+            idlist = traci.vehicle.getIDList()
+            for v in idlist : 
+                traci.vehicle.remove(v)
+                # event = EventTypes.EventDeleteObject(v)
+                # self.PublishEvent(event)
         
-        traci.close()
-        sys.stdout.flush()
+            traci.close()
+            sys.stdout.flush()
 
-        self.SumoProcess.wait()
+            self.SumoProcess.wait()
+        except :
+            exctype, value =  sys.exc_info()[:2]
+            warnings.warn('[SumoConnector] shutdown failed with exception type %s; %s' %  (exctype, str(value)))
 
     # -----------------------------------------------------------------
     def SimulationStart(self) :

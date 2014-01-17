@@ -94,14 +94,8 @@ def _RunSimulation(evrouter, interval, lastiteration) :
 
         iterations += 1
 
-    endtime = clk()
-
-    # send the shutdown event
-    event = EventTypes.ShutdownEvent(lastiteration,endtime)
-    evrouter.RouterQueue.put(event)
-
     # compute a few stats
-    elapsed = endtime - starttime
+    elapsed = clk() - starttime
     avginterval = 1000.0 * elapsed / iterations
     print "%d iterations completed with an elapsed time %f or %f ms per iteration" % (iterations, elapsed, avginterval)
 
@@ -141,11 +135,17 @@ def Controller(settings) :
         _RunSimulation(evrouter, interval, lastiteration)
     except :
         warnings.warn('[controller] error occured during simulation, shutting down; %s' % (sys.exc_info()[0]))
-    finally :
-        # and finally shut down the connectors
-        for connproc in connectors :
-            connproc.join()
-        evrouterproc.join()
 
-        sys.exit(-1)
+    # send the shutdown event to the connectors
+    event = EventTypes.ShutdownEvent(False)
+    evrouter.RouterQueue.put(event)
+
+    for connproc in connectors :
+        connproc.join()
+
+    # and send the shutdown event to the router
+    event = EventTypes.ShutdownEvent(True)
+    evrouter.RouterQueue.put(event)
+
+    evrouterproc.join()
             

@@ -47,7 +47,7 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
 import math, random, json, heapq
-import EventRegistry, EventTypes, ValueTypes
+import EventRouter, EventHandler, EventTypes
 
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -98,11 +98,12 @@ class Trip :
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class SocialConnector() :
+class SocialConnector(EventHandler.EventHandler) :
            
     # -----------------------------------------------------------------
-    def __init__(self, evhandler, settings) :
-        self.EventHandler = evhandler
+    def __init__(self, evrouter, settings) :
+        EventHandler.EventHandler.__init__(self, evrouter)
+
         self.VehicleNumber = 1
         self.VehicleMap = {}
 
@@ -174,7 +175,7 @@ class SocialConnector() :
         self.VehicleMap[vname] = Trip(vname, person, dnode)
 
         event = EventTypes.EventAddVehicle(vname, vtype, rname, tname)
-        self.EventHandler.PublishEvent(event)
+        self.PublishEvent(event)
 
     # -----------------------------------------------------------------
     def GenerateVehicles(self, currentstep) :
@@ -211,20 +212,23 @@ class SocialConnector() :
         heapq.heappush(self.EventQ, [waittime, person])
 
     # -----------------------------------------------------------------
-    def SimulationStart(self) :
-        self.EventHandler.SubscribeEvent(EventTypes.TimerEvent,self.SimulationStep)
-        self.EventHandler.SubscribeEvent(EventTypes.EventDeleteObject, self.HandleDeleteObjectEvent)
-        return True
-
-    # -----------------------------------------------------------------
     # Returns True if the simulation can continue
-    def SimulationStep(self, event) :
+    def HandleTimerEvent(self, event) :
         if self.FinalStep > event.CurrentStep :
             self.GenerateVehicles(event.CurrentStep)
 
         self.LastStep = event.CurrentStep
-        return True
 
     # -----------------------------------------------------------------
-    def SimulationStop(self) :
-        return True
+    def HandleShutdownEvent(self, event) :
+        pass
+
+    # -----------------------------------------------------------------
+    def SimulationStart(self) :
+        self.SubscribeEvent(EventTypes.EventDeleteObject, self.HandleDeleteObjectEvent)
+        self.SubscribeEvent(EventTypes.TimerEvent, self.HandleTimerEvent)
+        self.SubscribeEvent(EventTypes.ShutdownEvent, self.HandleShutdownEvent)
+
+        # all set... time to get to work!
+        self.HandleEvents()
+

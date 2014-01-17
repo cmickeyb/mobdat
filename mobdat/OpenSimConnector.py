@@ -48,8 +48,7 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "
 
 import uuid
 import OpenSimRemoteControl
-import EventRegistry, EventTypes
-import ValueTypes
+import EventHandler, EventTypes, ValueTypes
 
 import Queue, threading, time
 import random
@@ -165,7 +164,7 @@ class OpenSimVehicle :
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class OpenSimConnector(EventHandler) :
+class OpenSimConnector(EventHandler.EventHandler) :
 
     # -----------------------------------------------------------------
     def __init__(self, evrouter, settings) :
@@ -176,7 +175,7 @@ class OpenSimConnector(EventHandler) :
         settings -- dictionary of settings from the configuration file
         """
 
-        EventHandler.__init__(self, evrouter)
+        EventHandler.EventHandler.__init__(self, evrouter)
 
         # Get the world size
         wsize =  settings["OpenSimConnector"]["WorldSize"]
@@ -207,6 +206,8 @@ class OpenSimConnector(EventHandler) :
         self.AsyncEndPoint = settings["OpenSimConnector"]["AsyncEndPoint"]
         self.Scene = settings["OpenSimConnector"]["Scene"]
         self.Binary = settings["OpenSimConnector"].get("Binary",False)
+
+        self.UpdateThreadCount = settings["OpenSimConnector"].get("UpdateThreadCount",2)
 
         self.CurrentStep = 0
         self.CurrentTime = 0
@@ -245,6 +246,9 @@ class OpenSimConnector(EventHandler) :
         vehicle = self.Vehicles[vname]
 
         deltat = self.CurrentTime - vehicle.UpdateTime
+        if deltat == 0 :
+            return True
+
         rotation = event.ObjectRotation
         position = event.ObjectPosition.ScaleVector(self.WorldSize).AddVector(self.WorldOffset)
         velocity = event.ObjectVelocity.ScaleVector(self.WorldSize)
@@ -307,7 +311,11 @@ class OpenSimConnector(EventHandler) :
         #     self.WorkQ.join()
 
     # -----------------------------------------------------------------
-    def HandleShutdownEvent(self) :
+    def HandleShutdownEvent(self, event) :
+        # clean up all the outstanding vehicles
+        for vehicle in self.Vehicles.itervalues() :
+            self.OpenSimConnector.DeleteObject(vehicle.VehicleID)
+
         # print 'waiting for update thread to terminate'
         for count in range(self.UpdateThreadCount) :
             self.WorkQ.put(None)
@@ -315,13 +323,8 @@ class OpenSimConnector(EventHandler) :
         for count in range(self.UpdateThreadCount) :
             self.UpdateThreads[count].join()
 
-        # clean up all the outstanding vehicles
-        for vehicle in self.Vechicles.itervalues() :
-            self.OpenSimConnector.DeleteObject(vehicle)
-
         print 'Create/delete messages sent to OpenSim: %d' % (self.OpenSimConnector.MessagesSent)
         print '%d vehicles interpolated correctly' % (self.Interpolated)
-        return True
 
 
     # -----------------------------------------------------------------
@@ -340,7 +343,6 @@ class OpenSimConnector(EventHandler) :
         # Start the worker threads
         self.WorkQ = Queue.Queue(0)
         self.UpdateThreads = []
-        self.UpdateThreadCount = settings["OpenSimConnector"].get("UpdateThreadCount",2)
         for count in range(self.UpdateThreadCount) :
             thread = OpenSimUpdateThread(self.WorkQ, self.EndPoint, self.Capability, self.Scene, self.Vehicles, self.Binary)
             thread.start()
