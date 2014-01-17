@@ -64,6 +64,7 @@ class SumoBuilder :
             self.InjectPrefix = settings["NetworkBuilder"].get("InjectionPrefix","IN")
             self.Path = settings["SumoConnector"].get("SumoNetworkPath",".")
             self.Prefix = settings["SumoConnector"].get("SumoDataFilePrefix","network")
+            self.ScaleValue = settings["SumoConnector"].get("NetworkScaleFactor",3.0)
         except NameError as detail: 
             warnings.warn("Failed processing sumo configuration; name error %s" % (str(detail)))
             sys.exit(-1)
