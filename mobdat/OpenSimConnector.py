@@ -50,7 +50,7 @@ import uuid
 import OpenSimRemoteControl
 import EventHandler, EventTypes, ValueTypes
 
-import Queue, threading, time
+import Queue, threading, time, platform
 import random
 ExitFlag = 0
 
@@ -212,6 +212,13 @@ class OpenSimConnector(EventHandler.EventHandler) :
         self.CurrentStep = 0
         self.CurrentTime = 0
 
+        self.Clock = time.time
+
+        ## this is an ugly hack because the cygwin and linux
+        ## versions of time.clock seem seriously broken
+        if platform.system() == 'Windows' :
+            self.Clock = time.clock
+
     # -----------------------------------------------------------------
     def HandleCreateObjectEvent(self,event) :
         vtype = self.VehicleTypes[event.ObjectType]
@@ -304,6 +311,10 @@ class OpenSimConnector(EventHandler.EventHandler) :
     def HandleTimerEvent(self, event) :
         self.CurrentStep = event.CurrentStep
         self.CurrentTime = event.CurrentTime
+
+        if self.CurrentStep % 50 == 0 :
+            drift = self.Clock() - self.CurrentTime
+            print "[OpenSimConnector] clock drift at step %d is %s" % (self.CurrentStep, drift)
         
         # s = self.WorkQ.qsize()
         # if s > 0 : 
