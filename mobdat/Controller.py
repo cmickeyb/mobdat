@@ -45,9 +45,9 @@ sys.path.append(os.path.join(os.environ.get("OPENSIM","/share/opensim"),"lib","p
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
-import time
-import EventRegistry, EventTypes, ValueTypes
-import platform
+import platform, time
+import EventRouter, EventTypes
+from multiprocessing import Process
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
@@ -60,13 +60,13 @@ _SimulationControllers = {
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
-def _RunSimulation(evhandler, interval, lastiteration) :
+def _RunSimulation(evrouter, interval, lastiteration) :
     """
     Run the simulation by sending the periodic clock ticks that each of the connectors
     can process.
 
     Arguments:
-    evhandler -- the initialized event handler object
+    evrouter -- the initialized event handler object
     interval -- time between successive clock ticks
     lastiteration -- number of iterations
     """
@@ -85,17 +85,23 @@ def _RunSimulation(evhandler, interval, lastiteration) :
         stime = clk()
 
         event = EventTypes.TimerEvent(iterations, stime)
-        evhandler.PublishEvent(event)
+        evrouter.RouterQueue.put(event)
 
         etime = clk()
 
         if (etime - stime) < interval :
-            # print "sleep %f seconds" % (interval - (etime - stime))
             time.sleep(interval - (etime - stime))
 
         iterations += 1
 
-    elapsed = clk() - starttime
+    endtime = clk()
+
+    # send the shutdown event
+    event = EventTypes.ShutdownEvent(lastiteration,endtime)
+    evrouter.RouterQueue.put(event)
+
+    # compute a few stats
+    elapsed = endtime - starttime
     avginterval = 1000.0 * elapsed / iterations
     print "%d iterations completed with an elapsed time %f or %f ms per iteration" % (iterations, elapsed, avginterval)
 
@@ -112,7 +118,7 @@ def Controller(settings) :
     interval = float(settings["General"]["Interval"])
     cnames = settings["General"].get("Connectors",['sumo', 'opensim', 'social'])
 
-    evhandler = EventRegistry.EventRegistry()
+    evrouter = EventRouter.EventRouter()
 
     # initialize the connectors first
     connectors = []
@@ -121,21 +127,25 @@ def Controller(settings) :
             warnings.warn('skipping unknown simulation connector; %s' % (cname))
             continue
 
-        connectors.append(_SimulationControllers[cname](evhandler, settings))
+        connector = _SimulationControllers[cname](evrouter, settings)
+        connproc = Process(target=connector.SimulationStart, args=())
+        connproc.start()
+        connectors.append(connproc)
             
-    # and start the connectors
-    for connector in connectors :
-        connector.SimulationStart()
+    evrouterproc = Process(target=evrouter.RouteEvents, args=())
+    evrouterproc.start()
 
     # and run the simulation through all its iterations
     lastiteration = settings["General"]["TimeSteps"]
     try :
-        _RunSimulation(evhandler, interval, lastiteration)
+        _RunSimulation(evrouter, interval, lastiteration)
     except :
         warnings.warn('[controller] error occured during simulation, shutting down; %s' % (sys.exc_info()[0]))
     finally :
         # and finally shut down the connectors
-        for connector in connectors :
-            connector.SimulationStop()
+        for connproc in connectors :
+            connproc.join()
+        evrouterproc.join()
+
         sys.exit(-1)
             
