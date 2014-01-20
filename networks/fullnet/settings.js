@@ -29,6 +29,7 @@
         "AccelerationDelta" : 0.05,
         "EndPoint" : "http://127.0.0.1:7060/Dispatcher/",
         "Scene" : "Scratch 00",
+        "UpdateThreadCount" : 6,
         "Binary" : true
     },
     
@@ -36,6 +37,7 @@
     {
 	"SumoNetworkPath" : "networks/fullnet/net/",
 	"SumoDataFilePrefix" : "network",
+        "NetworkScaleFactor" : 8.0,
         "ConfigFile" : "networks/fullnet/fullnet.sumocfg",
         "ExtensionFiles" : [ ],
         "VelocityFudgeFactor" : 1.0,
