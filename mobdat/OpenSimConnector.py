@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+!/usr/bin/env python
 """
 Copyright (c) 2014, Intel Corporation
 
@@ -52,7 +52,6 @@ import EventHandler, EventTypes, ValueTypes
 
 import Queue, threading, time, platform
 import random
-ExitFlag = 0
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -224,10 +223,10 @@ class OpenSimConnector(EventHandler.EventHandler) :
         vtype = self.VehicleTypes[event.ObjectType]
         vname = event.ObjectIdentity
 
-        result = self.OpenSimConnector.CreateObject(vtype["AssetID"], name=vname, parm=vtype.get("StartParam","{}"))
-        vehicle = result["ObjectID"]
+        vehicle = uuid.uuid4()
+        result = self.OpenSimConnector.CreateObject(vtype["AssetID"], objectid=vehicle, name=vname, parm=vtype.get("StartParam","{}"))
 
-        self.Vehicles[vname] = OpenSimVehicle(vname,vehicle)
+        self.Vehicles[vname] = OpenSimVehicle(vname,str(vehicle))
 
         # print "Created vehicle " + str(vname) + " with id " + str(vehicle)
         return True
@@ -340,7 +339,7 @@ class OpenSimConnector(EventHandler.EventHandler) :
 
     # -----------------------------------------------------------------
     def SimulationStart(self) :
-        self.OpenSimConnector = OpenSimRemoteControl.OpenSimRemoteControl(self.EndPoint)
+        self.OpenSimConnector = OpenSimRemoteControl.OpenSimRemoteControl(self.EndPoint, request = 'async')
         self.OpenSimConnector.Capability = self.Capability
         self.OpenSimConnector.Scene = self.Scene
 
