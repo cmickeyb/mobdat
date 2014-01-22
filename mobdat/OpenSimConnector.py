@@ -70,9 +70,9 @@ class OpenSimUpdateThread(threading.Thread) :
         self.Vehicles = vmap
         self.Binary = binary
 
-        logfile = 'log%d' % (random.randint(0,1000))
-        self.OpenSimConnector = OpenSimRemoteControl.OpenSimRemoteControl(self.EndPoint, request = 'async', logfile = logfile)
-        # self.OpenSimConnector = OpenSimRemoteControl.OpenSimRemoteControl(self.EndPoint, request = 'sync')
+        # logfile = 'log%d' % (random.randint(0,1000))
+        # self.OpenSimConnector = OpenSimRemoteControl.OpenSimRemoteControl(self.EndPoint, request = 'async', logfile = logfile)
+        self.OpenSimConnector = OpenSimRemoteControl.OpenSimRemoteControl(self.EndPoint, request = 'async')
         self.OpenSimConnector.Capability = self.Capability
         self.OpenSimConnector.Scene = self.Scene
         self.OpenSimConnector.Binary = self.Binary
