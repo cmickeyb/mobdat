@@ -38,7 +38,8 @@ the simulation modules in the mobdat simulation environment.
 
 """
 
-import os, sys, warnings
+import os, sys
+import logging
 
 sys.path.append(os.path.join(os.environ.get("SUMO_HOME"), "tools"))
 sys.path.append(os.path.join(os.environ.get("OPENSIM","/share/opensim"),"lib","python"))
@@ -56,6 +57,7 @@ class EventRouter :
         self.RouterQueue = Queue()
         self.RouterRegistry = {}
         self.Subscriptions = {}
+        self._Logger = logging.getLogger(__name__)
 
     # -----------------------------------------------------------------
     def RegisterHandler(self, handler, queue) :
@@ -68,21 +70,25 @@ class EventRouter :
     # -----------------------------------------------------------------
     def RouteEventsLoop(self) :
         while True :
-            event = self.RouterQueue.get()
-            evtype = event.__class__
+            try :
+                event = self.RouterQueue.get()
+                evtype = event.__class__
 
-            if evtype == EventTypes.SubscribeEvent :
-                self.HandleSubscribeEvent(event)
-                continue
+                if evtype == EventTypes.SubscribeEvent :
+                    self.HandleSubscribeEvent(event)
+                    continue
 
-            if evtype == EventTypes.UnsubscribeEvent :
-                self.HandleUnsubscribeEvent(event)
-                continue
+                if evtype == EventTypes.UnsubscribeEvent :
+                    self.HandleUnsubscribeEvent(event)
+                    continue
 
-            if evtype == EventTypes.ShutdownEvent and event.RouterShutdown :
-                return
+                if evtype == EventTypes.ShutdownEvent and event.RouterShutdown :
+                    return
 
-            self.RouteEvent(evtype, event)
+                self.RouteEvent(evtype, event)
+            except :
+                exctype, value =  sys.exc_info()[:2]
+                self._Logger.warn('failed with exception type %s; %s', exctype, str(value))
 
 
     # -----------------------------------------------------------------

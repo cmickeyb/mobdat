@@ -39,7 +39,8 @@ clock ticks.
 
 """
 
-import os, sys, warnings
+import os, sys
+import logging
 
 sys.path.append(os.path.join(os.environ.get("OPENSIM","/share/opensim"),"lib","python"))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
@@ -59,6 +60,8 @@ _SimulationControllers = {
     'social' : SocialConnector.SocialConnector,
     'stats' : StatsConnector.StatsConnector
     }
+
+logger = logging.getLogger(__name__)
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
@@ -99,7 +102,7 @@ def _RunSimulation(evrouter, interval, lastiteration) :
     # compute a few stats
     elapsed = clk() - starttime
     avginterval = 1000.0 * elapsed / iterations
-    print "%d iterations completed with an elapsed time %f or %f ms per iteration" % (iterations, elapsed, avginterval)
+    logger.info("%d iterations completed with an elapsed time %f or %f ms per iteration", iterations, elapsed, avginterval)
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
@@ -120,7 +123,7 @@ def Controller(settings) :
     connectors = []
     for cname in cnames :
         if cname not in _SimulationControllers :
-            warnings.warn('skipping unknown simulation connector; %s' % (cname))
+            logger.warn('skipping unknown simulation connector; %s' % (cname))
             continue
 
         connector = _SimulationControllers[cname](evrouter, settings)
@@ -135,8 +138,10 @@ def Controller(settings) :
     lastiteration = settings["General"]["TimeSteps"]
     try :
         _RunSimulation(evrouter, interval, lastiteration)
+    except KeyboardInterrupt :
+        logger.info('keyboard interrupt received, shutting down')
     except :
-        warnings.warn('[controller] error occured during simulation, shutting down; %s' % (sys.exc_info()[0]))
+        logger.warn('error occured during simulation, shutting down; %s',(sys.exc_info()[0]))
 
     # send the shutdown event to the connectors
     event = EventTypes.ShutdownEvent(False)

@@ -38,7 +38,8 @@ the simulation modules in the mobdat simulation environment.
 
 """
 
-import os, sys, warnings
+import os, sys
+import logging
 
 sys.path.append(os.path.join(os.environ.get("SUMO_HOME"), "tools"))
 sys.path.append(os.path.join(os.environ.get("OPENSIM","/share/opensim"),"lib","python"))
@@ -59,6 +60,7 @@ class EventHandler :
         self.HandlerID = 'ID%x' % random.randint(0,1000000)
         self.HandlerRegistry = {}
 
+        self._Logger = logging.getLogger(__name__)
         router.RegisterHandler(self.HandlerID, self.HandlerQueue)
 
     # -----------------------------------------------------------------
@@ -89,22 +91,22 @@ class EventHandler :
     # -----------------------------------------------------------------
     def HandleEventsLoop(self) :
         while True :
-            event = self.HandlerQueue.get()
-            evtype = event.__class__
+            try :
+                event = self.HandlerQueue.get()
+                evtype = event.__class__
 
-            self.HandleEvent(evtype, event)
+                self.HandleEvent(evtype, event)
 
-            if evtype == EventTypes.ShutdownEvent :
-                return
+                if evtype == EventTypes.ShutdownEvent :
+                    return
+
+            except :
+                exctype, value =  sys.exc_info()[:2]
+                self._Logger.warn('[EventHandler %s] handler failed with exception type %s; %s', self.HandlerID, exctype, str(value))
     
     # -----------------------------------------------------------------
     def HandleEvent(self, evtype, event) :
         if evtype in self.HandlerRegistry :
             for handler in self.HandlerRegistry[evtype] :
-                try :
-                    handler(event)
-                except :
-                    exctype, value =  sys.exc_info()[:2]
-                    warnings.warn('[EventHandler %s] handler failed with exception type %s; %s' %  (self.HandlerID, exctype, str(value)))
-
+                handler(event)
                     

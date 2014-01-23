@@ -233,8 +233,10 @@ class OpenSimConnector(EventHandler.EventHandler) :
 
         # Initialize the vehicle and vehicle types
         self.Vehicles = {}
+        self.VehicleReuseList = {}
         self.VehicleTypes = {}
         for vtype in settings["VehicleTypes"] :
+            self.VehicleReuseList[vtype["Name"]] = []
             self.VehicleTypes[vtype["Name"]] = vtype
 
         # Initialize some of the update control variables
