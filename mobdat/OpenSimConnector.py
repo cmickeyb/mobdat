@@ -149,6 +149,52 @@ class OpenSimUpdateThread(threading.Thread) :
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+class OpenSimVehicleDynamics :
+
+    # -----------------------------------------------------------------
+    @staticmethod
+    def ComputeVelocity(velocity, acceleration, deltat) :
+        return velocity + aceleration * deltat
+    
+    # -----------------------------------------------------------------
+    @staticmethod
+    def ComputePosition(position, velocity, acceleration, deltat) :
+        return position + velocity * deltat + aceleration * (0.5 * deltat * deltat)
+
+    # -----------------------------------------------------------------
+    @staticmethod
+    def CreateTweenUpdate(oldpos, newpos, deltat) :
+        """
+        Compute the dynamics (position, velocity and acceleration) that occurs
+        at a time between two update events.
+        """
+
+        # this is the average acceleration over the time interval
+        acceleration = newpos.Velocity.SubVector(oldpos.Velocity) / deltat
+
+        tween = OpenSimVehicleDynamics()
+        tween.Position = ComputePosition(oldpos.Position, oldpos.Velocity, acceleration, 0.5 * deltat)
+        tween.Velocity = ComputeVelocity(oldpos.Velocity, acceleration, 0.5 * deltat)
+        tween.Rotation = newpos.Rotation # this is just wrong but i dont like quaternion math
+        tween.Acceleration = acceleration
+        tween.UpdateTime = oldpos.UpdateTime + 0.5 * deltat
+        return tween
+
+    # -----------------------------------------------------------------
+    def __init__(self) :
+        self.Position = ValueTypes.Vector3()
+        self.Velocity = ValueTypes.Vector3()
+        self.Acceleration = ValueTypes.Vector3()
+        self.Rotation = ValueTypes.Quaternion()
+        self.UpdateTime = 0
+
+    # -----------------------------------------------------------------
+    def InterpolatePosition(self, deltat) :
+        return ComputePosition(self.Position, self.Velocity, self.Acceleration, deltat)
+    
+
+# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class OpenSimVehicle :
 
     # -----------------------------------------------------------------
@@ -156,11 +202,8 @@ class OpenSimVehicle :
         self.VehicleName = vname # Name of the sumo vehicle
         self.VehicleID = vehicle  # UUID of the vehicle object in OpenSim
 
-        self.Position = ValueTypes.Vector3()
-        self.Velocity = ValueTypes.Vector3()
-        self.Acceleration = ValueTypes.Vector3()
-        self.Rotation = ValueTypes.Quaternion()
-        self.UpdateTime = 0
+        self.LastUpdate = OpenSimVehicleDynamics()
+        self.TweenUpdate = OpenSimVehicleDynamics()
 
         self.InUpdateQueue = False
 
@@ -259,23 +302,26 @@ class OpenSimConnector(EventHandler.EventHandler) :
 
         vehicle = self.Vehicles[vname]
 
-        deltat = self.CurrentTime - vehicle.UpdateTime
-        if deltat == 0 :
-            return True
+        deltat = self.CurrentTime - vehicle.LastUpdate.UpdateTime
+        if deltat == 0 : return True
 
-        rotation = event.ObjectRotation
-        position = event.ObjectPosition.ScaleVector(self.WorldSize).AddVector(self.WorldOffset)
-        velocity = event.ObjectVelocity.ScaleVector(self.WorldSize)
-        acceleration = ValueTypes.ZeroVector if velocity.LengthSquared() < self.VelocityDelta else velocity.SubVector(vehicle.Velocity) / deltat
+        # Save the dynamics information, acceleration is only needed in the tween update
+        update = OpenSimVehicleDynamics()
+        update.Position = event.ObjectPosition.ScaleVector(self.WorldSize).AddVector(self.WorldOffset)
+        update.Velocity = event.ObjectVelocity.ScaleVector(self.WorldSize)
+        update.Rotation = event.Rotation
+        update.UpdateTime = self.CurrentTime
+
+        # Compute the tween update (the update halfway between the last reported position and
+        # the current reported position, with the tween we know the acceleration as opposed to
+        # the current update where we dont know acceleration
+        tween = OpenSimVehicleDynamics.CreateTweenUpdate(vehicle.LastUpdate, update, deltat)
 
         # if the vehicle is already in the queue then just save the new values
         # and call it quits
         if vehicle.InUpdateQueue :
-            vehicle.UpdateTime = self.CurrentTime
-            vehicle.Position = position
-            vehicle.Velocity = velocity
-            vehicle.Rotation = rotation
-            vehicle.Acceleration = acceleration
+            vehicle.TweenUpdate = tween
+            vehicle.LastUpdate = update
             return True
 
         # check to see if the change in position or velocity is signficant enough to
@@ -285,24 +331,16 @@ class OpenSimConnector(EventHandler.EventHandler) :
         # Condition 1: this is not the first update
         if vehicle.UpdateTime > 0 :
             # Condition 2: the acceleration is about the same
-            if vehicle.Acceleration.ApproxEquals(acceleration,self.AccelerationDelta) :
-                # Condition 3: the velocity is about the same though the acceleration check should
-                # have caught this one already
-                if vehicle.Velocity.ApproxEquals(velocity,self.VelocityDelta) :
-                    # Condition 4: the position check, need to handle lane changes so this check
-                    # is not redundant with acceleration and velocity checks
-                    
-                    # p1 = p0 + vt + (at^2)/2
-                    ipos = vehicle.Position + vehicle.Velocity * deltat + acceleration * (0.5 * deltat * deltat)
-                    if ipos.ApproxEquals(position,self.PositionDelta) :
-                        self.Interpolated += 1
-                        return True
+            if vehicle.TweenUpdate.Acceleration.ApproxEquals(tween.Acceleration, self.AccelerationDelta) :
+                # Condition 3: the position check, need to handle lane changes so this check
+                # is not redundant with acceleration check
+                ipos = vehicle.TweenUpdate.InterpolatePosition(deltat)
+                if ipos.ApproxEquals(tween.Position,self.PositionDelta) :
+                    self.Interpolated += 1
+                    return True
             
-        vehicle.UpdateTime = self.CurrentTime
-        vehicle.Position = position
-        vehicle.Velocity = velocity
-        vehicle.Acceleration = acceleration
-        vehicle.Rotation = rotation
+        vehicle.TweenUpdate = tween
+        vehicle.LastUpdate = update
         vehicle.InUpdateQueue = True
 
         # if self.WorkQ.full() :
