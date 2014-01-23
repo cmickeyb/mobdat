@@ -37,7 +37,8 @@ Simple test combining sumo traffic simulation and opensim 3d virtual world.
 
 """
 
-import os, sys, warnings
+import os, sys
+import logging
 import math
 
 # we need to import python modules from the $SUMO_HOME/tools directory
@@ -61,6 +62,8 @@ class OpenSimUpdateThread(threading.Thread) :
     def __init__(self, workq, endpoint, capability, scene, vmap, binary = False) :
         threading.Thread.__init__(self)
 
+        self.Logger = logging.getLogger(__name__)
+
         self.TotalUpdates = 0
         self.WorkQ = workq
         self.EndPoint = endpoint
@@ -83,7 +86,7 @@ class OpenSimUpdateThread(threading.Thread) :
         updates = self.TotalUpdates
         messages = self.OpenSimConnector.MessagesSent
         mbytes = self.OpenSimConnector.BytesSent / 1000000.0
-        print '%d updates sent to OpenSim in %d messages using %f MB' % (updates, messages, mbytes)
+        self.Logger.info('%d updates sent to OpenSim in %d messages using %f MB',updates, messages, mbytes)
 
     # -----------------------------------------------------------------
     def ProcessUpdatesLoop(self) :
@@ -125,7 +128,7 @@ class OpenSimUpdateThread(threading.Thread) :
         updates = []
         for vname in vnames :
             if vname not in self.Vehicles :
-                warnings.warn("missing vehicle %s in update thread" % (vname))
+                self.Logger.warn("missing vehicle %s in update thread" % (vname))
                 continue
 
             vehicle = self.Vehicles[vname]
@@ -176,6 +179,8 @@ class OpenSimConnector(EventHandler.EventHandler) :
 
         EventHandler.EventHandler.__init__(self, evrouter)
 
+        self.Logger = logging.getLogger(__name__)
+
         # Get the world size
         wsize =  settings["OpenSimConnector"]["WorldSize"]
         self.WorldSize = ValueTypes.Vector3(wsize[0], wsize[1], wsize[2])
@@ -197,7 +202,7 @@ class OpenSimConnector(EventHandler.EventHandler) :
 
         # Setup the remote control object
         if 'Capability' not in settings["OpenSimConnector"] :
-            warnings.warn("missing or expired opensim remote control capability")
+            self.Logger.error("missing or expired opensim remote control capability")
             sys.exit(-1)
 
         self.Capability = uuid.UUID(settings["OpenSimConnector"]["Capability"])
@@ -211,9 +216,8 @@ class OpenSimConnector(EventHandler.EventHandler) :
         self.DumpCount = 50
         self.CurrentStep = 0
         self.CurrentTime = 0
-        self.LastStepTime = 0
-        self.TimeScale = 0
-        self.AverageQueueLength = 0
+        self.AverageClockSkew = 0.0
+        self.AverageQueueLength = 0.0
 
         self.Clock = time.time
 
@@ -250,7 +254,7 @@ class OpenSimConnector(EventHandler.EventHandler) :
     def HandleObjectDynamicsEvent(self,event) :
         vname = event.ObjectIdentity
         if vname not in self.Vehicles :
-            warnings.warn("attempt to update unknown vehicle %s" % (vname))
+            self.Logger.warn("attempt to update unknown vehicle %s" % (vname))
             return True
 
         vehicle = self.Vehicles[vname]
@@ -315,19 +319,15 @@ class OpenSimConnector(EventHandler.EventHandler) :
         self.CurrentStep = event.CurrentStep
         self.CurrentTime = event.CurrentTime
 
-        # Compute the simulation time scale
-        if self.LastStepTime > 0 :
-            delta = self.CurrentTime - self.LastStepTime
-            if delta > 0 :
-                self.TimeScale = (9.0 * self.TimeScale + 1.0 / delta) / 10.0
-        self.LastStepTime = self.CurrentTime
+        # Compute the clock skew
+        self.AverageClockSkew = (9.0 * self.AverageClockSkew + (self.Clock() - self.CurrentTime)) / 10.0
 
         # Compute weighted average queue length
         self.AverageQueueLength = (9.0 * self.AverageQueueLength + self.WorkQ.qsize()) / 10.0
 
         # Send the event if we need to
         if (self.CurrentStep % self.DumpCount) == 0 :
-            event = EventTypes.OpenSimConnectorStatsEvent('OpenSimConnector', event.CurrentStep, self.TimeScale, self.AverageQueueLength)
+            event = EventTypes.OpenSimConnectorStatsEvent('OpenSimConnector', self.CurrentStep, self.AverageClockSkew, self.AverageQueueLength)
             self.PublishEvent(event)
 
     # -----------------------------------------------------------------
@@ -343,9 +343,9 @@ class OpenSimConnector(EventHandler.EventHandler) :
         for count in range(self.UpdateThreadCount) :
             self.UpdateThreads[count].join()
 
-        print 'Create/delete messages sent to OpenSim: %d' % (self.OpenSimConnector.MessagesSent)
-        print '%d vehicles interpolated correctly' % (self.Interpolated)
-
+        self.Logger.info('create/delete messages sent to opensim: %d', self.OpenSimConnector.MessagesSent)
+        self.Logger.info('%d vehicles interpolated correctly', self.Interpolated)
+        self.Logger.info('shut down')
 
     # -----------------------------------------------------------------
     def SimulationStart(self) :

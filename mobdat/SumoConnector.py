@@ -37,8 +37,9 @@ This file defines the SumoConnector class that translates mobdat events
 and operations into and out of the sumo traffic simulator.
 
 """
-import os, sys, warnings
-import subprocess, threading, string, time
+import os, sys
+import logging
+import subprocess, threading, string, time, platform
 
 sys.path.append(os.path.join(os.environ.get("SUMO_HOME"), "tools"))
 sys.path.append(os.path.join(os.environ.get("OPENSIM","/share/opensim"),"lib","python"))
@@ -62,6 +63,8 @@ class SumoConnector(EventHandler.EventHandler) :
     def __init__(self, evrouter, settings) :
         EventHandler.EventHandler.__init__(self, evrouter)
 
+        self.Logger = logging.getLogger(__name__)
+
         # the sumo time scale is 1sec per iteration so we need to scale
         # to the 100ms target for our iteration time, this probably 
         # should be computed based on the target step size
@@ -76,7 +79,15 @@ class SumoConnector(EventHandler.EventHandler) :
 
         self.VelocityFudgeFactor = settings["SumoConnector"].get("VelocityFudgeFactor",0.90)
 
-        self.LastStepTime = 0.0
+        self.AverageClockSkew = 0.0
+        # self.LastStepTime = 0.0
+
+        self.Clock = time.time
+
+        ## this is an ugly hack because the cygwin and linux
+        ## versions of time.clock seem seriously broken
+        if platform.system() == 'Windows' :
+            self.Clock = time.clock
 
         # for cf in settings["SumoConnector"].get("ExtensionFiles",[]) :
         #     execfile(cf,{"EventHandler" : self})
@@ -190,46 +201,49 @@ class SumoConnector(EventHandler.EventHandler) :
     # -----------------------------------------------------------------
     # Returns True if the simulation can continue
     def HandleTimerEvent(self, event) :
-        currentStep = event.CurrentStep
-        ctime = event.CurrentTime
+        self.CurrentStep = event.CurrentStep
+        self.CurrentTime = event.CurrentTime
+
+        # Compute the clock skew
+        self.AverageClockSkew = (9.0 * self.AverageClockSkew + (self.Clock() - self.CurrentTime)) / 10.0
 
         # handle the time scale computation based on the inter-interval
         # times
-        if self.LastStepTime > 0 :
-            delta = ctime - self.LastStepTime
-            if delta > 0 :
-                self.TimeScale = (9.0 * self.TimeScale + 1.0 / delta) / 10.0
-        self.LastStepTime = ctime
+        # if self.LastStepTime > 0 :
+        #     delta = ctime - self.LastStepTime
+        #     if delta > 0 :
+        #         self.TimeScale = (9.0 * self.TimeScale + 1.0 / delta) / 10.0
+        # self.LastStepTime = ctime
 
         try :
             traci.simulationStep()
 
-            self.HandleInductionLoops(currentStep)
-            self.HandleTrafficLights(currentStep)
-            self.HandleDepartedVehicles(currentStep)
-            self.HandleVehicleUpdates(currentStep)
-            self.HandleArrivedVehicles(currentStep)
+            self.HandleInductionLoops(self.CurrentStep)
+            self.HandleTrafficLights(self.CurrentStep)
+            self.HandleDepartedVehicles(self.CurrentStep)
+            self.HandleVehicleUpdates(self.CurrentStep)
+            self.HandleArrivedVehicles(self.CurrentStep)
         except TypeError as detail: 
-            warnings.warn("[sumoconector] simulation step failed with type error %s" % (str(detail)))
+            self.Logger.error("[sumoconector] simulation step failed with type error %s" % (str(detail)))
             sys.exit(-1)
         except ValueError as detail: 
-            warnings.warn("[sumoconector] simulation step failed with value error %s" % (str(detail)))
+            self.Logger.error("[sumoconector] simulation step failed with value error %s" % (str(detail)))
             sys.exit(-1)
         except NameError as detail: 
-            warnings.warn("[sumoconector] simulation step failed with name error %s" % (str(detail)))
+            self.Logger.error("[sumoconector] simulation step failed with name error %s" % (str(detail)))
             sys.exit(-1)
         except AttributeError as detail: 
-            warnings.warn("[sumoconnector] simulation step failed with attribute error %s" % (str(detail)))
+            self.Logger.error("[sumoconnector] simulation step failed with attribute error %s" % (str(detail)))
             sys.exit(-1)
         except :
-            warnings.warn("[sumoconnector] error occured in simulation step; %s" % (sys.exc_info()[0]))
+            self.Logger.error("[sumoconnector] error occured in simulation step; %s" % (sys.exc_info()[0]))
             sys.exit(-1)
 
         self._RecomputeRoutes()
 
         if (event.CurrentStep % self.DumpCount) == 0 :
             count = traci.vehicle.getIDCount()
-            event = EventTypes.SumoConnectorStatsEvent('SumoConnector', event.CurrentStep, self.TimeScale, count)
+            event = EventTypes.SumoConnectorStatsEvent('SumoConnector', self.CurrentStep, self.AverageClockSkew, count)
             self.PublishEvent(event)
 
         return True
@@ -237,20 +251,18 @@ class SumoConnector(EventHandler.EventHandler) :
     # -----------------------------------------------------------------
     def HandleShutdownEvent(self, event) :
         try :
-            print '[SumoConnector] shut down'
             idlist = traci.vehicle.getIDList()
             for v in idlist : 
                 traci.vehicle.remove(v)
-                # event = EventTypes.EventDeleteObject(v)
-                # self.PublishEvent(event)
         
             traci.close()
             sys.stdout.flush()
 
             self.SumoProcess.wait()
+            self.Logger.info('shut down')
         except :
             exctype, value =  sys.exc_info()[:2]
-            warnings.warn('[SumoConnector] shutdown failed with exception type %s; %s' %  (exctype, str(value)))
+            self.Logger.warn('shutdown failed with exception type %s; %s' %  (exctype, str(value)))
 
     # -----------------------------------------------------------------
     def SimulationStart(self) :

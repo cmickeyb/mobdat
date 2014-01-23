@@ -37,7 +37,8 @@ Picks up stats events and canonicalizes processing
 
 """
 
-import os, sys, warnings
+import os, sys
+import logging
 
 # we need to import python modules from the $SUMO_HOME/tools directory
 sys.path.append(os.path.join(os.environ.get("SUMO_HOME"), "tools"))
@@ -61,13 +62,14 @@ class StatsConnector(EventHandler.EventHandler) :
         """
 
         EventHandler.EventHandler.__init__(self, evrouter)
+        self.Logger = logging.getLogger(__name__)
 
         self.CurrentStep = 0
         self.CurrentTime = 0
 
     # -----------------------------------------------------------------
     def HandleStatsEvent(self,event) :
-        print str(event)
+        self.Logger.info(str(event))
 
     # -----------------------------------------------------------------
     # Returns True if the simulation can continue
@@ -81,7 +83,7 @@ class StatsConnector(EventHandler.EventHandler) :
 
     # -----------------------------------------------------------------
     def SimulationStart(self) :
-        print "StatsConnector initialized"
+        # print "StatsConnector initialized"
 
         # Connect to the event registry
         # self.SubscribeEvent(EventTypes.StatsEvent, self.HandleStatsEvent)

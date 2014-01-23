@@ -37,7 +37,8 @@ This is the main script for running the mobdat mobile data simulator.
 
 """
 
-import sys, os, warnings
+import sys, os
+import logging, warnings
 
 sys.path.append(os.path.join(os.environ.get("OPENSIM","/share/opensim"),"lib","python"))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
@@ -134,14 +135,30 @@ def ParseCommandLine(config, args) :
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
-def HandleWarnings(message, category, filename, lineno, file=None) :
-    mformat = 'WARNING: {0}\n'
-    sys.stderr.write(mformat.format(message))
+# def HandleWarnings(message, category, filename, lineno, file=None) :
+#     mformat = 'WARNING: {0}\n'
+#     sys.stderr.write(mformat.format(message))
+
+# -----------------------------------------------------------------
+# -----------------------------------------------------------------
+def SetupLoggers() :
+    logger = logging.getLogger()
+    logger.setLevel(logging.INFO)
+
+    logfile = filename=os.path.join(os.path.dirname(__file__), "../logs/mobdat.log")
+    flog = logging.FileHandler(logfile, mode='w')
+    flog.setFormatter(logging.Formatter('%(levelname)s [%(name)s] %(message)s'))
+    logger.addHandler(flog)
+
+    clog = logging.StreamHandler()
+    clog.addFilter(logging.Filter(name='mobdat'))
+    clog.setFormatter(logging.Formatter('[%(name)s] %(message)s'))
+    logger.addHandler(clog)
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
 def Main() :
-    warnings.showwarning = HandleWarnings
+    SetupLoggers()
 
     # parse out the configuration file first
     parser = argparse.ArgumentParser()
