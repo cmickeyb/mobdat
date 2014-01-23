@@ -100,9 +100,11 @@ class EventHandler :
                 if evtype == EventTypes.ShutdownEvent :
                     return
 
+            except TypeError as detail :
+                self._Logger.warn('handler for event %s failed with type error; %s', evtype.__name__, str(detail))
             except :
                 exctype, value =  sys.exc_info()[:2]
-                self._Logger.warn('[EventHandler %s] handler failed with exception type %s; %s', self.HandlerID, exctype, str(value))
+                self._Logger.warn('handler failed with exception type %s; %s', exctype, str(value))
     
     # -----------------------------------------------------------------
     def HandleEvent(self, evtype, event) :

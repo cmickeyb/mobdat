@@ -51,6 +51,7 @@ import uuid
 import OpenSimRemoteControl
 import EventHandler, EventTypes, ValueTypes
 
+from collections import deque
 import Queue, threading, time, platform
 import random
 
@@ -198,8 +199,9 @@ class OpenSimVehicleDynamics :
 class OpenSimVehicle :
 
     # -----------------------------------------------------------------
-    def __init__(self, vname, vehicle) :
+    def __init__(self, vname, vtype, vehicle) :
         self.VehicleName = vname # Name of the sumo vehicle
+        self.VehicleType = vtype
         self.VehicleID = vehicle  # UUID of the vehicle object in OpenSim
 
         self.LastUpdate = OpenSimVehicleDynamics()
@@ -236,7 +238,7 @@ class OpenSimConnector(EventHandler.EventHandler) :
         self.VehicleReuseList = {}
         self.VehicleTypes = {}
         for vtype in settings["VehicleTypes"] :
-            self.VehicleReuseList[vtype["Name"]] = []
+            self.VehicleReuseList[vtype["Name"]] = deque([])
             self.VehicleTypes[vtype["Name"]] = vtype
 
         # Initialize some of the update control variables
@@ -274,23 +276,52 @@ class OpenSimConnector(EventHandler.EventHandler) :
     # -----------------------------------------------------------------
     def HandleCreateObjectEvent(self,event) :
         vtype = self.VehicleTypes[event.ObjectType]
+        vtypename = vtype["Name"]
         vname = event.ObjectIdentity
 
-        vehicle = uuid.uuid4()
-        result = self.OpenSimConnector.CreateObject(vtype["AssetID"], objectid=vehicle, name=vname, parm=vtype.get("StartParam","{}"))
+        self.Logger.debug("create vehicle %s with type %s", vname, vtypename)
+        
+        if len(self.VehicleReuseList[vtypename]) > 0 :
+            vehicle = self.VehicleReuseList[vtypename].popleft()
+            # self.Logger.debug("reuse vehicle %s for %s", vehicle.VehicleName, vname)
 
-        self.Vehicles[vname] = OpenSimVehicle(vname,str(vehicle))
+            # remove the old one from the vehicle map
+            del self.Vehicles[vehicle.VehicleName]
+            
+            # update it and add it back to the map with the new name
+            vehicle.VehicleName = vname
+            self.Vehicles[vname] = vehicle
+            return
 
-        # print "Created vehicle " + str(vname) + " with id " + str(vehicle)
+        vuuid = str(uuid.uuid4())
+        self.Vehicles[vname] = OpenSimVehicle(vname, vtypename, vuuid)
+
+        result = self.OpenSimConnector.CreateObject(vtype["AssetID"], objectid=vuuid, name="car", parm=vtype.get("StartParam","{}"))
+ 
+        # self.Logger.debug("create new vehicle %s with id %s", vname, vuuid)
         return True
 
     # -----------------------------------------------------------------
     def HandleDeleteObjectEvent(self,event) :
-        vname = event.ObjectIdentity
-        vehicleID = self.Vehicles[vname].VehicleID
+        """Handle the delete object event. In this case, rather than delete the
+        object from the scene completely, mothball it in a location well away from
+        the simulation.
+        """
+        
+        vehicle = self.Vehicles[event.ObjectIdentity]
+        self.VehicleReuseList[vehicle.VehicleType].append(vehicle)
 
-        result = self.OpenSimConnector.DeleteObject(vehicleID)
-        del self.Vehicles[vname]
+        mothball = OpenSimVehicleDynamics()
+        mothball.Position = ValueTypes.Vector3(10.0, 10.0, 500.0);
+        mothball.UpdateTime = self.CurrentTime
+
+        vehicle.TweenUpdate = mothball
+        vehicle.LastUpdate = mothball
+        vehicle.InUpdateQueue = True
+
+        self.WorkQ.put(vehicle.VehicleName)
+
+        # result = self.OpenSimConnector.DeleteObject(vehicleID)
 
         # print "Deleted vehicle " + vname + " with id " + str(vehicle)
         return True
@@ -393,6 +424,7 @@ class OpenSimConnector(EventHandler.EventHandler) :
         self.OpenSimConnector = OpenSimRemoteControl.OpenSimRemoteControl(self.EndPoint, request = 'async')
         self.OpenSimConnector.Capability = self.Capability
         self.OpenSimConnector.Scene = self.Scene
+        self.OpenSimConnector.Binary = self.Binary
 
         # Connect to the event registry
         self.SubscribeEvent(EventTypes.EventCreateObject, self.HandleCreateObjectEvent)
