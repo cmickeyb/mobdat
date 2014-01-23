@@ -51,11 +51,13 @@ from multiprocessing import Process
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
-import SumoConnector, OpenSimConnector, SocialConnector
+import SumoConnector, OpenSimConnector, SocialConnector, StatsConnector
+
 _SimulationControllers = {
     'sumo' : SumoConnector.SumoConnector,
     'opensim' : OpenSimConnector.OpenSimConnector,
-    'social' : SocialConnector.SocialConnector
+    'social' : SocialConnector.SocialConnector,
+    'stats' : StatsConnector.StatsConnector
     }
 
 # -----------------------------------------------------------------
@@ -110,7 +112,7 @@ def Controller(settings) :
     """
 
     interval = float(settings["General"]["Interval"])
-    cnames = settings["General"].get("Connectors",['sumo', 'opensim', 'social'])
+    cnames = settings["General"].get("Connectors",['sumo', 'opensim', 'social', 'stats'])
 
     evrouter = EventRouter.EventRouter()
 

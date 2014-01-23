@@ -72,6 +72,43 @@ class ShutdownEvent :
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+class StatsEvent :
+    # -----------------------------------------------------------------
+    def __init__(self, connector, timestep, cycletime) :
+        self.Connector = connector
+        self.CurrentStep = timestep
+        self.CycleTime = cycletime
+
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+class SumoConnectorStatsEvent(StatsEvent) :
+    # -----------------------------------------------------------------
+    def __init__(self, connector, timestep, cycletime = 0.0, vehiclecount = 0) :
+        StatsEvent.__init__(self, connector, timestep, cycletime)
+
+        self.VehicleCount = vehiclecount
+
+    # -----------------------------------------------------------------
+    def __str__(self) :
+        fstring = "[{0}:{1}] cycletime={2:.3f}, vehiclecount={3}"
+        return fstring.format(self.Connector, self.CurrentStep, self.CycleTime, self.VehicleCount)
+
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+class OpenSimConnectorStatsEvent(StatsEvent) :
+    # -----------------------------------------------------------------
+    def __init__(self, connector, timestep, cycletime = 0.0, queuelength = 0) :
+        StatsEvent.__init__(self, connector, timestep, cycletime)
+
+        self.QueueLength = 0
+
+    # -----------------------------------------------------------------
+    def __str__(self) :
+        fstring = "[{0}:{1}] cycletime={2:.3f}, queuelength={3}"
+        return fstring.format(self.Connector, self.CurrentStep, self.CycleTime, self.QueueLength)
+
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class TimerEvent :
     # -----------------------------------------------------------------
     def __init__(self, currentStep, currentTime) :

@@ -1,4 +1,4 @@
-!/usr/bin/env python
+#!/usr/bin/env python
 """
 Copyright (c) 2014, Intel Corporation
 
@@ -208,8 +208,12 @@ class OpenSimConnector(EventHandler.EventHandler) :
 
         self.UpdateThreadCount = settings["OpenSimConnector"].get("UpdateThreadCount",2)
 
+        self.DumpCount = 50
         self.CurrentStep = 0
         self.CurrentTime = 0
+        self.LastStepTime = 0
+        self.TimeScale = 0
+        self.AverageQueueLength = 0
 
         self.Clock = time.time
 
@@ -311,14 +315,20 @@ class OpenSimConnector(EventHandler.EventHandler) :
         self.CurrentStep = event.CurrentStep
         self.CurrentTime = event.CurrentTime
 
-        if self.CurrentStep % 50 == 0 :
-            drift = self.Clock() - self.CurrentTime
-            print "[OpenSimConnector] clock drift at step %d is %s" % (self.CurrentStep, drift)
-        
-        # s = self.WorkQ.qsize()
-        # if s > 0 : 
-        #     print "%d pending updates at time step %d" % (s, self.CurrentStep)
-        #     self.WorkQ.join()
+        # Compute the simulation time scale
+        if self.LastStepTime > 0 :
+            delta = self.CurrentTime - self.LastStepTime
+            if delta > 0 :
+                self.TimeScale = (9.0 * self.TimeScale + 1.0 / delta) / 10.0
+        self.LastStepTime = self.CurrentTime
+
+        # Compute weighted average queue length
+        self.AverageQueueLength = (9.0 * self.AverageQueueLength + self.WorkQ.qsize()) / 10.0
+
+        # Send the event if we need to
+        if (self.CurrentStep % self.DumpCount) == 0 :
+            event = EventTypes.OpenSimConnectorStatsEvent('OpenSimConnector', event.CurrentStep, self.TimeScale, self.AverageQueueLength)
+            self.PublishEvent(event)
 
     # -----------------------------------------------------------------
     def HandleShutdownEvent(self, event) :

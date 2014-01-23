@@ -228,7 +228,9 @@ class SumoConnector(EventHandler.EventHandler) :
         self._RecomputeRoutes()
 
         if (event.CurrentStep % self.DumpCount) == 0 :
-            print '%d vehicles in the scene at step %d with timescale %f' % (traci.vehicle.getIDCount(), currentStep, self.TimeScale)
+            count = traci.vehicle.getIDCount()
+            event = EventTypes.SumoConnectorStatsEvent('SumoConnector', event.CurrentStep, self.TimeScale, count)
+            self.PublishEvent(event)
 
         return True
 

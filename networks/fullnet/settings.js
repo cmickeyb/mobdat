@@ -3,7 +3,7 @@
     {
         "TimeSteps" : 2000,
         "Interval" : 0.100,
-        "Connectors" : ["opensim", "sumo", "social"]
+        "Connectors" : ["opensim", "sumo", "social", "stats"]
     },
 
     "NetworkBuilder" :
