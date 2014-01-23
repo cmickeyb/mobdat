@@ -133,10 +133,10 @@ class OpenSimUpdateThread(threading.Thread) :
 
             vehicle = self.Vehicles[vname]
             vid = vehicle.VehicleID
-            vpos = vehicle.Position.ToList()
-            vvel = vehicle.Velocity.ToList()
-            vrot = vehicle.Rotation.ToList()
-            vacc = vehicle.Acceleration.ToList()
+            vpos = vehicle.TweenUpdate.Position.ToList()
+            vvel = vehicle.TweenUpdate.Velocity.ToList()
+            vrot = vehicle.TweenUpdate.Rotation.ToList()
+            vacc = vehicle.TweenUpdate.Acceleration.ToList()
             update = OpenSimRemoteControl.BulkUpdateItem(vid, vpos, vvel, vrot, vacc)
             updates.append(update)
             vehicle.InUpdateQueue = False
@@ -154,12 +154,12 @@ class OpenSimVehicleDynamics :
     # -----------------------------------------------------------------
     @staticmethod
     def ComputeVelocity(velocity, acceleration, deltat) :
-        return velocity + aceleration * deltat
+        return velocity + acceleration * deltat
     
     # -----------------------------------------------------------------
     @staticmethod
     def ComputePosition(position, velocity, acceleration, deltat) :
-        return position + velocity * deltat + aceleration * (0.5 * deltat * deltat)
+        return position + velocity * deltat + acceleration * (0.5 * deltat * deltat)
 
     # -----------------------------------------------------------------
     @staticmethod
@@ -173,8 +173,8 @@ class OpenSimVehicleDynamics :
         acceleration = newpos.Velocity.SubVector(oldpos.Velocity) / deltat
 
         tween = OpenSimVehicleDynamics()
-        tween.Position = ComputePosition(oldpos.Position, oldpos.Velocity, acceleration, 0.5 * deltat)
-        tween.Velocity = ComputeVelocity(oldpos.Velocity, acceleration, 0.5 * deltat)
+        tween.Position = OpenSimVehicleDynamics.ComputePosition(oldpos.Position, oldpos.Velocity, acceleration, 0.5 * deltat)
+        tween.Velocity = OpenSimVehicleDynamics.ComputeVelocity(oldpos.Velocity, acceleration, 0.5 * deltat)
         tween.Rotation = newpos.Rotation # this is just wrong but i dont like quaternion math
         tween.Acceleration = acceleration
         tween.UpdateTime = oldpos.UpdateTime + 0.5 * deltat
@@ -190,7 +190,7 @@ class OpenSimVehicleDynamics :
 
     # -----------------------------------------------------------------
     def InterpolatePosition(self, deltat) :
-        return ComputePosition(self.Position, self.Velocity, self.Acceleration, deltat)
+        return OpenSimVehicleDynamics.ComputePosition(self.Position, self.Velocity, self.Acceleration, deltat)
     
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -309,7 +309,7 @@ class OpenSimConnector(EventHandler.EventHandler) :
         update = OpenSimVehicleDynamics()
         update.Position = event.ObjectPosition.ScaleVector(self.WorldSize).AddVector(self.WorldOffset)
         update.Velocity = event.ObjectVelocity.ScaleVector(self.WorldSize)
-        update.Rotation = event.Rotation
+        update.Rotation = event.ObjectRotation
         update.UpdateTime = self.CurrentTime
 
         # Compute the tween update (the update halfway between the last reported position and
@@ -329,12 +329,13 @@ class OpenSimConnector(EventHandler.EventHandler) :
         # will handle position updates reasonably if the velocity is consistent
 
         # Condition 1: this is not the first update
-        if vehicle.UpdateTime > 0 :
+        if vehicle.LastUpdate.UpdateTime > 0 :
             # Condition 2: the acceleration is about the same
             if vehicle.TweenUpdate.Acceleration.ApproxEquals(tween.Acceleration, self.AccelerationDelta) :
                 # Condition 3: the position check, need to handle lane changes so this check
                 # is not redundant with acceleration check
-                ipos = vehicle.TweenUpdate.InterpolatePosition(deltat)
+                ideltat = tween.UpdateTime - vehicle.TweenUpdate.UpdateTime
+                ipos = vehicle.TweenUpdate.InterpolatePosition(ideltat)
                 if ipos.ApproxEquals(tween.Position,self.PositionDelta) :
                     self.Interpolated += 1
                     return True
