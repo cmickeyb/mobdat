@@ -50,35 +50,35 @@
 	    "Name" : "One Lane Road Segment",
 	    "EdgeTypes" : [ "etype1A", "etype1B", "etype1C" ],
 	    "ZOffset" : 20.5,
-	    "AssetID" : "3b155bd7-074b-4347-bfd2-c1e232a33e55"
+	    "AssetID" : "7c3df98d-4b1e-4d35-92ec-f5bbad5f4596"
 	},
 
 	{
 	    "Name" : "Two Lane Road Segment",
 	    "EdgeTypes" : [ "etype2A", "etype2B", "etype2C" ],
 	    "ZOffset" : 20.5,
-	    "AssetID" : "8e621d4b-d067-4d69-ba48-748997b73aa6"
+	    "AssetID" : "ee4f62a8-3311-4808-86f0-b6caa4d62ecc"
 	},
 
 	{
 	    "Name" : "Parking Lot Segment",
 	    "EdgeTypes" : ["parking_entry"],
 	    "ZOffset" : 25.25,
-	    "AssetID" : "ea5280c4-d2e5-4d40-b4cc-6f05a36a6dae"
+	    "AssetID" : "b2b6c88f-e044-493e-a922-7da651138aae"
 	},
 
 	{
 	    "Name" : "Marble Driveway",
 	    "EdgeTypes" : ["driveway"],
 	    "ZOffset" : 20.5,
-	    "AssetID" : "f51c1812-0d8c-4e1e-b2ac-fea6756d908a"
+	    "AssetID" : "6d5ad1c2-54db-42a2-8544-b9117d3b1db5"
 	},
 
 	{
 	    "Name" : "Asphalt Driveway",
 	    "EdgeTypes" : ["parking_drive"],
 	    "ZOffset" : 25.25,
-	    "AssetID" : "85265a47-e1a9-4f28-8425-88f29d8409b6"
+	    "AssetID" : "5147e8cf-41e5-480c-b9c3-0282bdb3867c"
 	}
 
     ],
