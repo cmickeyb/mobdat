@@ -87,8 +87,8 @@
     [
 	{
 	    "Name" : "Parking Lot Intersection [* P * P]",
-	    "AssetID" : "685018da-1f1d-47df-a85a-61086c12e715",
-	    "ZOffset" : 25.25,
+	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "Parking Lot Intersection [* P * P]" },
+	    "ZOffset" : 20.50,
 	    "Padding" : 2.5,
 	    "Signature" : ["*", "*", "*", "*"],
             "NodeTypes" : [ "parking_drive_intersection" ]
@@ -96,7 +96,7 @@
 
 	{
 	    "Name" : "ParkingLot Entry [2L P 2L P]",
-	    "AssetID" : "46dc7390-8401-4b74-a76b-82eb43dd8531",
+	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "ParkingLot Entry [2L P 2L P]" },
 	    "ZOffset" : 20.5,
 	    "Padding" : 5,
 	    "Signature" : ["1L", "P", "1L", "P"],
@@ -105,7 +105,7 @@
 
 	{
 	    "Name" : "ParkingLot Entry [2L P 2L 0L]",
-	    "AssetID" : "8dc50ef2-cea4-4dea-9647-02ade0ade752",
+	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "ParkingLot Entry [2L P 2L 0L]" },
 	    "ZOffset" : 20.5,
 	    "Padding" : 5,
 	    "Signature" : ["1L", "P", "1L", "0L"],
@@ -114,25 +114,25 @@
 
 	{
 	    "Name" : "Intersection [0L, 0L, 1L, 2L]",
-	    "AssetID" : "a7588c14-b555-4d09-9190-8cb0d4221388",
+	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "Intersection [0L, 0L, 1L, 2L]" },
 	    "ZOffset" : 20.5,
-	    "Padding" : 15,
+	    "Padding" : 7.5,
 	    "Signature" : ["0L", "0L", "1L", "2L"],
             "NodeTypes" : [ "stoplight", "priority" ]
 	},
 
 	{
 	    "Name" : "Intersection [0L, 0L, 2L, 1L]",
-	    "AssetID" : "44a318a4-2df2-4461-ac60-81eeaa6a4ec5",
+	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "Intersection [0L, 0L, 2L, 1L]" },
 	    "ZOffset" : 20.5,
-	    "Padding" : 15,
+	    "Padding" : 7.5,
 	    "Signature" : ["0L", "0L", "2L", "1L"],
             "NodeTypes" : [ "stoplight", "priority" ]
 	},
 
 	{
 	    "Name" : "Intersection [0L 1L 1L 1L]",
-	    "AssetID" : "e598dd5e-f0d9-4d73-818b-617aef753675",
+	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "Intersection [0L 1L 1L 1L]" },
 	    "ZOffset" : 20.5,
 	    "Padding" : 7.5,
 	    "Signature" : ["0L", "1L", "1L", "1L"],
@@ -140,89 +140,98 @@
 	},
 
 	{
-	    "Name" : "Intersection 3way 4lane by 2lane",
-	    "AssetID" : "69e601e3-f8b4-4ab0-8c49-5e8c0bee5ad8",
+	    "Name" : "Intersection [2L 0L 2L 1L]",
+	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "Intersection [2L 0L 2L 1L]" },
 	    "ZOffset" : 20.5,
-	    "Padding" : 15,
-	    "Signature" : ["0L", "2L", "1L", "2L"],
+	    "Padding" : 7.5,
+	    "Signature" : ["2L", "0L", "2L", "1L"],
             "NodeTypes" : [ "stoplight", "priority" ]
 	},
 
 	{
-	    "Name" : "Intersection 3way 4lane by 4lane",
-	    "AssetID" : "5a629990-da65-4f00-bb38-afa0a359d462",
+	    "Name" : "Intersection [2L 0L 2L 2L]",
+	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "Intersection [2L 0L 2L 2L]"},
 	    "ZOffset" : 20.5,
-	    "Padding" : 15,
+	    "Padding" : 7.5,
 	    "Signature" : ["0L", "2L", "2L", "2L"],
             "NodeTypes" : [ "stoplight", "priority" ]
 	},
 
 	{
-	    "Name" : "Intersection 4way 4lane by 2lane",
-	    "AssetID" : "ca60b2d0-21db-458f-89be-92222b3e09a0",
+	    "Name" : "Intersection [1L, 2L, 1L, 2L]",
+	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "Intersection [1L, 2L, 1L, 2L]" },
 	    "ZOffset" : 20.5,
-	    "Padding" : 15,
+	    "Padding" : 7.5,
 	    "Signature" : ["1L", "2L", "1L", "2L"],
             "NodeTypes" : [ "stoplight", "priority" ]
 	},
 
 	{
-	    "Name" : "Intersection 4way 4lane by 4lane",
-	    "AssetID" : "226ae7d4-7e9d-48f8-8d3a-e05dd02c7e41",
+	    "Name" : "Intersection [1L, 2L, 2L, 2L]",
+	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "Intersection [1L, 2L, 2L, 2L]" },
 	    "ZOffset" : 20.5,
-	    "Padding" : 15,
+	    "Padding" : 7.5,
+	    "Signature" : ["1L", "2L", "2L", "2L"],
+            "NodeTypes" : [ "stoplight", "priority" ]
+	},
+
+	{
+	    "Name" : "Intersection [2L 2L 2L 2L]",
+	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "Intersection [2L 2L 2L 2L]" },
+	    "ZOffset" : 20.5,
+	    "Padding" : 7.5,
 	    "Signature" : ["2L", "2L", "2L", "2L"],
             "NodeTypes" : [ "stoplight", "priority" ]
 	},
 
 	{
-	    "Name" : "Intersection 4way 2lane by 2lane",
-	    "AssetID" : "b7d436cb-6674-4936-b97a-cfa89bea8e37",
+	    "Name" : "Intersection [1L 1L 1L 1L]",
+	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "Intersection [1L 1L 1L 1L]" },
 	    "ZOffset" : 20.5,
-	    "Padding" : 15,
+	    "Padding" : 7.5,
 	    "Signature" : ["1L", "1L", "1L", "1L"],
             "NodeTypes" : [ "stoplight", "priority" ]
 	},
 	    
 	{
-	    "Name" : "Intersection 3way 4lane by 2x2lane",
-	    "AssetID" : "fc4477b6-27dd-45d1-8815-31ed704f112d",
+	    "Name" : "Intersection [1L 0L 1L 2L]",
+	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "Intersection [1L 0L 1L 2L]" },
 	    "ZOffset" : 20.5,
-	    "Padding" : 15,
+	    "Padding" : 7.5,
 	    "Signature" : ["1L", "0L", "1L", "2L"],
             "NodeTypes" : [ "stoplight", "priority" ]
 	},
 	
 	{
-	    "Name" : "Intersection 4way 4lane by 3x2lane",
-	    "AssetID" : "48399e53-4331-4e21-9812-4e57232d1efc",
+	    "Name" : "Intersection [1L 1L 1L 2L]",
+	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "Intersection [1L 1L 1L 2L]" },
 	    "ZOffset" : 20.5,
-	    "Padding" : 15,
+	    "Padding" : 7.5,
 	    "Signature" : ["1L", "1L", "1L", "2L"],
             "NodeTypes" : [ "stoplight", "priority" ]
 	},
 
 	{
-	    "Name" : "Intersection corner 2lane by 2lane",
-	    "AssetID" : "b5f2d609-766d-41db-bcdf-412f572d6c3d",
+	    "Name" : "Intersection [0L 0L 1L 1L]",
+	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "Intersection [0L 0L 1L 1L]" },
 	    "ZOffset" : 20.5,
-	    "Padding" : 15,
+	    "Padding" : 7.5,
 	    "Signature" : ["0L", "0L", "1L", "1L"],
             "NodeTypes" : [ "stoplight", "priority" ]
 	},
 
 	{
-	    "Name" : "Intersection corner 4lane by 4lane",
-	    "AssetID" : "2650ad8b-c771-49ed-bc36-76cce2971420",
+	    "Name" : "Intersection [0L 0L 2L 2L]",
+	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "Intersection [0L 0L 2L 2L]" },
 	    "ZOffset" : 20.5,
-	    "Padding" : 15,
+	    "Padding" : 7.5,
 	    "Signature" : ["0L", "0L", "2L", "2L"],
             "NodeTypes" : [ "stoplight", "priority" ]
 	},
 
 	{
 	    "Name" : "Residential Row 1way 1lane",
-            "AssetID" : "afdcc4a3-0b7f-4e2f-baff-cd787b3508e8",
+	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "Residential Row 1way 1lane" },
 	    "ZOffset" : 25.0,
 	    "Padding" : 0,
 	    "Signature" : ["0L", "0L", "D", "0L"],
@@ -231,7 +240,7 @@
 
 	{
 	    "Name" : "Residential 1way 1lane",
-            "AssetID" : "d60e8dda-620f-4b7e-86e7-51db7a8b5e47",
+	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "Residential 1way 1lane" },
 	    "ZOffset" : 25.4,
 	    "Padding" : 0,
 	    "Signature" : ["0L", "0L", "D", "0L"],
@@ -241,7 +250,7 @@
 
         {
             "Name" : "Business Box [D 0L 0L 0L]",
-            "AssetID" : "1c5fcc2c-256c-4bd4-a39a-acea1afbc592",
+	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "Business Box [D 0L 0L 0L]" },
             "ZOffset" : 26.0,
             "Padding" : 0,
             "Signature" : ["D", "0L", "0L", "0L"],
@@ -250,7 +259,7 @@
 
 	{
 	    "Name" : "Intersection 2Lane Driveway",
-	    "AssetID" : "696c39eb-fbb4-4273-b860-bc3b6db35053",
+	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "Intersection 2Lane Driveway" },
 	    "ZOffset" : 20.5,
 	    "Padding" : 2.5,
 	    "Signature" : ["1L", "D", "1L", "D"],
@@ -259,7 +268,7 @@
 
 	{
 	    "Name" : "Intersection 2Lane Driveway",
-	    "AssetID" : "696c39eb-fbb4-4273-b860-bc3b6db35053",
+	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "Intersection 2Lane Driveway" },
 	    "ZOffset" : 20.5,
 	    "Padding" : 2.5,
 	    "Signature" : ["1L", "0L", "1L", "D"],
@@ -268,7 +277,7 @@
 
 	{
 	    "Name" : "Intersection 2Lane Driveway",
-	    "AssetID" : "696c39eb-fbb4-4273-b860-bc3b6db35053",
+	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "Intersection 2Lane Driveway" },
 	    "ZOffset" : 20.5,
 	    "Padding" : 2.5,
 	    "Signature" : ["1L", "0L", "1L", "0L"],
@@ -277,7 +286,7 @@
 
 	{
 	    "Name" : "Intersection 2Lane Driveway",
-	    "AssetID" : "696c39eb-fbb4-4273-b860-bc3b6db35053",
+	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "Intersection 2Lane Driveway" },
 	    "ZOffset" : 20.5,
 	    "Padding" : 2.5,
 	    "Signature" : ["1L", "0L", "0L", "1L"],
@@ -286,7 +295,7 @@
 
 	{
 	    "Name" : "Intersection 2Lane Driveway",
-	    "AssetID" : "696c39eb-fbb4-4273-b860-bc3b6db35053",
+	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "Intersection 2Lane Driveway" },
 	    "ZOffset" : 20.5,
 	    "Padding" : 2.5,
 	    "Signature" : ["1L", "1L", "0L", "1L"],
@@ -295,7 +304,7 @@
 
 	{
 	    "Name" : "Intersection 4Lane Driveway",
-	    "AssetID" : "620272dc-4613-4a43-94d5-889628280c69",
+	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "Intersection 4Lane Driveway" },
 	    "ZOffset" : 20.5,
 	    "Padding" : 5,
 	    "Signature" : ["2L", "D", "2L", "D"],
@@ -398,7 +407,6 @@
 	    "MinGap" : 1,
 	    "MaxSpeed" : 3.0,
 	    "AssetID" : "d8f32d8f-bd4e-4ed7-ba17-3a1420c332e2",
-            "OldAssetID" : "3c053732-8f49-4613-8ed2-a6775940864b",
             "Position" : [128.0, 128.0, 30.0],
             "Rotation" : [0.0, 0.0, 0.0, 1.0],
             "Velocity" : [0.0, 0.0, 0.0],
@@ -419,7 +427,6 @@
 	    "MaxSpeed" : 1.0,
             "AssetID" : "65715f46-7dc1-4b4a-ba64-23b9f972bdc4",
             "StartParam" : "{ 'terminate' : 0, 'color' : '<0.0, 1.0, 0.0>', 'scale' : '<1.5, 5.0, 1.5>' }",
-            "xAssetID" : "51505cf3-1903-41cd-acb2-c684ec6426a6",
             "StartParameter" : "{}",
             "Position" : [128.0, 128.0, 30.0],
             "Rotation" : [0.0, 0.0, 0.0, 1.0],

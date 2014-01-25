@@ -37,7 +37,8 @@ This file defines the opensim builder class for mobdat traffic networks.
 The functions in this file will rez a mobdat network in an OpenSim region.
 """
 
-import os, sys, warnings
+import os, sys
+import logging
 
 # we need to import python modules from the $SUMO_HOME/tools directory
 sys.path.append(os.path.join(os.environ.get("OPENSIM","/share/opensim"),"lib","python"))
@@ -58,20 +59,45 @@ class OpenSimBuilder :
         self.NetworkInfo = netinfo
         self.EdgeMap = {}
         self.NodeMap = {}
+        self.Logger = logging.getLogger(__name__)
 
         try :
             self.OpenSimConnector = OpenSimRemoteControl.OpenSimRemoteControl(settings["OpenSimConnector"]["EndPoint"])
             self.OpenSimConnector.Capability = uuid.UUID(settings["OpenSimConnector"]["Capability"])
             self.OpenSimConnector.Scene = settings["OpenSimConnector"]["Scene"]
         except NameError as detail: 
-            warnings.warn("Failed processing OpenSim configuration; name error %s" % (str(detail)))
+            self.Logger.warn("Failed processing OpenSim configuration; name error %s", (str(detail)))
             sys.exit(-1)
         except KeyError as detail: 
-            warnings.warn("unable to locate OpenSim configuration value for %s" % (str(detail)))
+            self.Logger.warn("unable to locate OpenSim configuration value for %s", (str(detail)))
             sys.exit(-1)
         except :
-            warnings.warn("OpenSimConnector configuration failed; %s" % (sys.exc_info()[0]))
+            exctype, value =  sys.exc_info()[:2]
+            self._Logger.warn('handler failed with exception type %s; %s', exctype, str(value))
             sys.exit(-1)
+
+    # -----------------------------------------------------------------
+    def FindAssetInObject(self, assetinfo) :
+        oname = assetinfo["ObjectName"]
+        iname = assetinfo["ItemName"]
+
+        result = self.OpenSimConnector.FindObjects(pattern = oname)
+        if not result["_Success"] or len(result["Objects"]) == 0 :
+            self.Logger.warn("Unable to locate container object %s; %s",oname, result["_Message"])
+            sys.exit(-1)
+
+        objectid = result["Objects"][0]
+        result = self.OpenSimConnector.GetObjectInventory(objectid)
+        if not result["_Success"] :
+            self.Logger.warn("Failed to get inventory from container object %s; %s",oname, result["_Message"])
+            sys.exit(-1)
+            
+        for item in result["Inventory"] :
+            if item["Name"] == iname :
+                return item["AssetID"]
+
+        self.Logger.warn("Failed to locate item %s in object %s",iname, oname);
+        return None
 
     # -----------------------------------------------------------------
     def ComputeRotation(self, sig1, sig2) :
@@ -90,11 +116,11 @@ class OpenSimBuilder :
     # -----------------------------------------------------------------
     def ComputeLocation(self, snode, enode) :
         if snode.Name not in self.NodeMap :
-            warnings.warn('cannot find node %s in the node map' % (snode.Name))
+            self.Logger.warn('cannot find node %s in the node map' % (snode.Name))
             return False
 
         if enode.Name not in self.NodeMap :
-            warnings.warn('cannot find node %s in the node map' % (enode.Name))
+            self.Logger.warn('cannot find node %s in the node map' % (enode.Name))
             return False
 
         sbump = self.NodeMap[snode.Name].Padding
@@ -132,7 +158,7 @@ class OpenSimBuilder :
             e1y = enode.Y + ebump
 
         else :
-            warnings.warn('something went wrong computing the signature')
+            self.Logger.warn('something went wrong computing the signature')
             return(0,0,0,0)
 
         return (s1x + 512, s1y + 512, e1x + 512, e1y + 512)
@@ -153,7 +179,7 @@ class OpenSimBuilder :
                 continue
 
             if edge.EdgeType.Name not in self.NetworkInfo.EdgeTypeMap :
-                warnings.warn('Failed to find asset for %s' % (edge.EdgeType.Name))
+                self.Logger.warn('Failed to find asset for %s' % (edge.EdgeType.Name))
                 continue 
 
             # check to see if we need to render this edge at all
@@ -161,11 +187,15 @@ class OpenSimBuilder :
                 asset = self.NetworkInfo.EdgeTypeMap[edge.EdgeType.Name][0].AssetID
                 zoff = self.NetworkInfo.EdgeTypeMap[edge.EdgeType.Name][0].ZOffset
 
-                (p1x, p1y, p2x, p2y) = self.ComputeLocation(edge.StartNode, edge.EndNode)
+                if type(asset) == dict :
+                    asset = self.FindAssetInObject(asset)
+                    self.NetworkInfo.EdgeTypeMap[edge.EdgeType.Name][0].AssetID = asset
 
+                (p1x, p1y, p2x, p2y) = self.ComputeLocation(edge.StartNode, edge.EndNode)
                 startparms = "{ 'spoint' : '<%f, %f, %f>', 'epoint' : '<%f, %f, %f>' }" % (p1x, p1y, zoff, p2x, p2y, zoff)
 
-                result = self.OpenSimConnector.CreateObject(asset, pos=[p1x, p1y, 20.5], name=e, parm=startparms)
+                if abs(p1x - p2x) > 0.1 or abs(p1y - p2y) > 0.1 :
+                    result = self.OpenSimConnector.CreateObject(asset, pos=[p1x, p1y, 20.5], name=e, parm=startparms)
 
             self.EdgeMap[edge.Name] = True
             self.EdgeMap[edge.ReverseName()] = True
@@ -179,7 +209,7 @@ class OpenSimBuilder :
             sig1 = node.Signature()
 
             if tname not in self.NetworkInfo.NodeTypeMap :
-                warnings.warn('Unable to locate node type %s' % (tname))
+                self.Logger.warn('Unable to locate node type %s' % (tname))
                 continue
 
             success = False
@@ -194,6 +224,10 @@ class OpenSimBuilder :
                     p1y = node.Y + 512
                     p1z = itype.ZOffset
                     asset = itype.AssetID
+                    if type(asset) == dict :
+                        asset = self.FindAssetInObject(asset)
+                        itype.AssetID = asset
+
                     startparms = "{ 'center' : '<%f, %f, %f>', 'angle' : %f }" % (p1x, p1y, p1z, 90.0 * rot)
 
                     if node.NodeType.Render :
@@ -203,4 +237,4 @@ class OpenSimBuilder :
                     break
 
             if not success :
-                warnings.warn("No match for node %s with type %s and signature %s" % (n, tname, sig1))
+                self.Logger.warn("No match for node %s with type %s and signature %s" % (n, tname, sig1))
