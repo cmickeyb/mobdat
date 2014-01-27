@@ -274,6 +274,29 @@ class OpenSimConnector(EventHandler.EventHandler) :
             self.Clock = time.clock
 
     # -----------------------------------------------------------------
+    def _FindAssetInObject(self, assetinfo) :
+        oname = assetinfo["ObjectName"]
+        iname = assetinfo["ItemName"]
+
+        result = self.OpenSimConnector.FindObjects(pattern = oname)
+        if not result["_Success"] or len(result["Objects"]) == 0 :
+            self.Logger.warn("Unable to locate container object %s; %s",oname, result["_Message"])
+            sys.exit(-1)
+
+        objectid = result["Objects"][0]
+        result = self.OpenSimConnector.GetObjectInventory(objectid)
+        if not result["_Success"] :
+            self.Logger.warn("Failed to get inventory from container object %s; %s",oname, result["_Message"])
+            sys.exit(-1)
+            
+        for item in result["Inventory"] :
+            if item["Name"] == iname :
+                return item["AssetID"]
+
+        self.Logger.warn("Failed to locate item %s in object %s",iname, oname);
+        return None
+
+    # -----------------------------------------------------------------
     def HandleCreateObjectEvent(self,event) :
         vtype = self.VehicleTypes[event.ObjectType]
         vtypename = vtype["Name"]
@@ -296,7 +319,12 @@ class OpenSimConnector(EventHandler.EventHandler) :
         vuuid = str(uuid.uuid4())
         self.Vehicles[vname] = OpenSimVehicle(vname, vtypename, vuuid)
 
-        result = self.OpenSimConnector.CreateObject(vtype["AssetID"], objectid=vuuid, name="car", parm=vtype.get("StartParam","{}"))
+        assetid = vtype["AssetID"]
+        if type(assetid) == dict :
+            assetid = self._FindAssetInObject(assetid)
+            vtype["AssetID"] = assetid
+
+        result = self.OpenSimConnectorAsync.CreateObject(vtype["AssetID"], objectid=vuuid, name="car", parm=vtype.get("StartParam","{}"))
  
         # self.Logger.debug("create new vehicle %s with id %s", vname, vuuid)
         return True
@@ -321,7 +349,7 @@ class OpenSimConnector(EventHandler.EventHandler) :
 
         self.WorkQ.put(vehicle.VehicleName)
 
-        # result = self.OpenSimConnector.DeleteObject(vehicleID)
+        # result = self.OpenSimConnectorAsync.DeleteObject(vehicleID)
 
         # print "Deleted vehicle " + vname + " with id " + str(vehicle)
         return True
@@ -406,7 +434,7 @@ class OpenSimConnector(EventHandler.EventHandler) :
     def HandleShutdownEvent(self, event) :
         # clean up all the outstanding vehicles
         for vehicle in self.Vehicles.itervalues() :
-            self.OpenSimConnector.DeleteObject(vehicle.VehicleID)
+            self.OpenSimConnectorAsync.DeleteObject(vehicle.VehicleID)
 
         # print 'waiting for update thread to terminate'
         for count in range(self.UpdateThreadCount) :
@@ -421,7 +449,12 @@ class OpenSimConnector(EventHandler.EventHandler) :
 
     # -----------------------------------------------------------------
     def SimulationStart(self) :
-        self.OpenSimConnector = OpenSimRemoteControl.OpenSimRemoteControl(self.EndPoint, request = 'async')
+        self.OpenSimConnectorAsync = OpenSimRemoteControl.OpenSimRemoteControl(self.EndPoint, request = 'async')
+        self.OpenSimConnectorAsync.Capability = self.Capability
+        self.OpenSimConnectorAsync.Scene = self.Scene
+        self.OpenSimConnectorAsync.Binary = self.Binary
+
+        self.OpenSimConnector = OpenSimRemoteControl.OpenSimRemoteControl(self.EndPoint)
         self.OpenSimConnector.Capability = self.Capability
         self.OpenSimConnector.Scene = self.Scene
         self.OpenSimConnector.Binary = self.Binary
