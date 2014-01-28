@@ -478,7 +478,7 @@ class Network :
         return None
 
     # -----------------------------------------------------------------
-    def BuildSimpleParkingLot(self, origin, itype, rgen, prefix = 'tile', slength = 30, elength = 70, offset = 25) :
+    def BuildSimpleParkingLotNS(self, origin, itype, rgen, prefix = 'tile', slength = 30, elength = 70, offset = 25) :
         dist1 = slength
         dist2 = elength - slength
 
@@ -510,3 +510,37 @@ class Network :
         self.ConnectNodes(cnode1, dnode1, rgen.EdgeType)
         self.ConnectNodes(cnode2, dnode2, rgen.EdgeType)
         self._GenerateResidentialYAxis(dnode1, dnode2, rgen, prefix)
+
+    # -----------------------------------------------------------------
+    def BuildSimpleParkingLotEW(self, origin, itype, rgen, prefix = 'tile', slength = 30, elength = 70, offset = 25) :
+        dist1 = slength
+        dist2 = elength - slength
+
+        # find the first split point
+        edge = origin.EastEdge()
+        while (edge.EndNode.X - edge.StartNode.X <= dist1) :
+            dist1 = dist1 - (edge.EndNode.X - edge.StartNode.X)
+            edge = edge.EndNode.EastEdge()
+
+        # if the node already exists, don't overwrite the existing type
+        cnode1 = edge.StartNode
+        if dist1 > 0 :
+            cnode1 = self.AddNodeBetween(edge.StartNode, edge.EndNode, dist1, itype, prefix)
+        
+        # find the second split point
+        edge = cnode1.EastEdge()
+        while (edge.EndNode.X - edge.StartNode.X <= dist2) :
+            dist2 = dist2 - (edge.EndNode.X - edge.StartNode.X)
+            edge = edge.EndNode.EastEdge()
+
+        cnode2 = edge.StartNode
+        if dist2 > 0 :
+            cnode2 = self.AddNodeBetween(edge.StartNode, edge.EndNode, dist2, itype, prefix)
+
+        # cnode1 and cnode2 are the connection nodes, now build a path between them
+        dnode1 = self.AddNode(cnode1.X, cnode1.Y + offset, rgen.IntersectionType, prefix)
+        dnode2 = self.AddNode(cnode2.X, cnode2.Y + offset, rgen.IntersectionType, prefix)
+
+        self.ConnectNodes(cnode1, dnode1, rgen.EdgeType)
+        self.ConnectNodes(cnode2, dnode2, rgen.EdgeType)
+        self._GenerateResidentialXAxis(dnode1, dnode2, rgen, prefix)

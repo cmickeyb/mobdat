@@ -89,9 +89,15 @@ def BuildNetwork(ng) :
 
     # And then set a bunch of the edges to be two lane instead
     # of the four lane edges we created for the rest of the grid
-    ng.SetEdgeTypeByPattern('main.*[EW]0N:main.*[EW]0N',e1A)
-    ng.SetEdgeTypeByPattern('main[0-9]*[EW][24]00[NS]:main[0-9]*[EW][24]00[NS]',e1A)
-    ng.SetEdgeTypeByPattern('main[24]00[EW][0-9]*[NS]:main[24]00[EW][0-9]*[NS]',e1A)
+    # ng.SetEdgeTypeByPattern('main.*[EW]0N:main.*[EW]0N',e1A)
+    # ng.SetEdgeTypeByPattern('main[0-9]*[EW][24]00[NS]:main[0-9]*[EW][24]00[NS]',e1A)
+    # ng.SetEdgeTypeByPattern('main[24]00[EW][0-9]*[NS]:main[24]00[EW][0-9]*[NS]',e1A)
+
+    ng.SetEdgeTypeByPattern('main[0-9]*[EW]200[NS]:main[0-9]*[EW]200[NS]',e1A)
+    ng.SetEdgeTypeByPattern('main[0-9]*[EW]400[NS]:main[0-9]*[EW]400[NS]',e1A)
+
+    ng.SetEdgeTypeByPattern('main300[EW][0-9]*[NS]:main300[EW][0-9]*[NS]',e1A)
+    ng.SetEdgeTypeByPattern('main400[EW][0-9]*[NS]:main400[EW][0-9]*[NS]',e1A)
 
     # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     # PLAZA GRID
@@ -102,6 +108,8 @@ def BuildNetwork(ng) :
 
     # The central north/south road is four lane
     ng.SetEdgeTypeByPattern('plaza[0-9]*[EW]100[NS]:plaza[0-9]*[EW]100[NS]',e2B)
+    ng.SetEdgeTypeByPattern('plaza[0-9]*[EW]0N:plaza[0-9]*[EW]0N',e2B)
+    ng.SetEdgeTypeByPattern('plaza0E[0-9]*[NS]:plaza0E[0-9]*[NS]',e2B)
     ng.SetEdgeTypeByPattern('plaza0E[0-9]*[NS]:plaza0E[0-9]*[NS]',e2B)
 
     # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -127,6 +135,8 @@ def BuildNetwork(ng) :
     ng.ConnectNodes(ng.gNodes['main100W100S'],ng.gNodes['plaza50W100S'],e2A)
     ng.ConnectNodes(ng.gNodes['main100E100N'],ng.gNodes['plaza50E100N'],e2A)
     ng.ConnectNodes(ng.gNodes['main100E100S'],ng.gNodes['plaza50E100S'],e2A)
+    ng.ConnectNodes(ng.gNodes['main100W0N'],ng.gNodes['plaza50W0N'],e2A)
+    ng.ConnectNodes(ng.gNodes['main100E0N'],ng.gNodes['plaza50E0N'],e2A)
 
     # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     # BUILD THE RESIDENTIAL NEIGHBORHOODS
@@ -174,13 +184,33 @@ def BuildNetwork(ng) :
     rgenplR = NetBuilder.ResidentialGenerator(plotentry, plotnode, plotdrive, bntype, driveway = 8, bspace = 5, spacing = 5, both = False)
     rgenplL = NetBuilder.ResidentialGenerator(plotentry, plotnode, plotdrive, bntype, driveway = -8, bspace = 5, spacing = 5, both = False)
 
-    for n in ['main200W300S', 'main200W200S', 'main200W100S', 'main200W0N', 'main200W100N', 'main200W200N'] : 
-        ng.BuildSimpleParkingLot(ng.gNodes[n], pntype, rgenplR, "tile", offset=15)
-        ng.BuildSimpleParkingLot(ng.gNodes[n], pntype, rgenplL, "tile", offset=-15)
+    for n in ['main300W200S', 'main200W200S', 'main100E200S', 'main200E200S'] :
+        ng.BuildSimpleParkingLotEW(ng.gNodes[n], pntype, rgenplR, "tile", offset=15)
+        ng.BuildSimpleParkingLotEW(ng.gNodes[n], pntype, rgenplL, "tile", offset=-15)
 
-    for n in ['main200E300S', 'main200E200S', 'main200E100S', 'main200E0N', 'main200E100N', 'main200E200N'] : 
-        ng.BuildSimpleParkingLot(ng.gNodes[n], pntype, rgenplR, "tile", offset=15)
-        ng.BuildSimpleParkingLot(ng.gNodes[n], pntype, rgenplL, "tile", offset=-15)
+    for n in ['main300W200N', 'main200W200N', 'main100E200N', 'main200E200N'] :
+        ng.BuildSimpleParkingLotEW(ng.gNodes[n], pntype, rgenplR, "tile", offset=15)
+        ng.BuildSimpleParkingLotEW(ng.gNodes[n], pntype, rgenplL, "tile", offset=-15)
+
+    for n in ['plaza50W250S', 'plaza50W200S', 'plaza50W150S', 'plaza50W100S', 'plaza50W50S' ] :
+        ng.BuildSimpleParkingLotNS(ng.gNodes[n], pntype, rgenplL, "tile", offset=15, slength = 17.5, elength=32.5)
+
+    for n in ['plaza50W0N', 'plaza50W50N', 'plaza50W100N', 'plaza50W150N', 'plaza50W200N' ] :
+        ng.BuildSimpleParkingLotNS(ng.gNodes[n], pntype, rgenplL, "tile", offset=15, slength = 17.5, elength=32.5)
+
+    for n in ['plaza50E250S', 'plaza50E200S', 'plaza50E150S', 'plaza50E100S', 'plaza50E50S'] :
+        ng.BuildSimpleParkingLotNS(ng.gNodes[n], pntype, rgenplR, "tile", offset=-15, slength = 17.5, elength=32.5)
+
+    for n in ['plaza50E0N', 'plaza50E50N', 'plaza50E100N', 'plaza50E150N', 'plaza50E200N'] :
+        ng.BuildSimpleParkingLotNS(ng.gNodes[n], pntype, rgenplR, "tile", offset=-15, slength = 17.5, elength=32.5)
+        
+    # for n in ['main200W300S', 'main200W200S', 'main200W100S', 'main200W0N', 'main200W100N', 'main200W200N'] : 
+    #     ng.BuildSimpleParkingLot(ng.gNodes[n], pntype, rgenplR, "tile", offset=15)
+    #     ng.BuildSimpleParkingLot(ng.gNodes[n], pntype, rgenplL, "tile", offset=-15)
+
+    # for n in ['main200E300S', 'main200E200S', 'main200E100S', 'main200E0N', 'main200E100N', 'main200E200N'] : 
+    #     ng.BuildSimpleParkingLot(ng.gNodes[n], pntype, rgenplR, "tile", offset=15)
+    #     ng.BuildSimpleParkingLot(ng.gNodes[n], pntype, rgenplL, "tile", offset=-15)
 
     # ng.GenerateResidential(ng.gNodes['main400W200S'],ng.gNodes['main300W200S'], rgenh)
     # ng.GenerateResidential(ng.gNodes['main400W0N'],  ng.gNodes['main300W0N'], rgenh)
