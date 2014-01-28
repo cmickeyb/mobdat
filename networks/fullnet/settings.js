@@ -144,7 +144,7 @@
 	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "Intersection [2L 0L 2L 1L]" },
 	    "ZOffset" : 20.5,
 	    "Padding" : 7.5,
-	    "Signature" : ["2L", "0L", "2L", "1L"],
+	    "Signature" : ["0L", "2L", "1L", "2L"],
             "NodeTypes" : [ "stoplight", "priority" ]
 	},
 
@@ -314,6 +314,46 @@
 
     "VehicleTypes" :
     [
+        {
+            "Name" : "Police Car",
+            "Description" : "A blue car",
+            "Rate" : 15,
+	    "SourceNodeTypes" : [],
+	    "DestinationNodeTypes" : [],
+	    "Acceleration" : 0.3,
+	    "Deceleration" : 0.3,
+	    "Sigma" : 0.5,
+	    "Length" : 3,
+	    "MinGap" : 2,
+	    "MaxSpeed" : 2.0,
+            "AssetID" : { "ObjectName" : "SumoAssets Vehicles", "ItemName" : "Police Car" },
+            "StartParam" : "{}",
+            "Position" : [128.0, 128.0, 30.0],
+            "Rotation" : [0.0, 0.0, 0.0, 1.0],
+            "Velocity" : [0.0, 0.0, 0.0],
+            "StartParameter" : "{}"
+        },
+
+        {
+            "Name" : "Trolly",
+            "Description" : "A blue car",
+            "Rate" : 15,
+	    "SourceNodeTypes" : [],
+	    "DestinationNodeTypes" : [],
+	    "Acceleration" : 0.3,
+	    "Deceleration" : 0.3,
+	    "Sigma" : 0.5,
+	    "Length" : 3,
+	    "MinGap" : 2,
+	    "MaxSpeed" : 2.0,
+            "AssetID" : { "ObjectName" : "SumoAssets Vehicles", "ItemName" : "Trolly" },
+            "StartParam" : "{}",
+            "Position" : [128.0, 128.0, 30.0],
+            "Rotation" : [0.0, 0.0, 0.0, 1.0],
+            "Velocity" : [0.0, 0.0, 0.0],
+            "StartParameter" : "{}"
+        },
+
         {
             "Name" : "BlueCar",
             "Description" : "A blue car",
