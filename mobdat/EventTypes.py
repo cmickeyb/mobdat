@@ -74,38 +74,55 @@ class ShutdownEvent :
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class StatsEvent :
     # -----------------------------------------------------------------
-    def __init__(self, connector, timestep, clockskew) :
-        self.Connector = connector
+    def __init__(self, timestep, skey = None) :
+        self.StatKey = self.__class__.__name__ if not skey else skey
         self.CurrentStep = timestep
-        self.ClockSkew = clockskew
+
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+class TripLengthStatsEvent(StatsEvent) :
+    # -----------------------------------------------------------------
+    def __init__(self, timestep, duration, person, snode, dnode) :
+        StatsEvent.__init__(self, timestep, 'tripdata')
+
+        self.Duration = duration
+        self.Person = person
+        self.SourceNode = snode
+        self.DestinationNode = dnode
+
+    # -----------------------------------------------------------------
+    def __str__(self) :
+        fstring = "{0},{1},{2},{3},{4},{5}"
+        return fstring.format(self.StatKey, self.CurrentStep, self.Duration, self.Person, self.SourceNode, self.DestinationNode)
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class SumoConnectorStatsEvent(StatsEvent) :
     # -----------------------------------------------------------------
-    def __init__(self, connector, timestep, clockskew = 0.0, vehiclecount = 0) :
-        StatsEvent.__init__(self, connector, timestep, clockskew)
+    def __init__(self, timestep, clockskew = 0.0, vehiclecount = 0) :
+        StatsEvent.__init__(self, timestep, 'sumoconnector')
 
+        self.ClockSkew = clockskew
         self.VehicleCount = vehiclecount
 
     # -----------------------------------------------------------------
     def __str__(self) :
-        fstring = "{0}, currentstep={1}, clockskew={2:.3f}, vehiclecount={3}"
-        return fstring.format(self.Connector, self.CurrentStep, self.ClockSkew, self.VehicleCount)
+        fstring = "{0},{1},{2:.3f},{3}"
+        return fstring.format(self.StatKey, self.CurrentStep, self.ClockSkew, self.VehicleCount)
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class OpenSimConnectorStatsEvent(StatsEvent) :
     # -----------------------------------------------------------------
-    def __init__(self, connector, timestep, clockskew = 0.0, queuelength = 0) :
-        StatsEvent.__init__(self, connector, timestep, clockskew)
+    def __init__(self, timestep, clockskew = 0.0) :
+        StatsEvent.__init__(self, timestep, 'osconnector')
 
-        self.QueueLength = 0
+        self.ClockSkew = clockskew
 
     # -----------------------------------------------------------------
     def __str__(self) :
-        fstring = "{0}, currentstep={1}, clockskew={2:.3f}, queuelength={3}"
-        return fstring.format(self.Connector, self.CurrentStep, self.ClockSkew, self.QueueLength)
+        fstring = "{0},{1},{2:.3f}"
+        return fstring.format(self.StatKey, self.CurrentStep, self.ClockSkew)
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

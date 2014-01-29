@@ -243,7 +243,7 @@ class SumoConnector(EventHandler.EventHandler) :
 
         if (event.CurrentStep % self.DumpCount) == 0 :
             count = traci.vehicle.getIDCount()
-            event = EventTypes.SumoConnectorStatsEvent('SumoConnector', self.CurrentStep, self.AverageClockSkew, count)
+            event = EventTypes.SumoConnectorStatsEvent(self.CurrentStep, self.AverageClockSkew, count)
             self.PublishEvent(event)
 
         return True

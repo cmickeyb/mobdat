@@ -91,9 +91,11 @@ class Person :
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class Trip :
-    def __init__(self, vname, person, destination) :
+    def __init__(self, stime, vname, person, source, destination) :
+        self.StartTime = stime
         self.VehicleName = vname
         self.Person = person
+        self.Source = source
         self.Destination = destination
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -116,6 +118,8 @@ class SocialConnector(EventHandler.EventHandler) :
         self._CreateVehicleTypeMap(settings["VehicleTypes"])
         self._CreateNodeTypeMap(settings["SocialConnector"]["NodeDataFile"])
         self._CreatePeople()
+
+        self.CurrentStep = 0
 
     # -----------------------------------------------------------------
     def _CreateVehicleTypeMap(self, vtypes) :
@@ -165,6 +169,15 @@ class SocialConnector(EventHandler.EventHandler) :
             heapq.heappush(self.EventQ,[waittime, person])
 
     # -----------------------------------------------------------------
+    def _GenerateTripStatsEvent(self, trip) :
+        pname = trip.Person.Name
+        sname = trip.Source.Name
+        dname = trip.Destination.Name
+        duration = self.CurrentStep - trip.StartTime
+        event = EventTypes.TripLengthStatsEvent(self.CurrentStep, duration, pname, sname, dname)
+        self.PublishEvent(event)
+
+    # -----------------------------------------------------------------
     def _GenerateVehicle(self, person, dnode) :
         self.VehicleNumber += 1
         vname = "car%i" % (self.VehicleNumber)
@@ -172,7 +185,7 @@ class SocialConnector(EventHandler.EventHandler) :
         rname = str(person.CurrentLocation.OutRoute)
         tname = str(dnode.InEdge)
 
-        self.VehicleMap[vname] = Trip(vname, person, dnode)
+        self.VehicleMap[vname] = Trip(self.CurrentStep, vname, person, person.CurrentLocation, dnode)
 
         event = EventTypes.EventAddVehicle(vname, vtype, rname, tname)
         self.PublishEvent(event)
@@ -197,27 +210,28 @@ class SocialConnector(EventHandler.EventHandler) :
                 dest = random.choice(self.NodeTypeMap['business'])
 
             self._GenerateVehicle(person, dest)
-
+            
     # -----------------------------------------------------------------
-    def HandleDeleteObjectEvent(self,event) :
+    def HandleDeleteObjectEvent(self, event) :
         vname = event.ObjectIdentity
         
         trip = self.VehicleMap[vname]
         del self.VehicleMap[vname]
 
+        self._GenerateTripStatsEvent(trip)
+
         person = trip.Person
         person.CurrentLocation = trip.Destination
 
-        waittime = self.LastStep + int(random.gauss(self.WaitMean,self.WaitSigma))
+        waittime = self.CurrentStep + int(random.gauss(self.WaitMean,self.WaitSigma))
         heapq.heappush(self.EventQ, [waittime, person])
 
     # -----------------------------------------------------------------
     # Returns True if the simulation can continue
     def HandleTimerEvent(self, event) :
-        if self.FinalStep > event.CurrentStep :
-            self.GenerateVehicles(event.CurrentStep)
-
-        self.LastStep = event.CurrentStep
+        self.CurrentStep = event.CurrentStep
+        if self.FinalStep > self.CurrentStep :
+            self.GenerateVehicles(self.CurrentStep)
 
     # -----------------------------------------------------------------
     def HandleShutdownEvent(self, event) :

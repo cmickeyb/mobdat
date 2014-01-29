@@ -68,11 +68,17 @@ class StatsConnector(EventHandler.EventHandler) :
         self.CurrentTime = 0
 
     # -----------------------------------------------------------------
-    def HandleStatsEvent(self,event) :
+    def HandleVehicle(self,event) :
         self.Logger.info(str(event))
 
     # -----------------------------------------------------------------
-    # Returns True if the simulation can continue
+    def HandleStatsEvent(self, event) :
+        if event.__class__ == EventTypes.SumoConnectorStatsEvent :
+            print "{0} vehicles in the simulation at time step {1}".format(event.VehicleCount, event.CurrentStep)
+            
+        self.Logger.info(str(event))
+
+    # -----------------------------------------------------------------
     def HandleTimerEvent(self, event) :
         self.CurrentStep = event.CurrentStep
         self.CurrentTime = event.CurrentTime
@@ -89,6 +95,7 @@ class StatsConnector(EventHandler.EventHandler) :
         # self.SubscribeEvent(EventTypes.StatsEvent, self.HandleStatsEvent)
         self.SubscribeEvent(EventTypes.SumoConnectorStatsEvent, self.HandleStatsEvent)
         self.SubscribeEvent(EventTypes.OpenSimConnectorStatsEvent, self.HandleStatsEvent)
+        self.SubscribeEvent(EventTypes.TripLengthStatsEvent, self.HandleStatsEvent)
 
         self.SubscribeEvent(EventTypes.TimerEvent, self.HandleTimerEvent)
         self.SubscribeEvent(EventTypes.ShutdownEvent, self.HandleShutdownEvent)

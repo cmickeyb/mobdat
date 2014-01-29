@@ -226,6 +226,11 @@ class OpenSimConnector(EventHandler.EventHandler) :
 
         self.Logger = logging.getLogger(__name__)
 
+        # Get world time
+        self.Interval =  settings["General"]["Interval"]
+        self.SecondsPerStep = settings["General"]["SecondsPerStep"]
+        self.StartTimeOfDay = settings["General"]["StartTimeOfDay"]
+
         # Get the world size
         wsize =  settings["OpenSimConnector"]["WorldSize"]
         self.WorldSize = ValueTypes.Vector3(wsize[0], wsize[1], wsize[2])
@@ -264,7 +269,6 @@ class OpenSimConnector(EventHandler.EventHandler) :
         self.CurrentStep = 0
         self.CurrentTime = 0
         self.AverageClockSkew = 0.0
-        self.AverageQueueLength = 0.0
 
         self.Clock = time.time
 
@@ -422,12 +426,9 @@ class OpenSimConnector(EventHandler.EventHandler) :
         # Compute the clock skew
         self.AverageClockSkew = (9.0 * self.AverageClockSkew + (self.Clock() - self.CurrentTime)) / 10.0
 
-        # Compute weighted average queue length
-        self.AverageQueueLength = (9.0 * self.AverageQueueLength + self.WorkQ.qsize()) / 10.0
-
         # Send the event if we need to
         if (self.CurrentStep % self.DumpCount) == 0 :
-            event = EventTypes.OpenSimConnectorStatsEvent('OpenSimConnector', self.CurrentStep, self.AverageClockSkew, self.AverageQueueLength)
+            event = EventTypes.OpenSimConnectorStatsEvent(self.CurrentStep, self.AverageClockSkew)
             self.PublishEvent(event)
 
     # -----------------------------------------------------------------
@@ -453,6 +454,11 @@ class OpenSimConnector(EventHandler.EventHandler) :
         self.OpenSimConnector.Capability = self.Capability
         self.OpenSimConnector.Scene = self.Scene
         self.OpenSimConnector.Binary = self.Binary
+
+        # set up the simulator time to match, the daylength is the number of wallclock
+        # hours necessary to complete one virtual day
+        daylength = 24.0 * self.Interval / self.SecondsPerStep
+        self.OpenSimConnector.SetSunParameters(daylength=daylength, currenttime=self.StartTimeOfDay)
 
         # Connect to the event registry
         self.SubscribeEvent(EventTypes.EventCreateObject, self.HandleCreateObjectEvent)
