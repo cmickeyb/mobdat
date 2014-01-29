@@ -2,7 +2,9 @@
     "General" :
     {
         "TimeSteps" : 2000,
-        "Interval" : 0.100,
+        "Interval" : 0.150,
+        "SecondsPerStep" : 2.0,
+        "StartTimeOfDay" : 8.0,
         "Connectors" : ["opensim", "sumo", "social", "stats"]
     },
 
@@ -99,13 +101,22 @@
 	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "ParkingLot Entry [2L P 2L P]" },
 	    "ZOffset" : 20.5,
 	    "Padding" : 5,
+	    "Signature" : ["2L", "P", "2L", "P"],
+            "NodeTypes" : [ "priority" ]
+	},
+
+	{
+	    "Name" : "ParkingLot Entry [1L P 1L P]",
+	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "ParkingLot Entry [1L P 1L P]" },
+	    "ZOffset" : 20.5,
+	    "Padding" : 5,
 	    "Signature" : ["1L", "P", "1L", "P"],
             "NodeTypes" : [ "priority" ]
 	},
 
 	{
-	    "Name" : "ParkingLot Entry [2L P 2L 0L]",
-	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "ParkingLot Entry [2L P 2L 0L]" },
+	    "Name" : "ParkingLot Entry [1L P 1L 0L]",
+	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "ParkingLot Entry [1L P 1L 0L]" },
 	    "ZOffset" : 20.5,
 	    "Padding" : 5,
 	    "Signature" : ["1L", "P", "1L", "0L"],

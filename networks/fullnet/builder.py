@@ -84,8 +84,9 @@ def BuildNetwork(ng) :
 
     # All of these nodes should be four way stops, they are the
     # two lane intersections
-    ng.SetNodeTypeByPattern('main[24]00[EW]:[24]00[NS]',pntype)
-    ng.SetNodeTypeByPattern('main[24]00[EW]:0N',pntype)
+
+    # ng.SetNodeTypeByPattern('main[24]00[EW][24]00[NS]',pntype)
+    # ng.SetNodeTypeByPattern('main[24]00[EW]0N',pntype)
 
     # And then set a bunch of the edges to be two lane instead
     # of the four lane edges we created for the rest of the grid
@@ -93,11 +94,11 @@ def BuildNetwork(ng) :
     # ng.SetEdgeTypeByPattern('main[0-9]*[EW][24]00[NS]:main[0-9]*[EW][24]00[NS]',e1A)
     # ng.SetEdgeTypeByPattern('main[24]00[EW][0-9]*[NS]:main[24]00[EW][0-9]*[NS]',e1A)
 
-    ng.SetEdgeTypeByPattern('main[0-9]*[EW]200[NS]:main[0-9]*[EW]200[NS]',e1A)
-    ng.SetEdgeTypeByPattern('main[0-9]*[EW]400[NS]:main[0-9]*[EW]400[NS]',e1A)
+    ng.SetEdgeTypeByPattern('main[0-9]*[EW]200[NS]=O=main[0-9]*[EW]200[NS]',e1A)
+    ng.SetEdgeTypeByPattern('main[0-9]*[EW]400[NS]=O=main[0-9]*[EW]400[NS]',e1A)
 
-    ng.SetEdgeTypeByPattern('main300[EW][0-9]*[NS]:main300[EW][0-9]*[NS]',e1A)
-    ng.SetEdgeTypeByPattern('main400[EW][0-9]*[NS]:main400[EW][0-9]*[NS]',e1A)
+    ng.SetEdgeTypeByPattern('main300[EW][0-9]*[NS]=O=main300[EW][0-9]*[NS]',e1A)
+    ng.SetEdgeTypeByPattern('main400[EW][0-9]*[NS]=O=main400[EW][0-9]*[NS]',e1A)
 
     # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     # PLAZA GRID
@@ -107,10 +108,10 @@ def BuildNetwork(ng) :
     ng.GenerateGrid(-50, -250, 50, 250, 50, 50, sntype, e1B, 'plaza')
 
     # The central north/south road is four lane
-    ng.SetEdgeTypeByPattern('plaza[0-9]*[EW]100[NS]:plaza[0-9]*[EW]100[NS]',e2B)
-    ng.SetEdgeTypeByPattern('plaza[0-9]*[EW]0N:plaza[0-9]*[EW]0N',e2B)
-    ng.SetEdgeTypeByPattern('plaza0E[0-9]*[NS]:plaza0E[0-9]*[NS]',e2B)
-    ng.SetEdgeTypeByPattern('plaza0E[0-9]*[NS]:plaza0E[0-9]*[NS]',e2B)
+    ng.SetEdgeTypeByPattern('plaza[0-9]*[EW]100[NS]=O=plaza[0-9]*[EW]100[NS]',e2B)
+    ng.SetEdgeTypeByPattern('plaza[0-9]*[EW]0N=O=plaza[0-9]*[EW]0N',e2B)
+    ng.SetEdgeTypeByPattern('plaza0E[0-9]*[NS]=O=plaza0E[0-9]*[NS]',e2B)
+    ng.SetEdgeTypeByPattern('plaza0E[0-9]*[NS]=O=plaza0E[0-9]*[NS]',e2B)
 
     # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     # CONNECT THE GRIDS
@@ -204,13 +205,13 @@ def BuildNetwork(ng) :
     for n in ['plaza50E0N', 'plaza50E50N', 'plaza50E100N', 'plaza50E150N', 'plaza50E200N'] :
         ng.BuildSimpleParkingLotNS(ng.gNodes[n], pntype, rgenplR, "tile", offset=-15, slength = 17.5, elength=32.5)
         
-    # for n in ['main200W300S', 'main200W200S', 'main200W100S', 'main200W0N', 'main200W100N', 'main200W200N'] : 
-    #     ng.BuildSimpleParkingLot(ng.gNodes[n], pntype, rgenplR, "tile", offset=15)
-    #     ng.BuildSimpleParkingLot(ng.gNodes[n], pntype, rgenplL, "tile", offset=-15)
+    for n in ['main200W300S', 'main200W200S', 'main200W100S', 'main200W0N', 'main200W100N', 'main200W200N'] : 
+        ng.BuildSimpleParkingLotNS(ng.gNodes[n], pntype, rgenplR, "tile", offset=15)
+        ng.BuildSimpleParkingLotNS(ng.gNodes[n], pntype, rgenplL, "tile", offset=-15)
 
-    # for n in ['main200E300S', 'main200E200S', 'main200E100S', 'main200E0N', 'main200E100N', 'main200E200N'] : 
-    #     ng.BuildSimpleParkingLot(ng.gNodes[n], pntype, rgenplR, "tile", offset=15)
-    #     ng.BuildSimpleParkingLot(ng.gNodes[n], pntype, rgenplL, "tile", offset=-15)
+    for n in ['main200E300S', 'main200E200S', 'main200E100S', 'main200E0N', 'main200E100N', 'main200E200N'] : 
+        ng.BuildSimpleParkingLotNS(ng.gNodes[n], pntype, rgenplR, "tile", offset=15)
+        ng.BuildSimpleParkingLotNS(ng.gNodes[n], pntype, rgenplL, "tile", offset=-15)
 
     # ng.GenerateResidential(ng.gNodes['main400W200S'],ng.gNodes['main300W200S'], rgenh)
     # ng.GenerateResidential(ng.gNodes['main400W0N'],  ng.gNodes['main300W0N'], rgenh)

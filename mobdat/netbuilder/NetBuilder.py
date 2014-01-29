@@ -176,7 +176,7 @@ class Edge :
     
     # -----------------------------------------------------------------
     def __init__(self, snode, enode, etype) :
-        self.Name = "%s:%s" % (snode.Name, enode.Name)
+        self.Name = "%s=O=%s" % (snode.Name, enode.Name)
         self.EdgeType = etype
         self.StartNode = snode
         self.EndNode = enode
@@ -186,7 +186,7 @@ class Edge :
 
     # -----------------------------------------------------------------
     def ReverseName(self) :
-        return "%s:%s" % (self.EndNode.Name, self.StartNode.Name)
+        return "%s=O=%s" % (self.EndNode.Name, self.StartNode.Name)
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -391,8 +391,8 @@ class Network :
 
     # -----------------------------------------------------------------
     def GenerateResidential(self, node1, node2, rgen, prefix = 'res') :
-        self.DropEdgeByName("%s:%s" % (node1.Name, node2.Name))
-        self.DropEdgeByName("%s:%s" % (node2.Name, node1.Name))
+        self.DropEdgeByName("%s=O=%s" % (node1.Name, node2.Name))
+        self.DropEdgeByName("%s=O=%s" % (node2.Name, node1.Name))
         rgenp = copy.copy(rgen)
 
         if node1.X == node2.X :
