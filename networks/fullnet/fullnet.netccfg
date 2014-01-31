@@ -7,6 +7,7 @@
         <node-files value="net/network.nod.xml"/>
         <edge-files value="net/network.edg.xml"/>
         <type-files value="net/network.typ.xml"/>
+        <connection-files value="net/network.con.xml"/>
         <no-turnarounds value="true"/>
         <no-turnarounds.tls value="true"/>
         <tls.green.time value="41"/>
@@ -22,3 +23,4 @@
     </report>
 
 </configuration>
+
