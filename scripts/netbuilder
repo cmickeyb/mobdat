@@ -134,6 +134,7 @@ def SetupLoggers() :
 
     clog = logging.StreamHandler()
     clog.setFormatter(logging.Formatter('[%(name)s] %(message)s'))
+    clog.setLevel(logging.WARN)
     logger.addHandler(clog)
 
 # -----------------------------------------------------------------
