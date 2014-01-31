@@ -111,6 +111,33 @@ class SumoBuilder :
             fp.write("</nodes>\n")
 
     # -----------------------------------------------------------------
+    def CreateConnections(self) :
+        fname = os.path.join(self.Path,self.Prefix + '.con.xml')
+
+        fstring = "  <connection from=\"{0}\" to=\"{1}\" fromLane=\"{2}\" toLane=\"{3}\" />\n"
+        with open(fname, 'w') as fp :
+            fp.write("<connections>\n")
+            
+            for n in self.Network.gNodes :
+                node = self.Network.gNodes[n]
+                if not node.Signature() == ['2L', '2L', '2L', '2L' ] :
+                    continue
+
+                oedges = node.OutputEdgeMap()
+                iedges = node.InputEdgeMap()
+                for pos in range(4) :
+                    lpos = (pos + 1) % 4 # left turn
+                    spos = (pos + 2) % 4 # straight across
+                    rpos = (pos + 3) % 4 # right turn
+
+                    fp.write(fstring.format(iedges[pos].Name, oedges[lpos].Name, 1, 1))
+                    fp.write(fstring.format(iedges[pos].Name, oedges[spos].Name, 1, 1))
+                    fp.write(fstring.format(iedges[pos].Name, oedges[spos].Name, 0, 0))
+                    fp.write(fstring.format(iedges[pos].Name, oedges[rpos].Name, 0, 0))
+
+            fp.write("</connections>\n")
+
+    # -----------------------------------------------------------------
     def CreateEdgeTypes(self) :
         fname = os.path.join(self.Path,self.Prefix + '.typ.xml')
 
@@ -159,4 +186,4 @@ class SumoBuilder :
         self.CreateEdges()
         self.CreateEdgeTypes()
         self.CreateRoutes()
-
+        self.CreateConnections()

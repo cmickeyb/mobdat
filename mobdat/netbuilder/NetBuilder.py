@@ -134,25 +134,46 @@ class Node :
         return None
 
     # -----------------------------------------------------------------
+    def _EdgeMapPosition(self, node) :
+        deltax = node.X - self.X
+        deltay = node.Y - self.Y
+        if deltax < 0 and deltay == 0 :
+            return 0
+        elif deltax == 0 and deltay > 0 :
+            return 1
+        elif deltax > 0 and deltay == 0 :
+            return 2
+        elif deltax == 0 and deltay < 0 :
+            return 3
+        # this means that self & node are at the same location
+        return -1 
+
+    # -----------------------------------------------------------------
+    def OutputEdgeMap(self) :
+        edgemap = [None, None, None, None]
+        for e in self.OEdges :
+            position = self._EdgeMapPosition(e.EndNode)
+            edgemap[position] = e
+
+        return edgemap
+
+    # -----------------------------------------------------------------
+    def InputEdgeMap(self) :
+        edgemap = [None, None, None, None]
+        for e in self.IEdges :
+            position = self._EdgeMapPosition(e.StartNode)
+            edgemap[position] = e
+
+        return edgemap
+
+    # -----------------------------------------------------------------
     # signature returned is west, north, east, south
     # -----------------------------------------------------------------
     def Signature(self) :
-        signature = ['0L', '0L', '0L', '0L']
-        for e in self.OEdges :
-            sig = e.EdgeType.Signature
-            node = e.EndNode
-            deltax = node.X - self.X
-            deltay = node.Y - self.Y
-            if deltax < 0 and deltay == 0 :
-                signature[0] = sig
-            elif deltax == 0 and deltay > 0 :
-                signature[1] = sig
-            elif deltax > 0 and deltay == 0 :
-                signature[2] = sig
-            elif deltax == 0 and deltay < 0 :
-                signature[3] = sig
-            else :
-                print 'something went wrong computing the signature'
+        signature = []
+        for e in self.OutputEdgeMap() :
+            sig = e.EdgeType.Signature if e else '0L'
+            signature.append(sig)
 
         return signature
 
