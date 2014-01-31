@@ -69,7 +69,7 @@ class InjectionNode :
             self.Type = info["Type"]
             self.InEdge = info["InEdge"]
             self.OutRoute = info["OutRoute"]
-            self.Available = True
+            self.Capacity = 1
         except :
             warnings.warn('failed to extract injection point data; %s' % (sys.exc_info()[0]))
             sys.exit(-1)
@@ -83,8 +83,21 @@ class Person :
     def __init__(self, resnodes, biznodes, vehicles) :
         Person.Count = Person.Count + 1
         self.Name = Person.NameFormat.format(Person.Count)
-        self.Home = random.choice(resnodes)
-        self.Work = random.choice(biznodes)
+
+        # pick a residence
+        index = random.randint(0,len(resnodes) - 1)
+        self.Home = resnodes[index]
+        resnodes[index].Capacity = resnodes[index].Capacity - 1
+        if resnodes[index].Capacity <= 0 :
+            del resnodes[index]
+
+        # pick a business
+        index = random.randint(0,len(biznodes) - 1)
+        self.Work = biznodes[index]
+        biznodes[index].Capacity = biznodes[index].Capacity - 1
+        if biznodes[index].Capacity <= 0 :
+            del biznodes[index]
+
         self.VehicleType = random.choice(vehicles)
         self.CurrentLocation = self.Home
 
@@ -152,6 +165,17 @@ class SocialConnector(EventHandler.EventHandler) :
                 if node.Type not in self.NodeTypeMap :
                     self.NodeTypeMap[node.Type] = []
                 self.NodeTypeMap[node.Type].append(node)
+
+        # make sure the people are more or less distributed evenly through the residences
+        rescapacity = 1 + int(self.PeopleCount / len(self.NodeTypeMap['residence']))
+        for node in self.NodeTypeMap['residence'] :
+            node.Capacity = rescapacity
+
+        # even distribution in the businesses is a little less important, will make this
+        # more interesting in a bit
+        buscapacity = 1 + int(self.PeopleCount / len(self.NodeTypeMap['business']))
+        for node in self.NodeTypeMap['business'] :
+            node.Capacity = 2 * buscapacity
 
     # -----------------------------------------------------------------
     def _CreatePeople(self) :
