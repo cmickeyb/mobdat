@@ -37,4 +37,5 @@ This package defines modules for the mobdat simulation environment
 
 """
 
-__all__ = ['Controller', 'EventHandler','EventRouter', 'EventTypes', 'OpenSimConnector', 'SocialConnector', 'StatsConnector', 'SumoConnector', 'ValueTypes']
+__all__ = ['Controller', 'EventHandler','EventRouter', 'EventTypes', 'ValueTypes',
+           'BaseConnector', 'OpenSimConnector', 'SocialConnector', 'StatsConnector', 'SumoConnector']

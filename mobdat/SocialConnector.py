@@ -38,7 +38,8 @@ the social (people) aspects of the mobdat simulation.
 
 """
 
-import os, sys, warnings
+import os, sys
+import logging
 import subprocess
 
 sys.path.append(os.path.join(os.environ.get("SUMO_HOME"), "tools"))
@@ -47,7 +48,7 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
 import math, random, json, heapq
-import EventRouter, EventHandler, EventTypes
+import BaseConnector, EventRouter, EventHandler, EventTypes
 
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -113,16 +114,19 @@ class Trip :
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class SocialConnector(EventHandler.EventHandler) :
+class SocialConnector(EventHandler.EventHandler, BaseConnector.BaseConnector) :
            
     # -----------------------------------------------------------------
     def __init__(self, evrouter, settings) :
         EventHandler.EventHandler.__init__(self, evrouter)
+        BaseConnector.BaseConnector.__init__(self, settings)
+
+        self.__Logger = logging.getLogger(__name__)
 
         self.VehicleNumber = 1
         self.VehicleMap = {}
 
-        self.FinalStep = settings["General"]["TimeSteps"] - 200
+        self.FinalStep = self.TotalTimeSteps - 200
         self.InjectionRate = settings["SocialConnector"].get("InjectionRate",1.0)
         self.PeopleCount = settings["SocialConnector"].get("PeopleCount",300)
         self.WaitMean = settings["SocialConnector"].get("WaitMean",300.0)

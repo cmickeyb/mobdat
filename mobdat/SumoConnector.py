@@ -39,7 +39,7 @@ and operations into and out of the sumo traffic simulator.
 """
 import os, sys
 import logging
-import subprocess, threading, string, time, platform
+import subprocess, threading, string, time
 
 sys.path.append(os.path.join(os.environ.get("SUMO_HOME"), "tools"))
 sys.path.append(os.path.join(os.environ.get("OPENSIM","/share/opensim"),"lib","python"))
@@ -50,25 +50,26 @@ from sumolib import checkBinary
 
 import traci
 import traci.constants as tc
-import EventRouter, EventHandler, EventTypes
+import BaseConnector, EventRouter, EventHandler, EventTypes
 import ValueTypes
 
 import math
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class SumoConnector(EventHandler.EventHandler) :
+class SumoConnector(EventHandler.EventHandler, BaseConnector.BaseConnector) :
 
     # -----------------------------------------------------------------
     def __init__(self, evrouter, settings) :
         EventHandler.EventHandler.__init__(self, evrouter)
+        BaseConnector.BaseConnector.__init__(self, settings)
 
-        self.Logger = logging.getLogger(__name__)
+        self.__Logger = logging.getLogger(__name__)
 
         # the sumo time scale is 1sec per iteration so we need to scale
         # to the 100ms target for our iteration time, this probably 
         # should be computed based on the target step size
-        self.TimeScale = 1.0 / float(settings["General"]["Interval"])
+        self.TimeScale = 1.0 / self.Interval
 
         self.ConfigFile = settings["SumoConnector"]["ConfigFile"]
         self.Port = settings["SumoConnector"]["SumoPort"]
@@ -81,13 +82,6 @@ class SumoConnector(EventHandler.EventHandler) :
 
         self.AverageClockSkew = 0.0
         # self.LastStepTime = 0.0
-
-        self.Clock = time.time
-
-        ## this is an ugly hack because the cygwin and linux
-        ## versions of time.clock seem seriously broken
-        if platform.system() == 'Windows' :
-            self.Clock = time.clock
 
         # for cf in settings["SumoConnector"].get("ExtensionFiles",[]) :
         #     execfile(cf,{"EventHandler" : self})
@@ -224,19 +218,19 @@ class SumoConnector(EventHandler.EventHandler) :
             self.HandleVehicleUpdates(self.CurrentStep)
             self.HandleArrivedVehicles(self.CurrentStep)
         except TypeError as detail: 
-            self.Logger.error("[sumoconector] simulation step failed with type error %s" % (str(detail)))
+            self.__Logger.error("[sumoconector] simulation step failed with type error %s" % (str(detail)))
             sys.exit(-1)
         except ValueError as detail: 
-            self.Logger.error("[sumoconector] simulation step failed with value error %s" % (str(detail)))
+            self.__Logger.error("[sumoconector] simulation step failed with value error %s" % (str(detail)))
             sys.exit(-1)
         except NameError as detail: 
-            self.Logger.error("[sumoconector] simulation step failed with name error %s" % (str(detail)))
+            self.__Logger.error("[sumoconector] simulation step failed with name error %s" % (str(detail)))
             sys.exit(-1)
         except AttributeError as detail: 
-            self.Logger.error("[sumoconnector] simulation step failed with attribute error %s" % (str(detail)))
+            self.__Logger.error("[sumoconnector] simulation step failed with attribute error %s" % (str(detail)))
             sys.exit(-1)
         except :
-            self.Logger.error("[sumoconnector] error occured in simulation step; %s" % (sys.exc_info()[0]))
+            self.__Logger.error("[sumoconnector] error occured in simulation step; %s" % (sys.exc_info()[0]))
             sys.exit(-1)
 
         self._RecomputeRoutes()
@@ -259,10 +253,10 @@ class SumoConnector(EventHandler.EventHandler) :
             sys.stdout.flush()
 
             self.SumoProcess.wait()
-            self.Logger.info('shut down')
+            self.__Logger.info('shut down')
         except :
             exctype, value =  sys.exc_info()[:2]
-            self.Logger.warn('shutdown failed with exception type %s; %s' %  (exctype, str(value)))
+            self.__Logger.warn('shutdown failed with exception type %s; %s' %  (exctype, str(value)))
 
     # -----------------------------------------------------------------
     def SimulationStart(self) :

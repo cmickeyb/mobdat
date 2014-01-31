@@ -49,7 +49,7 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "
 
 import uuid
 import OpenSimRemoteControl
-import EventHandler, EventTypes, ValueTypes
+import BaseConnector, EventHandler, EventTypes, ValueTypes
 
 from collections import deque
 import Queue, threading, time, platform
@@ -63,7 +63,7 @@ class OpenSimUpdateThread(threading.Thread) :
     def __init__(self, workq, endpoint, capability, scene, vmap, binary = False) :
         threading.Thread.__init__(self)
 
-        self.Logger = logging.getLogger(__name__)
+        self.__Logger = logging.getLogger(__name__)
 
         self.TotalUpdates = 0
         self.WorkQ = workq
@@ -87,7 +87,7 @@ class OpenSimUpdateThread(threading.Thread) :
         updates = self.TotalUpdates
         messages = self.OpenSimConnector.MessagesSent
         mbytes = self.OpenSimConnector.BytesSent / 1000000.0
-        self.Logger.info('%d updates sent to OpenSim in %d messages using %f MB',updates, messages, mbytes)
+        self.__Logger.info('%d updates sent to OpenSim in %d messages using %f MB',updates, messages, mbytes)
 
     # -----------------------------------------------------------------
     def ProcessUpdatesLoop(self) :
@@ -129,7 +129,7 @@ class OpenSimUpdateThread(threading.Thread) :
         updates = []
         for vname in vnames :
             if vname not in self.Vehicles :
-                self.Logger.warn("missing vehicle %s in update thread" % (vname))
+                self.__Logger.warn("missing vehicle %s in update thread" % (vname))
                 continue
 
             vehicle = self.Vehicles[vname]
@@ -211,7 +211,7 @@ class OpenSimVehicle :
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class OpenSimConnector(EventHandler.EventHandler) :
+class OpenSimConnector(EventHandler.EventHandler, BaseConnector.BaseConnector) :
 
     # -----------------------------------------------------------------
     def __init__(self, evrouter, settings) :
@@ -223,13 +223,9 @@ class OpenSimConnector(EventHandler.EventHandler) :
         """
 
         EventHandler.EventHandler.__init__(self, evrouter)
+        BaseConnector.BaseConnector.__init__(self, settings)
 
-        self.Logger = logging.getLogger(__name__)
-
-        # Get world time
-        self.Interval =  settings["General"]["Interval"]
-        self.SecondsPerStep = settings["General"]["SecondsPerStep"]
-        self.StartTimeOfDay = settings["General"]["StartTimeOfDay"]
+        self.__Logger = logging.getLogger(__name__)
 
         # Get the world size
         wsize =  settings["OpenSimConnector"]["WorldSize"]
@@ -254,7 +250,7 @@ class OpenSimConnector(EventHandler.EventHandler) :
 
         # Setup the remote control object
         if 'Capability' not in settings["OpenSimConnector"] :
-            self.Logger.error("missing or expired opensim remote control capability")
+            self.__Logger.error("missing or expired opensim remote control capability")
             sys.exit(-1)
 
         self.Capability = uuid.UUID(settings["OpenSimConnector"]["Capability"])
@@ -284,20 +280,20 @@ class OpenSimConnector(EventHandler.EventHandler) :
 
         result = self.OpenSimConnector.FindObjects(pattern = oname, async = False)
         if not result["_Success"] or len(result["Objects"]) == 0 :
-            self.Logger.warn("Unable to locate container object %s; %s",oname, result["_Message"])
+            self.__Logger.warn("Unable to locate container object %s; %s",oname, result["_Message"])
             sys.exit(-1)
 
         objectid = result["Objects"][0]
         result = self.OpenSimConnector.GetObjectInventory(objectid, async = False)
         if not result["_Success"] :
-            self.Logger.warn("Failed to get inventory from container object %s; %s",oname, result["_Message"])
+            self.__Logger.warn("Failed to get inventory from container object %s; %s",oname, result["_Message"])
             sys.exit(-1)
             
         for item in result["Inventory"] :
             if item["Name"] == iname :
                 return item["AssetID"]
 
-        self.Logger.warn("Failed to locate item %s in object %s",iname, oname);
+        self.__Logger.warn("Failed to locate item %s in object %s",iname, oname);
         return None
 
     # -----------------------------------------------------------------
@@ -306,11 +302,11 @@ class OpenSimConnector(EventHandler.EventHandler) :
         vtypename = vtype["Name"]
         vname = event.ObjectIdentity
 
-        self.Logger.debug("create vehicle %s with type %s", vname, vtypename)
+        self.__Logger.debug("create vehicle %s with type %s", vname, vtypename)
         
         if len(self.VehicleReuseList[vtypename]) > 0 :
             vehicle = self.VehicleReuseList[vtypename].popleft()
-            # self.Logger.debug("reuse vehicle %s for %s", vehicle.VehicleName, vname)
+            # self.__Logger.debug("reuse vehicle %s for %s", vehicle.VehicleName, vname)
 
             # remove the old one from the vehicle map
             del self.Vehicles[vehicle.VehicleName]
@@ -330,7 +326,7 @@ class OpenSimConnector(EventHandler.EventHandler) :
 
         result = self.OpenSimConnector.CreateObject(vtype["AssetID"], objectid=vuuid, name="car", parm=vtype.get("StartParam","{}"))
  
-        # self.Logger.debug("create new vehicle %s with id %s", vname, vuuid)
+        # self.__Logger.debug("create new vehicle %s with id %s", vname, vuuid)
         return True
 
     # -----------------------------------------------------------------
@@ -362,7 +358,7 @@ class OpenSimConnector(EventHandler.EventHandler) :
     def HandleObjectDynamicsEvent(self,event) :
         vname = event.ObjectIdentity
         if vname not in self.Vehicles :
-            self.Logger.warn("attempt to update unknown vehicle %s" % (vname))
+            self.__Logger.warn("attempt to update unknown vehicle %s" % (vname))
             return True
 
         vehicle = self.Vehicles[vname]
@@ -444,9 +440,9 @@ class OpenSimConnector(EventHandler.EventHandler) :
         for count in range(self.UpdateThreadCount) :
             self.UpdateThreads[count].join()
 
-        self.Logger.info('create/delete messages sent to opensim: %d', self.OpenSimConnector.MessagesSent)
-        self.Logger.info('%d vehicles interpolated correctly', self.Interpolated)
-        self.Logger.info('shut down')
+        self.__Logger.info('create/delete messages sent to opensim: %d', self.OpenSimConnector.MessagesSent)
+        self.__Logger.info('%d vehicles interpolated correctly', self.Interpolated)
+        self.__Logger.info('shut down')
 
     # -----------------------------------------------------------------
     def SimulationStart(self) :
@@ -457,8 +453,7 @@ class OpenSimConnector(EventHandler.EventHandler) :
 
         # set up the simulator time to match, the daylength is the number of wallclock
         # hours necessary to complete one virtual day
-        daylength = 24.0 * self.Interval / self.SecondsPerStep
-        self.OpenSimConnector.SetSunParameters(daylength=daylength, currenttime=self.StartTimeOfDay)
+        self.OpenSimConnector.SetSunParameters(daylength=self.RealDayLength, currenttime=self.StartTimeOfDay)
 
         # Connect to the event registry
         self.SubscribeEvent(EventTypes.EventCreateObject, self.HandleCreateObjectEvent)
