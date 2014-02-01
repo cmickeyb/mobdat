@@ -46,7 +46,7 @@ sys.path.append(os.path.join(os.environ.get("OPENSIM","/share/opensim"),"lib","p
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
-import platform, time
+import platform, time, threading, cmd, readline
 import EventRouter, EventTypes
 from multiprocessing import Process
 
@@ -65,44 +65,114 @@ logger = logging.getLogger(__name__)
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
-def _RunSimulation(evrouter, interval, lastiteration) :
-    """
-    Run the simulation by sending the periodic clock ticks that each of the connectors
-    can process.
+SimulatorShutdown = False
+CurrentIteration = 0
+FinalIteration = 0
 
-    Arguments:
-    evrouter -- the initialized event handler object
-    interval -- time between successive clock ticks
-    lastiteration -- number of iterations
-    """
+class TimerThread(threading.Thread) :
+    # -----------------------------------------------------------------
+    def __init__(self, evrouter, settings) :
+        """
+        This thread will drive the simulation steps by sending periodic clock
+        ticks that each of the connectors can process.
 
-    clk = time.time
+        Arguments:
+        evrouter -- the initialized event handler object
+        interval -- time between successive clock ticks
+        """
 
-    ## this is an ugly hack because the cygwin and linux
-    ## versions of time.clock seem seriously broken
-    if platform.system() == 'Windows' :
-        clk = time.clock
+        threading.Thread.__init__(self)
 
-    starttime = clk()
+        self.__Logger = logging.getLogger(__name__)
+        self.EventRouter = evrouter
+        self.IntervalTime = float(settings["General"]["Interval"])
+        
+        global FinalIteration
+        FinalIteration = settings["General"].get("TimeSteps",0)
 
-    iterations = 0
-    while iterations < lastiteration :
-        stime = clk()
+        self.Clock = time.time
 
-        event = EventTypes.TimerEvent(iterations, stime)
-        evrouter.RouterQueue.put(event)
+        ## this is an ugly hack because the cygwin and linux
+        ## versions of time.clock seem seriously broken
+        if platform.system() == 'Windows' :
+            self.Clock = time.clock
 
-        etime = clk()
+    # -----------------------------------------------------------------
+    def run(self) :
+        global SimulatorShutdown, FinalIteration, CurrentIteration
+        starttime = self.Clock()
 
-        if (etime - stime) < interval :
-            time.sleep(interval - (etime - stime))
+        CurrentIteration = 0
+        while not SimulatorShutdown :
+            if FinalIteration > 0 and CurrentIteration >= FinalIteration :
+                break
 
-        iterations += 1
+            stime = self.Clock()
 
-    # compute a few stats
-    elapsed = clk() - starttime
-    avginterval = 1000.0 * elapsed / iterations
-    logger.info("%d iterations completed with an elapsed time %f or %f ms per iteration", iterations, elapsed, avginterval)
+            event = EventTypes.TimerEvent(CurrentIteration, stime)
+            self.EventRouter.RouterQueue.put(event)
+
+            etime = self.Clock()
+
+            if (etime - stime) < self.IntervalTime :
+                time.sleep(self.IntervalTime - (etime - stime))
+
+            CurrentIteration += 1
+
+        # compute a few stats
+        elapsed = self.Clock() - starttime
+        avginterval = 1000.0 * elapsed / CurrentIteration
+        self.__Logger.warn("%d iterations completed with an elapsed time %f or %f ms per iteration", CurrentIteration, elapsed, avginterval)
+
+        # send the shutdown events
+        event = EventTypes.ShutdownEvent(False)
+        self.EventRouter.RouterQueue.put(event)
+
+        SimulatorShutdown = True
+
+# -----------------------------------------------------------------
+# -----------------------------------------------------------------
+class MobdatController(cmd.Cmd) :
+    pformat = 'mobdat [{0}]> '
+
+    # -----------------------------------------------------------------
+    def __init__(self, evrouter, logger) :
+        cmd.Cmd.__init__(self)
+
+        self.prompt = self.pformat.format(CurrentIteration)
+        self.EventRouter = evrouter
+        self.__Logger = logger
+
+    # -----------------------------------------------------------------
+    def postcmd(self, flag, line) :
+        self.prompt = self.pformat.format(CurrentIteration)
+        return flag
+
+    # -----------------------------------------------------------------
+    def do_stopat(self, args) :
+        """stopat iteration
+        Stop sending timer events and shutdown the simulator after the specified iteration
+        """
+        pargs = args.split()
+        try :
+            global FinalIteration
+            FinalIteration = int(pargs[0])
+        except :
+            print 'Unable to parse input parameter %s' % args
+        
+    # -----------------------------------------------------------------
+    def do_exit(self, args) :
+        """exit
+        Shutdown the simulator and exit the command loop
+        """
+
+        self.__Logger.warn("shutting down")
+
+        # kill the timer if it hasn't already shutdown
+        global SimulatorShutdown
+        SimulatorShutdown = True
+
+        return True
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
@@ -114,7 +184,6 @@ def Controller(settings) :
     settings -- nested dictionary with variables for configuring the connectors
     """
 
-    interval = float(settings["General"]["Interval"])
     cnames = settings["General"].get("Connectors",['sumo', 'opensim', 'social', 'stats'])
 
     evrouter = EventRouter.EventRouter()
@@ -134,19 +203,16 @@ def Controller(settings) :
     evrouterproc = Process(target=evrouter.RouteEvents, args=())
     evrouterproc.start()
 
-    # and run the simulation through all its iterations
-    lastiteration = settings["General"]["TimeSteps"]
-    try :
-        _RunSimulation(evrouter, interval, lastiteration)
-    except KeyboardInterrupt :
-        logger.info('keyboard interrupt received, shutting down')
-    except :
-        logger.warn('error occured during simulation, shutting down; %s',(sys.exc_info()[0]))
+    # start the timer thread
+    thread = TimerThread(evrouter, settings)
+    thread.start()
+
+    controller = MobdatController(evrouter, logger)
+    controller.cmdloop()
+
+    thread.join()
 
     # send the shutdown event to the connectors
-    event = EventTypes.ShutdownEvent(False)
-    evrouter.RouterQueue.put(event)
-
     for connproc in connectors :
         connproc.join()
 
@@ -155,4 +221,3 @@ def Controller(settings) :
     evrouter.RouterQueue.put(event)
 
     evrouterproc.join()
-            

@@ -1,7 +1,7 @@
 {
     "General" :
     {
-        "TimeSteps" : 2000,
+        "TimeSteps" : 0,
         "Interval" : 0.150,
         "SecondsPerStep" : 2.0,
         "StartTimeOfDay" : 8.0,
@@ -39,7 +39,7 @@
     {
 	"SumoNetworkPath" : "networks/fullnet/net/",
 	"SumoDataFilePrefix" : "network",
-        "NetworkScaleFactor" : 8.0,
+        "NetworkScaleFactor" : 16.0,
         "ConfigFile" : "networks/fullnet/fullnet.sumocfg",
         "ExtensionFiles" : [ ],
         "VelocityFudgeFactor" : 1.0,

@@ -98,10 +98,10 @@ def ParseCommandLine(config, args) :
     parser.add_argument('--endpoint', help='URL of the simulator dispatcher')
     parser.add_argument('--asendpoint', help='UDP endpoint of the dispatcher')
 
-    parser.add_argument("--steps", help="number of steps to execute", type=int)
     parser.add_argument("--interval", help="sumo interval time", type=float)
     parser.add_argument("--connectors", help="list of connectors to use in the simulation", nargs='+')
 
+    parser.add_argument("--steps", help="number of steps to execute", type=int)
     parser.add_argument("--people", help="number of people to simulate", type=int)
     parser.add_argument("--waittime", help="number of intervals on average for a person to wait", type=int)
     options = parser.parse_args(args)

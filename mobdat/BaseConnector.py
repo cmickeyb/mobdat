@@ -61,7 +61,6 @@ class BaseConnector :
         self.Interval =  float(settings["General"].get("Interval", 0.150))
         self.SecondsPerStep = float(settings["General"].get("SecondsPerStep", 2.0))
         self.StartTimeOfDay = float(settings["General"].get("StartTimeOfDay", 8.0))
-        self.TotalTimeSteps = int(settings["General"].get("TimeSteps",0))
 
         self.RealDayLength = 24.0 * self.Interval / self.SecondsPerStep
 

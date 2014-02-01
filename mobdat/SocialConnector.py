@@ -126,7 +126,6 @@ class SocialConnector(EventHandler.EventHandler, BaseConnector.BaseConnector) :
         self.VehicleNumber = 1
         self.VehicleMap = {}
 
-        self.FinalStep = self.TotalTimeSteps - 200
         self.InjectionRate = settings["SocialConnector"].get("InjectionRate",1.0)
         self.PeopleCount = settings["SocialConnector"].get("PeopleCount",300)
         self.WaitMean = settings["SocialConnector"].get("WaitMean",300.0)
@@ -258,8 +257,7 @@ class SocialConnector(EventHandler.EventHandler, BaseConnector.BaseConnector) :
     # Returns True if the simulation can continue
     def HandleTimerEvent(self, event) :
         self.CurrentStep = event.CurrentStep
-        if self.FinalStep > self.CurrentStep :
-            self.GenerateVehicles(self.CurrentStep)
+        self.GenerateVehicles(self.CurrentStep)
 
     # -----------------------------------------------------------------
     def HandleShutdownEvent(self, event) :
