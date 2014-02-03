@@ -104,7 +104,7 @@ class OpenSimBuilder :
         for i in range(4) :
             success = True
             for j in range(4) :
-                if sig1[j] != sig2[(i + j) % 4] and sig2[(i + j) % 4] != '*' :
+                if sig1[j] != sig2[(i + j) % 4] and sig2[(i + j) % 4] != '*/*' :
                     success = False
                     break
 
@@ -237,4 +237,5 @@ class OpenSimBuilder :
                     break
 
             if not success :
+                self.NodeMap[n] = self.NetworkInfo.NodeTypeMap[tname][0]
                 self.Logger.warn("No match for node %s with type %s and signature %s" % (n, tname, sig1))

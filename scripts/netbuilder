@@ -154,8 +154,9 @@ def Main() :
     netgen = NetBuilder.Network()
 
     for cf in settings["NetworkBuilder"].get("ExtensionFiles",[]) :
+        execfile(cf,{"netgen" : netgen})
         try :
-            execfile(cf,{"netgen" : netgen})
+            print cf
         except :
             exctype, value =  sys.exc_info()[:2]
             logger.warn('unhandled error processing extension file %s: %s/%s', cf, exctype, str(value))

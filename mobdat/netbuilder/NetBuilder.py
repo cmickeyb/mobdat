@@ -60,6 +60,10 @@ class NodeType :
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class Node :
+    WEST  = 0
+    NORTH = 1
+    EAST  = 2
+    SOUTH = 3
 
     # -----------------------------------------------------------------
     def __init__(self, x, y, ntype, prefix) :
@@ -89,6 +93,26 @@ class Node :
         return "%s%d%s%d%s" % (prefix, int(x), ewdir, int(y), nsdir)
 
     # -----------------------------------------------------------------
+    def _EdgeMapPosition(self, node) :
+        deltax = node.X - self.X
+        deltay = node.Y - self.Y
+        # west
+        if deltax < 0 and deltay == 0 :
+            return self.WEST
+        # north
+        elif deltax == 0 and deltay > 0 :
+            return self.NORTH
+        # east
+        elif deltax > 0 and deltay == 0 :
+            return self.EAST
+        # south
+        elif deltax == 0 and deltay < 0 :
+            return self.SOUTH
+
+        # this means that self & node are at the same location
+        return -1 
+
+    # -----------------------------------------------------------------
     def __str__(self) :
         out = "%s, %s, %d, %d" % (self.Name, self.NodeType.Name, self.X, self.Y)
         for e in self.OEdges :
@@ -106,47 +130,24 @@ class Node :
         self.OEdges.append(edge)
 
     # -----------------------------------------------------------------
-    def EastEdge(self) :
-        for e in self.OEdges :
-            if e.EndNode.X > self.X and e.EndNode.Y == self.Y :
-                return e
-        return None
-
-    # -----------------------------------------------------------------
     def WestEdge(self) :
-        for e in self.OEdges :
-            if e.EndNode.X < self.X and e.EndNode.Y == self.Y :
-                return e
-        return None
+        emap = self.OutputEdgeMap()
+        return emap[self.WEST]
 
     # -----------------------------------------------------------------
     def NorthEdge(self) :
-        for e in self.OEdges :
-            if e.EndNode.X == self.X and e.EndNode.Y > self.Y :
-                return e
-        return None
+        emap = self.OutputEdgeMap()
+        return emap[self.NORTH]
+
+    # -----------------------------------------------------------------
+    def EastEdge(self) :
+        emap = self.OutputEdgeMap()
+        return emap[self.EAST]
 
     # -----------------------------------------------------------------
     def SouthEdge(self) :
-        for e in self.OEdges :
-            if e.EndNode.X == self.X and e.EndNode.Y < self.Y :
-                return e
-        return None
-
-    # -----------------------------------------------------------------
-    def _EdgeMapPosition(self, node) :
-        deltax = node.X - self.X
-        deltay = node.Y - self.Y
-        if deltax < 0 and deltay == 0 :
-            return 0
-        elif deltax == 0 and deltay > 0 :
-            return 1
-        elif deltax > 0 and deltay == 0 :
-            return 2
-        elif deltax == 0 and deltay < 0 :
-            return 3
-        # this means that self & node are at the same location
-        return -1 
+        emap = self.OutputEdgeMap()
+        return emap[self.SOUTH]
 
     # -----------------------------------------------------------------
     def OutputEdgeMap(self) :
@@ -170,10 +171,19 @@ class Node :
     # signature returned is west, north, east, south
     # -----------------------------------------------------------------
     def Signature(self) :
-        signature = []
+        osignature = []
         for e in self.OutputEdgeMap() :
             sig = e.EdgeType.Signature if e else '0L'
-            signature.append(sig)
+            osignature.append(sig)
+
+        isignature = []
+        for e in self.InputEdgeMap() :
+            sig = e.EdgeType.Signature if e else '0L'
+            isignature.append(sig)
+
+        signature = []
+        for i in range(0,4) :
+            signature.append("{0}/{1}".format(osignature[i], isignature[i]))
 
         return signature
 
@@ -288,14 +298,8 @@ class Network :
 
         edge1 = self.FindEdgeBetweenNodes(node1, node2)
         edge2 = self.FindEdgeBetweenNodes(node2, node1)
-        if edge1 == None or edge2 == None:
+        if edge1 == None and edge2 == None:
             warnings.warn("no edge found between %s and %s" % (node1.Name, node2.Name))
-
-        etype1 = edge1.EdgeType
-        etype2 = edge2.EdgeType
-
-        self.DropEdgeByName(edge1.Name)
-        self.DropEdgeByName(edge2.Name)
 
         curx = node1.X
         cury = node1.Y
@@ -309,8 +313,18 @@ class Network :
             return None
 
         nnode = self.AddNode(curx, cury, ntype, prefix)
-        self.ConnectNodes(node1,nnode,etype1)
-        self.ConnectNodes(node2,nnode,etype2)
+
+        if edge1 :
+            etype1 = edge1.EdgeType
+            self.DropEdgeByName(edge1.Name)
+            self.AddEdge(node1,nnode,etype1)
+            self.AddEdge(nnode,node2,etype1)
+
+        if edge2 :
+            etype2 = edge2.EdgeType
+            self.DropEdgeByName(edge2.Name)
+            self.AddEdge(node2,nnode,etype2)
+            self.AddEdge(nnode,node1,etype2)
 
         return nnode
 
@@ -369,7 +383,7 @@ class Network :
         return True
 
     # -----------------------------------------------------------------
-    def DropEdgeByPatern(self, pattern) :
+    def DropEdgeByPattern(self, pattern) :
         names = self.gEdges.keys()
         for name in names :
             if re.match(pattern, name) :
@@ -531,6 +545,40 @@ class Network :
         self.ConnectNodes(cnode1, dnode1, rgen.EdgeType)
         self.ConnectNodes(cnode2, dnode2, rgen.EdgeType)
         self._GenerateResidentialYAxis(dnode1, dnode2, rgen, prefix)
+
+    # -----------------------------------------------------------------
+    def BuildSimpleParkingLotSN(self, origin, itype, rgen, prefix = 'tile', slength = 30, elength = 70, offset = 25) :
+        dist1 = slength
+        dist2 = elength - slength
+
+        # find the first split point
+        edge = origin.SouthEdge()
+        while (edge.StartNode.Y - edge.EndNode.Y <= dist1) :
+            dist1 = dist1 - (edge.StartNode.Y - edge.EndNode.Y)
+            edge = edge.StartNode.SouthEdge()
+
+        # if the node already exists, don't overwrite the existing type
+        cnode1 = edge.EndNode
+        if dist1 > 0 :
+            cnode1 = self.AddNodeBetween(edge.StartNode, edge.EndNode, dist1, itype, prefix)
+        
+        # find the second split point
+        edge = cnode1.SouthEdge()
+        while (edge.StartNode.Y - edge.EndNode.Y <= dist2) :
+            dist2 = dist2 - (edge.StartNode.Y - edge.EndNode.Y)
+            edge = edge.StartNode.SouthEdge()
+
+        cnode2 = edge.EndNode
+        if dist2 > 0 :
+            cnode2 = self.AddNodeBetween(edge.StartNode, edge.EndNode, dist2, itype, prefix)
+
+        # cnode1 and cnode2 are the connection nodes, now build a path between them
+        dnode1 = self.AddNode(cnode1.X + offset, cnode1.Y, rgen.IntersectionType, prefix)
+        dnode2 = self.AddNode(cnode2.X + offset, cnode2.Y, rgen.IntersectionType, prefix)
+
+        self.ConnectNodes(cnode1, dnode1, rgen.EdgeType)
+        self.ConnectNodes(cnode2, dnode2, rgen.EdgeType)
+        self._GenerateResidentialYAxis(dnode2, dnode1, rgen, prefix)
 
     # -----------------------------------------------------------------
     def BuildSimpleParkingLotEW(self, origin, itype, rgen, prefix = 'tile', slength = 30, elength = 70, offset = 25) :
