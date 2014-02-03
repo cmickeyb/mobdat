@@ -92,8 +92,17 @@
 	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "Parking Lot Intersection [* P * P]" },
 	    "ZOffset" : 20.50,
 	    "Padding" : 2.5,
-	    "Signature" : ["*", "*", "*", "*"],
+	    "Signature" : ["*/*", "*/*", "*/*", "*/*"],
             "NodeTypes" : [ "parking_drive_intersection" ]
+	},
+
+	{
+	    "Name" : "ParkingLot Entry [00L 02L pp 20L]",
+	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "ParkingLot Entry [00L 02L PP 20L]" },
+	    "ZOffset" : 20.5,
+	    "Padding" : 5,
+	    "Signature" : ["0L/2L", "P/P", "2L/0L", "0L/0L"],
+            "NodeTypes" : [ "priority" ]
 	},
 
 	{
@@ -101,7 +110,16 @@
 	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "ParkingLot Entry [2L P 2L P]" },
 	    "ZOffset" : 20.5,
 	    "Padding" : 5,
-	    "Signature" : ["2L", "P", "2L", "P"],
+	    "Signature" : ["2L/2L", "P/P", "2L/2L", "P/P"],
+            "NodeTypes" : [ "priority" ]
+	},
+
+	{
+	    "Name" : "ParkingLot Entry [2L P 2L P]",
+	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "ParkingLot Entry [2L P 2L P]" },
+	    "ZOffset" : 20.5,
+	    "Padding" : 5,
+	    "Signature" : ["2L/2L", "0L/0L", "2L/2L", "P/P"],
             "NodeTypes" : [ "priority" ]
 	},
 
@@ -110,7 +128,7 @@
 	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "ParkingLot Entry [1L P 1L P]" },
 	    "ZOffset" : 20.5,
 	    "Padding" : 5,
-	    "Signature" : ["1L", "P", "1L", "P"],
+	    "Signature" : ["1L/1L", "P/P", "1L/1L", "P/P"],
             "NodeTypes" : [ "priority" ]
 	},
 
@@ -119,8 +137,26 @@
 	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "ParkingLot Entry [1L P 1L 0L]" },
 	    "ZOffset" : 20.5,
 	    "Padding" : 5,
-	    "Signature" : ["1L", "P", "1L", "0L"],
+	    "Signature" : ["1L/1L", "P/P", "1L/1L", "0L/0L"],
             "NodeTypes" : [ "priority" ]
+	},
+
+	{
+	    "Name" : "Intersection [20L 00L 02L 22L]",
+	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "Intersection [20L 00L 02L 22L]" },
+	    "ZOffset" : 20.5,
+	    "Padding" : 7.5,
+	    "Signature" : ["2L/0L", "0L/0L", "0L/2L", "2L/2L"],
+            "NodeTypes" : [ "stoplight", "priority" ]
+	},
+
+	{
+	    "Name" : "Intersection [22L 20L 22L 02L]",
+	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "Intersection [22L 20L 22L 02L]" },
+	    "ZOffset" : 20.5,
+	    "Padding" : 7.5,
+	    "Signature" : ["2L/2L", "0L/2L", "2L/2L", "2L/0L"],
+            "NodeTypes" : [ "stoplight", "priority" ]
 	},
 
 	{
@@ -128,7 +164,7 @@
 	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "Intersection [0L, 0L, 1L, 2L]" },
 	    "ZOffset" : 20.5,
 	    "Padding" : 7.5,
-	    "Signature" : ["0L", "0L", "1L", "2L"],
+	    "Signature" : ["0L/0L", "0L/0L", "1L/1L", "2L/2L"],
             "NodeTypes" : [ "stoplight", "priority" ]
 	},
 
@@ -137,7 +173,7 @@
 	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "Intersection [0L, 0L, 2L, 1L]" },
 	    "ZOffset" : 20.5,
 	    "Padding" : 7.5,
-	    "Signature" : ["0L", "0L", "2L", "1L"],
+	    "Signature" : ["0L/0L", "0L/0L", "2L/2L", "1L/1L"],
             "NodeTypes" : [ "stoplight", "priority" ]
 	},
 
@@ -146,7 +182,7 @@
 	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "Intersection [0L 1L 1L 1L]" },
 	    "ZOffset" : 20.5,
 	    "Padding" : 7.5,
-	    "Signature" : ["0L", "1L", "1L", "1L"],
+	    "Signature" : ["0L/0L", "1L/1L", "1L/1L", "1L/1L"],
             "NodeTypes" : [ "stoplight", "priority" ]
 	},
 
@@ -155,7 +191,7 @@
 	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "Intersection [2L 0L 2L 1L]" },
 	    "ZOffset" : 20.5,
 	    "Padding" : 7.5,
-	    "Signature" : ["0L", "2L", "1L", "2L"],
+	    "Signature" : ["0L/0L", "2L/2L", "1L/1L", "2L/2L"],
             "NodeTypes" : [ "stoplight", "priority" ]
 	},
 
@@ -164,7 +200,7 @@
 	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "Intersection [2L 0L 2L 2L]"},
 	    "ZOffset" : 20.5,
 	    "Padding" : 7.5,
-	    "Signature" : ["0L", "2L", "2L", "2L"],
+	    "Signature" : ["0L/0L", "2L/2L", "2L/2L", "2L/2L"],
             "NodeTypes" : [ "stoplight", "priority" ]
 	},
 
@@ -173,7 +209,7 @@
 	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "Intersection [1L, 2L, 1L, 2L]" },
 	    "ZOffset" : 20.5,
 	    "Padding" : 7.5,
-	    "Signature" : ["1L", "2L", "1L", "2L"],
+	    "Signature" : ["1L/1L", "2L/2L", "1L/1L", "2L/2L"],
             "NodeTypes" : [ "stoplight", "priority" ]
 	},
 
@@ -182,7 +218,7 @@
 	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "Intersection [1L, 2L, 2L, 2L]" },
 	    "ZOffset" : 20.5,
 	    "Padding" : 7.5,
-	    "Signature" : ["1L", "2L", "2L", "2L"],
+	    "Signature" : ["1L/1L", "2L/2L", "2L/2L", "2L/2L"],
             "NodeTypes" : [ "stoplight", "priority" ]
 	},
 
@@ -191,7 +227,7 @@
 	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "Intersection [2L 2L 2L 2L]" },
 	    "ZOffset" : 20.5,
 	    "Padding" : 7.5,
-	    "Signature" : ["2L", "2L", "2L", "2L"],
+	    "Signature" : ["2L/2L", "2L/2L", "2L/2L", "2L/2L"],
             "NodeTypes" : [ "stoplight", "priority" ]
 	},
 
@@ -200,7 +236,7 @@
 	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "Intersection [1L 1L 1L 1L]" },
 	    "ZOffset" : 20.5,
 	    "Padding" : 7.5,
-	    "Signature" : ["1L", "1L", "1L", "1L"],
+	    "Signature" : ["1L/1L", "1L/1L", "1L/1L", "1L/1L"],
             "NodeTypes" : [ "stoplight", "priority" ]
 	},
 	    
@@ -209,7 +245,7 @@
 	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "Intersection [1L 0L 1L 2L]" },
 	    "ZOffset" : 20.5,
 	    "Padding" : 7.5,
-	    "Signature" : ["1L", "0L", "1L", "2L"],
+	    "Signature" : ["1L/1L", "0L/0L", "1L/1L", "2L/2L"],
             "NodeTypes" : [ "stoplight", "priority" ]
 	},
 	
@@ -218,7 +254,7 @@
 	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "Intersection [1L 1L 1L 2L]" },
 	    "ZOffset" : 20.5,
 	    "Padding" : 7.5,
-	    "Signature" : ["1L", "1L", "1L", "2L"],
+	    "Signature" : ["1L/1L", "1L/1L", "1L/1L", "2L/2L"],
             "NodeTypes" : [ "stoplight", "priority" ]
 	},
 
@@ -227,7 +263,7 @@
 	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "Intersection [0L 0L 1L 1L]" },
 	    "ZOffset" : 20.5,
 	    "Padding" : 7.5,
-	    "Signature" : ["0L", "0L", "1L", "1L"],
+	    "Signature" : ["0L/0L", "0L/0L", "1L/1L", "1L/1L"],
             "NodeTypes" : [ "stoplight", "priority" ]
 	},
 
@@ -236,7 +272,7 @@
 	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "Intersection [0L 0L 2L 2L]" },
 	    "ZOffset" : 20.5,
 	    "Padding" : 7.5,
-	    "Signature" : ["0L", "0L", "2L", "2L"],
+	    "Signature" : ["0L/0L", "0L/0L", "2L/2L", "2L/2L"],
             "NodeTypes" : [ "stoplight", "priority" ]
 	},
 
@@ -245,7 +281,7 @@
 	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "Residential Row 1way 1lane" },
 	    "ZOffset" : 25.0,
 	    "Padding" : 0,
-	    "Signature" : ["0L", "0L", "D", "0L"],
+	    "Signature" : ["0L/0L", "0L/0L", "D/D", "0L/0L"],
             "NodeTypes" : [ "residence" ]
 	},
 
@@ -254,7 +290,7 @@
 	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "Residential 1way 1lane" },
 	    "ZOffset" : 25.4,
 	    "Padding" : 0,
-	    "Signature" : ["0L", "0L", "D", "0L"],
+	    "Signature" : ["0L/0L", "0L/0L", "D/D", "0L/0L"],
             "NodeTypes" : [ ],
             "xNodeTypes" : [ "residence" ]
 	},
@@ -264,7 +300,7 @@
 	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "Business Box [D 0L 0L 0L]" },
             "ZOffset" : 26.0,
             "Padding" : 0,
-            "Signature" : ["D", "0L", "0L", "0L"],
+            "Signature" : ["D/D", "0L/0L", "0L/0L", "0L/0L"],
             "NodeTypes" : ["business"]
         },
 
@@ -273,7 +309,7 @@
 	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "Intersection 2Lane Driveway" },
 	    "ZOffset" : 20.5,
 	    "Padding" : 2.5,
-	    "Signature" : ["1L", "D", "1L", "D"],
+	    "Signature" : ["1L/1L", "D/D", "1L/1L", "D/D"],
             "NodeTypes" : [ "driveway" ]
 	},
 
@@ -282,7 +318,7 @@
 	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "Intersection 2Lane Driveway" },
 	    "ZOffset" : 20.5,
 	    "Padding" : 2.5,
-	    "Signature" : ["1L", "0L", "1L", "D"],
+	    "Signature" : ["1L/1L", "0L/0L", "1L/1L", "D/D"],
             "NodeTypes" : [ "driveway" ]
 	},
 
@@ -291,7 +327,7 @@
 	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "Intersection 2Lane Driveway" },
 	    "ZOffset" : 20.5,
 	    "Padding" : 2.5,
-	    "Signature" : ["1L", "0L", "1L", "0L"],
+	    "Signature" : ["1L/1L", "0L/0L", "1L/1L", "0L/0L"],
             "NodeTypes" : [ "driveway" ]
 	},
 
@@ -300,7 +336,7 @@
 	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "Intersection 2Lane Driveway" },
 	    "ZOffset" : 20.5,
 	    "Padding" : 2.5,
-	    "Signature" : ["1L", "0L", "0L", "1L"],
+	    "Signature" : ["1L/1L", "0L/0L", "0L/0L", "1L/1L"],
             "NodeTypes" : [ "driveway" ]
 	},
 
@@ -309,7 +345,7 @@
 	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "Intersection 2Lane Driveway" },
 	    "ZOffset" : 20.5,
 	    "Padding" : 2.5,
-	    "Signature" : ["1L", "1L", "0L", "1L"],
+	    "Signature" : ["1L/1L", "1L/1L", "0L", "1L/1L"],
             "NodeTypes" : [ "driveway" ]
 	},
 
@@ -318,7 +354,7 @@
 	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "Intersection 4Lane Driveway" },
 	    "ZOffset" : 20.5,
 	    "Padding" : 5,
-	    "Signature" : ["2L", "D", "2L", "D"],
+	    "Signature" : ["2L/2L", "D/D", "2L/2L", "D/D"],
             "NodeTypes" : [ "driveway" ]
 	}
     ],
