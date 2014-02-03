@@ -63,6 +63,13 @@
 	},
 
 	{
+	    "Name" : "Road [20L]",
+	    "EdgeTypes" : [ "1way2lane" ],
+	    "ZOffset" : 20.5,
+	    "AssetID" : { "ObjectName" : "SumoAssets Edges", "ItemName" : "Road [20L]" }
+	},
+
+	{
 	    "Name" : "Parking Lot Segment",
 	    "EdgeTypes" : ["parking_entry"],
 	    "ZOffset" : 25.25,
@@ -110,7 +117,7 @@
 	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "ParkingLot Entry [2L P 2L P]" },
 	    "ZOffset" : 20.5,
 	    "Padding" : 5,
-	    "Signature" : ["2L/2L", "P/P", "2L/2L", "P/P"],
+	    "Signature" : ["P/P", "2L/2L", "P/P", "2L/2L"],
             "NodeTypes" : [ "priority" ]
 	},
 
@@ -139,6 +146,60 @@
 	    "Padding" : 5,
 	    "Signature" : ["1L/1L", "P/P", "1L/1L", "0L/0L"],
             "NodeTypes" : [ "priority" ]
+	},
+
+	{
+	    "Name" : "Intersection [00L 20L 20L 20L]",
+	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "Intersection [00L 20L 20L 20L]" },
+	    "ZOffset" : 20.5,
+	    "Padding" : 5,
+	    "Signature" : ["0L/0L", "0L/2L", "1L/1L", "2L/0L"],
+            "NodeTypes" : [ "stoplight", "priority" ]
+	},
+
+	{
+	    "Name" : "Intersection [00L 20L 20L 00L] 1",
+	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "Intersection [00L 20L 20L 00L]" },
+	    "ZOffset" : 20.5,
+	    "Padding" : 5,
+	    "Signature" : ["0L/0L", "2L/0L", "0L/2L", "0L/0L"],
+            "NodeTypes" : [ "stoplight", "priority" ]
+	},
+
+	{
+	    "Name" : "Intersection [00L 20L 20L 00L] 2",
+	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "Intersection [00L 20L 20L 00L]" },
+	    "ZOffset" : 20.5,
+	    "Padding" : 5,
+	    "Signature" : ["0L/0L", "1L/1L", "0L/2L", "0L/0L"],
+            "NodeTypes" : [ "stoplight", "priority" ]
+	},
+
+	{
+	    "Name" : "Intersection [00L 20L 20L 00L] 3",
+	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "Intersection [00L 20L 20L 00L]" },
+	    "ZOffset" : 20.5,
+	    "Padding" : 5,
+	    "Signature" : ["0L/0L", "1L/1L", "2L/0L", "0L/0L"],
+            "NodeTypes" : [ "stoplight", "priority" ]
+	},
+
+	{
+	    "Name" : "Intersection [00L 20L 20L 00L] 4",
+	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "Intersection [00L 20L 20L 00L]" },
+	    "ZOffset" : 20.5,
+	    "Padding" : 5,
+	    "Signature" : ["0L/0L", "0L/2L", "1L/1L", "0L/0L"],
+            "NodeTypes" : [ "stoplight", "priority" ]
+	},
+
+	{
+	    "Name" : "Intersection [00L 20L 20L 00L] 5",
+	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "Intersection [00L 20L 20L 00L]" },
+	    "ZOffset" : 20.5,
+	    "Padding" : 5,
+	    "Signature" : ["0L/0L", "0L/2L", "2L/0L", "0L/0L"],
+            "NodeTypes" : [ "stoplight", "priority" ]
 	},
 
 	{

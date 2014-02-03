@@ -61,6 +61,8 @@ def BuildNetwork(ng) :
     e2B = ng.AddEdgeType('etype2B', 2, 40, 2.0, sig='2L')
     e2C = ng.AddEdgeType('etype2C', 2, 20, 1.0, sig='2L')
 
+    e1way = ng.AddEdgeType('1way2lane', 2, 40, 2.0, sig='2L', center=True) 
+
     # driveway
     dntype = ng.AddNodeType('driveway', 'priority_stop') 
     edrv = ng.AddEdgeType('driveway', 1, 10, 0.5, sig='D')
@@ -105,10 +107,11 @@ def BuildNetwork(ng) :
     # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
     # Create the plaza grid in the center of the map
-    ng.GenerateGrid(-50, -250, 50, 250, 50, 50, sntype, e2B, 'plaza')
+    ng.GenerateGrid(-50, -250, 50, 250, 50, 50, sntype, e1B, 'plaza')
 
+    # Make the east and west edges one way
     pattern = 'plaza50W{0}{2}=O=plaza50W{1}{3}'
-    for pos in range(-250, 200, 50) :
+    for pos in range(-250, 250, 50) :
         p1 = abs(pos)
         d1 = 'S' if pos < 0 else 'N'
         p2 = abs(pos+50)
@@ -116,12 +119,22 @@ def BuildNetwork(ng) :
         ng.DropEdgeByPattern(pattern.format(p1, p2, d1, d2))
 
     pattern = 'plaza50E{0}{2}=O=plaza50E{1}{3}'
-    for pos in range(-200, 250, 50) :
+    for pos in range(-200, 300, 50) :
         p1 = abs(pos)
         d1 = 'S' if pos < 0 else 'N'
         p2 = abs(pos-50)
         d2 = 'S' if (pos-50) < 0 else 'N'
         ng.DropEdgeByPattern(pattern.format(p1, p2, d1, d2))
+
+    # Make the north and south most east/west streets one way as well
+    ng.DropEdgeByPattern('plaza50E250S=O=plaza0E250S')
+    ng.DropEdgeByPattern('plaza0E250S=O=plaza50W250S')
+    ng.DropEdgeByPattern('plaza50W250N=O=plaza0E250N')
+    ng.DropEdgeByPattern('plaza0E250N=O=plaza50E250N')
+
+    # The one way streets are all 2 lanes
+    ng.SetEdgeTypeByPattern('plaza50[EW].*=O=plaza50[EW].*',e1way)
+    ng.SetEdgeTypeByPattern('plaza.*250[NS]=O=plaza.*250[NS]',e1way)
 
     # The central north/south road is four lane
     ng.SetEdgeTypeByPattern('plaza[0-9]*[EW]100[NS]=O=plaza[0-9]*[EW]100[NS]',e2A)
