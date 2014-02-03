@@ -91,8 +91,8 @@ class SumoBuilder :
                 sn = edge.StartNode.Name
                 en = edge.EndNode.Name
                 etype = edge.EdgeType.Name
-
-                fp.write("  <edge id=\"%s\" from=\"%s\" to=\"%s\" type=\"%s\" />\n" % (e, sn, en, etype))
+                cn = 'center' if edge.EdgeType.Center else 'right'
+                fp.write("  <edge id=\"%s\" spreadType=\"%s\" from=\"%s\" to=\"%s\" type=\"%s\" />\n" % (e, cn, sn, en, etype))
 
             fp.write("</edges>\n")
         
@@ -120,7 +120,7 @@ class SumoBuilder :
             
             for n in self.Network.gNodes :
                 node = self.Network.gNodes[n]
-                if not node.Signature() == ['2L', '2L', '2L', '2L' ] :
+                if not node.Signature() == ['2L/2L', '2L/2L', '2L/2L', '2L/2L' ] :
                     continue
 
                 oedges = node.OutputEdgeMap()

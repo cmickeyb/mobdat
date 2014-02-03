@@ -192,7 +192,7 @@ class Node :
 class EdgeType :
 
     # -----------------------------------------------------------------
-    def __init__(self, name, lanes = 1, pri = 70, speed = 2.0, wid = 2.5, sig = '1L', render = True) :
+    def __init__(self, name, lanes = 1, pri = 70, speed = 2.0, wid = 2.5, sig = '1L', render = True, center = False) :
         self.Name = name
         self.Lanes = lanes
         self.Priority = pri
@@ -200,6 +200,7 @@ class EdgeType :
         self.Width = wid
         self.Signature = sig
         self.Render = render
+        self.Center = center
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -247,9 +248,9 @@ class Network :
         self.InjectPrefix = "IN"
 
     # -----------------------------------------------------------------
-    def AddEdgeType(self, name, lanes = 1, pri = 70, speed = 2.0, wid = 2.5, sig = '1L', render = True) :
+    def AddEdgeType(self, name, lanes = 1, pri = 70, speed = 2.0, wid = 2.5, sig = '1L', render = True, center = False) :
         if name not in self.gEdgeTypes :
-            self.gEdgeTypes[name] = EdgeType(name, lanes, pri, speed, wid, sig, render)
+            self.gEdgeTypes[name] = EdgeType(name, lanes, pri, speed, wid, sig, render, center)
             
         return self.gEdgeTypes[name]
 
