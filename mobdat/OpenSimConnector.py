@@ -324,7 +324,7 @@ class OpenSimConnector(EventHandler.EventHandler, BaseConnector.BaseConnector) :
             assetid = self._FindAssetInObject(assetid)
             vtype["AssetID"] = assetid
 
-        result = self.OpenSimConnector.CreateObject(vtype["AssetID"], objectid=vuuid, name="car", parm=vtype.get("StartParam","{}"))
+        result = self.OpenSimConnector.CreateObject(vtype["AssetID"], objectid=vuuid, name="car", parm=vtype.get("StartParameter","{}"))
  
         # self.__Logger.debug("create new vehicle %s with id %s", vname, vuuid)
         return True

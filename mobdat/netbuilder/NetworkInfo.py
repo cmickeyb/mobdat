@@ -85,9 +85,6 @@ class VehicleInfo :
         self.MinGap = settings["MinGap"]
         self.MaxSpeed = settings["MaxSpeed"]
         self.AssetID = settings["AssetID"]
-        self.Position = settings["Position"]
-        self.Rotation = settings["Rotation"]
-        self.Velocity = settings["Velocity"]
         self.StartParameter = settings["StartParameter"]
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

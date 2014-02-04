@@ -435,10 +435,6 @@
 	    "MinGap" : 2,
 	    "MaxSpeed" : 2.0,
             "AssetID" : { "ObjectName" : "SumoAssets Vehicles", "ItemName" : "Police Car" },
-            "StartParam" : "{}",
-            "Position" : [128.0, 128.0, 30.0],
-            "Rotation" : [0.0, 0.0, 0.0, 1.0],
-            "Velocity" : [0.0, 0.0, 0.0],
             "StartParameter" : "{}"
         },
 
@@ -455,90 +451,6 @@
 	    "MinGap" : 2,
 	    "MaxSpeed" : 2.0,
             "AssetID" : { "ObjectName" : "SumoAssets Vehicles", "ItemName" : "Trolly" },
-            "StartParam" : "{}",
-            "Position" : [128.0, 128.0, 30.0],
-            "Rotation" : [0.0, 0.0, 0.0, 1.0],
-            "Velocity" : [0.0, 0.0, 0.0],
-            "StartParameter" : "{}"
-        },
-
-        {
-            "Name" : "BlueCar",
-            "Description" : "A blue car",
-            "Rate" : 15,
-	    "SourceNodeTypes" : ["residence", "business"],
-	    "DestinationNodeTypes" : ["residence", "business"],
-	    "Acceleration" : 0.3,
-	    "Deceleration" : 0.3,
-	    "Sigma" : 0.5,
-	    "Length" : 3,
-	    "MinGap" : 2,
-	    "MaxSpeed" : 2.0,
-            "AssetID" : "65715f46-7dc1-4b4a-ba64-23b9f972bdc4",
-            "StartParam" : "{ 'terminate' : 0, 'color' : '<0.0, 0.0, 1.0>', 'scale' : '<1.0, 3.0, 1.0>' }",
-            "Position" : [128.0, 128.0, 30.0],
-            "Rotation" : [0.0, 0.0, 0.0, 1.0],
-            "Velocity" : [0.0, 0.0, 0.0],
-            "StartParameter" : "{}"
-        },
-
-        {
-            "Name" : "OrangeCar",
-            "Description" : "A red car",
-            "Rate" : 15,
-	    "SourceNodeTypes" : ["residence", "business"],
-	    "DestinationNodeTypes" : ["residence", "business"],
-	    "Acceleration" : 0.8,
-	    "Deceleration" : 0.8,
-	    "Sigma" : 0.5,
-	    "Length" : 2,
-	    "MinGap" : 2,
-	    "MaxSpeed" : 4.0,
-            "AssetID" : "65715f46-7dc1-4b4a-ba64-23b9f972bdc4",
-            "StartParam" : "{ 'terminate' : 0, 'color' : '<1.0, 0.5, 0.0>', 'scale' : '<1.0, 3.0, 1.0>' }",
-            "Position" : [128.0, 128.0, 30.0],
-            "Rotation" : [0.0, 0.0, 0.0, 1.0],
-            "Velocity" : [0.0, 0.0, 0.0],
-            "StartParameter" : "{}"
-        },
-        
-        {
-            "Name" : "PurpleCar",
-            "Description" : "A red car",
-            "Rate" : 15,
-	    "SourceNodeTypes" : ["residence", "business"],
-	    "DestinationNodeTypes" : ["residence", "business"],
-	    "Acceleration" : 0.2,
-	    "Deceleration" : 0.2,
-	    "Sigma" : 0.5,
-	    "Length" : 2,
-	    "MinGap" : 2,
-	    "MaxSpeed" : 1.2,
-            "AssetID" : "65715f46-7dc1-4b4a-ba64-23b9f972bdc4",
-            "StartParam" : "{ 'terminate' : 0, 'color' : '<1.0, 0.0, 1.0>', 'scale' : '<1.0, 3.0, 1.0>' }",
-            "Position" : [128.0, 128.0, 30.0],
-            "Rotation" : [0.0, 0.0, 0.0, 1.0],
-            "Velocity" : [0.0, 0.0, 0.0],
-            "StartParameter" : "{}"
-        },
-        
-        {
-            "Name" : "RedCar",
-            "Description" : "A red car",
-            "Rate" : 15,
-	    "SourceNodeTypes" : ["residence", "business"],
-	    "DestinationNodeTypes" : ["residence", "business"],
-	    "Acceleration" : 0.4,
-	    "Deceleration" : 0.4,
-	    "Sigma" : 0.5,
-	    "Length" : 3,
-	    "MinGap" : 2,
-	    "MaxSpeed" : 3.0,
-            "AssetID" : "65715f46-7dc1-4b4a-ba64-23b9f972bdc4",
-            "StartParam" : "{ 'terminate' : 0, 'color' : '<1.0, 0.0, 0.0>', 'scale' : '<1.0, 3.0, 1.0>' }",
-            "Position" : [128.0, 128.0, 30.0],
-            "Rotation" : [0.0, 0.0, 0.0, 1.0],
-            "Velocity" : [0.0, 0.0, 0.0],
             "StartParameter" : "{}"
         },
 
@@ -555,10 +467,71 @@
 	    "MinGap" : 1,
 	    "MaxSpeed" : 3.0,
 	    "AssetID" : "d8f32d8f-bd4e-4ed7-ba17-3a1420c332e2",
-            "Position" : [128.0, 128.0, 30.0],
-            "Rotation" : [0.0, 0.0, 0.0, 1.0],
-            "Velocity" : [0.0, 0.0, 0.0],
             "StartParameter" : "{}"
+        },
+
+        {
+            "Name" : "BlueCar",
+            "Description" : "A blue car",
+            "Rate" : 15,
+	    "SourceNodeTypes" : ["residence", "business"],
+	    "DestinationNodeTypes" : ["residence", "business"],
+	    "Acceleration" : 0.3,
+	    "Deceleration" : 0.3,
+	    "Sigma" : 0.5,
+	    "Length" : 3,
+	    "MinGap" : 2,
+	    "MaxSpeed" : 2.0,
+            "AssetID" : "65715f46-7dc1-4b4a-ba64-23b9f972bdc4",
+            "StartParameter" : "{ 'terminate' : 0, 'color' : '<0.0, 0.0, 1.0>', 'scale' : '<0.75, 3.0, 0.75>' }"
+        },
+
+        {
+            "Name" : "OrangeCar",
+            "Description" : "An orange car",
+            "Rate" : 15,
+	    "SourceNodeTypes" : ["residence", "business"],
+	    "DestinationNodeTypes" : ["residence", "business"],
+	    "Acceleration" : 0.8,
+	    "Deceleration" : 0.8,
+	    "Sigma" : 0.5,
+	    "Length" : 2,
+	    "MinGap" : 2,
+	    "MaxSpeed" : 4.0,
+            "AssetID" : "65715f46-7dc1-4b4a-ba64-23b9f972bdc4",
+            "StartParameter" : "{ 'terminate' : 0, 'color' : '<1.0, 0.5, 0.0>', 'scale' : '<0.75, 2.0, 0.75>' }"
+        },
+        
+        {
+            "Name" : "PurpleCar",
+            "Description" : "A purple car",
+            "Rate" : 15,
+	    "SourceNodeTypes" : ["residence", "business"],
+	    "DestinationNodeTypes" : ["residence", "business"],
+	    "Acceleration" : 0.2,
+	    "Deceleration" : 0.2,
+	    "Sigma" : 0.5,
+	    "Length" : 2,
+	    "MinGap" : 2,
+	    "MaxSpeed" : 1.2,
+            "AssetID" : "65715f46-7dc1-4b4a-ba64-23b9f972bdc4",
+            "StartParameter" : "{ 'terminate' : 0, 'color' : '<1.0, 0.0, 1.0>', 'scale' : '<0.75, 2.0, 0.75>' }"
+        },
+        
+        {
+            "Name" : "RedCar",
+            "Description" : "A red car",
+            "Rate" : 15,
+	    "SourceNodeTypes" : ["residence", "business"],
+	    "DestinationNodeTypes" : ["residence", "business"],
+	    "Acceleration" : 0.4,
+	    "Deceleration" : 0.4,
+	    "Sigma" : 0.5,
+	    "Length" : 3,
+	    "MinGap" : 2,
+	    "MaxSpeed" : 3.0,
+            "AssetID" : "65715f46-7dc1-4b4a-ba64-23b9f972bdc4",
+            "StartParameter" : "{ 'terminate' : 0, 'color' : '<1.0, 0.0, 0.0>', 'scale' : '<0.75, 3.0, 0.75>' }"
         },
 
         {
@@ -574,11 +547,7 @@
 	    "MinGap" : 2,
 	    "MaxSpeed" : 1.0,
             "AssetID" : "65715f46-7dc1-4b4a-ba64-23b9f972bdc4",
-            "StartParam" : "{ 'terminate' : 0, 'color' : '<0.0, 1.0, 0.0>', 'scale' : '<1.5, 5.0, 1.5>' }",
-            "StartParameter" : "{}",
-            "Position" : [128.0, 128.0, 30.0],
-            "Rotation" : [0.0, 0.0, 0.0, 1.0],
-            "Velocity" : [0.0, 0.0, 0.0]
+            "StartParameter" : "{ 'terminate' : 0, 'color' : '<0.0, 1.0, 0.0>', 'scale' : '<1.25, 4.0, 1.25>' }"
         }
     ]
 }
