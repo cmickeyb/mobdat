@@ -58,13 +58,15 @@ def ConvertEdgeCoordinate(prefix, p1, p2) :
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
-PodIdentifier = 0
+PodIdentifier = {}
 def TagPod(prefix, nlist) :
     global PodIdentifier
+    if prefix not in PodIdentifier :
+        PodIdentifier[prefix] = 0
+    PodIdentifier[prefix] += 1
 
     for n in nlist :
-        PodIdentifier += 1
-        n.Tags.append(prefix + str(PodIdentifier))
+        n.Tags.append(prefix + str(PodIdentifier[prefix]))
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
@@ -221,34 +223,34 @@ def BuildNetwork(ng) :
 
     # these are the small "strip malls in the residential areas
     for n in ['main300W200S', 'main200W200S', 'main100E200S', 'main200E200S'] :
-        ng.BuildSimpleParkingLotEW(ng.gNodes[n], pntype, rgenplR, "civic", offset=-15, slength=40, elength=60)
-        ng.BuildSimpleParkingLotEW(ng.gNodes[n], pntype, rgenplL, "civic", offset=15, slength=40, elength=60)
+        TagPod('civic', ng.BuildSimpleParkingLotEW(ng.gNodes[n], pntype, rgenplR, "civic", offset=-15, slength=40, elength=60))
+        TagPod('civic', ng.BuildSimpleParkingLotEW(ng.gNodes[n], pntype, rgenplL, "civic", offset=15, slength=40, elength=60))
 
     for n in ['main300W200N', 'main200W200N', 'main100E200N', 'main200E200N'] :
-        ng.BuildSimpleParkingLotEW(ng.gNodes[n], pntype, rgenplR, "civic", offset=-15, slength=40, elength=60)
-        ng.BuildSimpleParkingLotEW(ng.gNodes[n], pntype, rgenplL, "civic", offset=15, slength=40, elength=60)
+        TagPod('civic', ng.BuildSimpleParkingLotEW(ng.gNodes[n], pntype, rgenplR, "civic", offset=-15, slength=40, elength=60))
+        TagPod('civic', ng.BuildSimpleParkingLotEW(ng.gNodes[n], pntype, rgenplL, "civic", offset=15, slength=40, elength=60))
 
     # these are the downtown work and shopping plazas
     for n in ['plaza50W200S', 'plaza50W150S', 'plaza50W100S', 'plaza50W50S' ] :
-        ng.BuildSimpleParkingLotSN(ng.gNodes[n], pntype, rgenplL, "plaza", offset=15, slength = 17.5, elength=32.5)
-
+        TagPod('plaza', ng.BuildSimpleParkingLotSN(ng.gNodes[n], pntype, rgenplL, "plaza", offset=15, slength = 17.5, elength=32.5))
+ 
     for n in ['plaza50W0N', 'plaza50W50N', 'plaza50W100N', 'plaza50W150N', 'plaza50W200N', 'plaza50W250N' ] :
-        ng.BuildSimpleParkingLotSN(ng.gNodes[n], pntype, rgenplL, "plaza", offset=15, slength = 17.5, elength=32.5)
+        TagPod('plaza', ng.BuildSimpleParkingLotSN(ng.gNodes[n], pntype, rgenplL, "plaza", offset=15, slength = 17.5, elength=32.5))
 
     for n in ['plaza50E250S', 'plaza50E200S', 'plaza50E150S', 'plaza50E100S', 'plaza50E50S'] :
-        ng.BuildSimpleParkingLotNS(ng.gNodes[n], pntype, rgenplR, "plaza", offset=-15, slength = 17.5, elength=32.5)
+        TagPod('plaza', ng.BuildSimpleParkingLotNS(ng.gNodes[n], pntype, rgenplR, "plaza", offset=-15, slength = 17.5, elength=32.5))
 
     for n in ['plaza50E0N', 'plaza50E50N', 'plaza50E100N', 'plaza50E150N', 'plaza50E200N'] :
-        ng.BuildSimpleParkingLotNS(ng.gNodes[n], pntype, rgenplR, "plaza", offset=-15, slength = 17.5, elength=32.5)
+        TagPod('plaza', ng.BuildSimpleParkingLotNS(ng.gNodes[n], pntype, rgenplR, "plaza", offset=-15, slength = 17.5, elength=32.5))
         
     # these are 
     for n in ['main200W300S', 'main200W200S', 'main200W100S', 'main200W0N', 'main200W100N', 'main200W200N'] : 
-        ng.BuildSimpleParkingLotNS(ng.gNodes[n], pntype, rgenplR, "mall", offset=-30)
-        ng.BuildSimpleParkingLotNS(ng.gNodes[n], pntype, rgenplL, "mall", offset=30)
+        TagPod('mall', ng.BuildSimpleParkingLotNS(ng.gNodes[n], pntype, rgenplR, "mall", offset=-30))
+        TagPod('mall', ng.BuildSimpleParkingLotNS(ng.gNodes[n], pntype, rgenplL, "mall", offset=30))
 
     for n in ['main200E300S', 'main200E200S', 'main200E100S', 'main200E0N', 'main200E100N', 'main200E200N'] : 
-        ng.BuildSimpleParkingLotNS(ng.gNodes[n], pntype, rgenplR, "mall", offset=-30)
-        ng.BuildSimpleParkingLotNS(ng.gNodes[n], pntype, rgenplL, "mall", offset=30)
+        TagPod('mall', ng.BuildSimpleParkingLotNS(ng.gNodes[n], pntype, rgenplR, "mall", offset=-30))
+        TagPod('mall', ng.BuildSimpleParkingLotNS(ng.gNodes[n], pntype, rgenplL, "mall", offset=30))
 
     # ng.GenerateResidential(ng.gNodes['main400W200S'],ng.gNodes['main300W200S'], rgenh)
     # ng.GenerateResidential(ng.gNodes['main400W0N'],  ng.gNodes['main300W0N'], rgenh)
