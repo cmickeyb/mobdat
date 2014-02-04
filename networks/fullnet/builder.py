@@ -44,6 +44,30 @@ from mobdat.netbuilder import *
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
+def ConvertNodeCoordinate(prefix, p) :
+    x1 = abs(p[0])
+    dx = 'W' if p[0] < 0 else 'E'
+    y1 = abs(p[1])
+    dy = 'S' if p[1] < 0 else 'N'
+    return prefix + str(x1) + dx + str(y1) + dy
+
+# -----------------------------------------------------------------
+# -----------------------------------------------------------------
+def ConvertEdgeCoordinate(prefix, p1, p2) :
+    return ConvertNodeCoordinate(prefix, p1) + "=O=" + ConvertNodeCoordinate(prefix, p2)
+
+# -----------------------------------------------------------------
+# -----------------------------------------------------------------
+PodIdentifier = 0
+def TagPod(prefix, nlist) :
+    global PodIdentifier
+
+    for n in nlist :
+        PodIdentifier += 1
+        n.Tags.append(prefix + str(PodIdentifier))
+
+# -----------------------------------------------------------------
+# -----------------------------------------------------------------
 def BuildNetwork(ng) :
 
     # residence and business nodes
@@ -111,26 +135,17 @@ def BuildNetwork(ng) :
 
     # Make the east and west edges one way
     pattern = 'plaza50W{0}{2}=O=plaza50W{1}{3}'
-    for pos in range(-250, 250, 50) :
-        p1 = abs(pos)
-        d1 = 'S' if pos < 0 else 'N'
-        p2 = abs(pos+50)
-        d2 = 'S' if (pos+50) < 0 else 'N'
-        ng.DropEdgeByPattern(pattern.format(p1, p2, d1, d2))
+    for ns in range(-250, 250, 50) :
+        ng.DropEdgeByName(ConvertEdgeCoordinate('plaza', (-50, ns), (-50, ns + 50)))
 
-    pattern = 'plaza50E{0}{2}=O=plaza50E{1}{3}'
-    for pos in range(-200, 300, 50) :
-        p1 = abs(pos)
-        d1 = 'S' if pos < 0 else 'N'
-        p2 = abs(pos-50)
-        d2 = 'S' if (pos-50) < 0 else 'N'
-        ng.DropEdgeByPattern(pattern.format(p1, p2, d1, d2))
+    for ns in range(-200, 300, 50) :
+        ng.DropEdgeByName(ConvertEdgeCoordinate('plaza', ( 50, ns), ( 50, ns - 50)))
 
     # Make the north and south most east/west streets one way as well
-    ng.DropEdgeByPattern('plaza50E250S=O=plaza0E250S')
-    ng.DropEdgeByPattern('plaza0E250S=O=plaza50W250S')
-    ng.DropEdgeByPattern('plaza50W250N=O=plaza0E250N')
-    ng.DropEdgeByPattern('plaza0E250N=O=plaza50E250N')
+    ng.DropEdgeByName('plaza50E250S=O=plaza0E250S')
+    ng.DropEdgeByName('plaza0E250S=O=plaza50W250S')
+    ng.DropEdgeByName('plaza50W250N=O=plaza0E250N')
+    ng.DropEdgeByName('plaza0E250N=O=plaza50E250N')
 
     # The one way streets are all 2 lanes
     ng.SetEdgeTypeByPattern('plaza50[EW].*=O=plaza50[EW].*',e1way)
@@ -175,45 +190,25 @@ def BuildNetwork(ng) :
     rgenv = NetBuilder.ResidentialGenerator(e1C, dntype, edrv, rntype, bspace = 20, spacing = 10, driveway = 5)
     rgenh = NetBuilder.ResidentialGenerator(e1C, dntype, edrv, rntype, bspace = 40, spacing = 10)
 
-    ng.GenerateResidential(ng.gNodes['main400W200S'],ng.gNodes['main400W100S'], rgenv)
-    ng.GenerateResidential(ng.gNodes['main400W100S'],ng.gNodes['main400W0N'], rgenv)
-    ng.GenerateResidential(ng.gNodes['main400W0N'],  ng.gNodes['main400W100N'], rgenv)
-    ng.GenerateResidential(ng.gNodes['main400W100N'],ng.gNodes['main400W200N'], rgenv)
+    for ew in [-400, -300, 300, 400] :
+        for nw in range (-200, 200, 100) :
+            node1 = ng.gNodes[ConvertNodeCoordinate('main', (ew, nw))]
+            node2 = ng.gNodes[ConvertNodeCoordinate('main', (ew, nw + 100))]
+            TagPod('respod', ng.GenerateResidential(node1, node2, rgenv))
 
-    ng.GenerateResidential(ng.gNodes['main400E200S'],ng.gNodes['main400E100S'], rgenv)
-    ng.GenerateResidential(ng.gNodes['main400E100S'],ng.gNodes['main400E0N'], rgenv)
-    ng.GenerateResidential(ng.gNodes['main400E0N'],  ng.gNodes['main400E100N'], rgenv)
-    ng.GenerateResidential(ng.gNodes['main400E100N'],ng.gNodes['main400E200N'], rgenv)
-
-    ng.GenerateResidential(ng.gNodes['main300W200S'],ng.gNodes['main300W100S'], rgenv)
-    ng.GenerateResidential(ng.gNodes['main300W100S'],ng.gNodes['main300W0N'], rgenv)
-    ng.GenerateResidential(ng.gNodes['main300W0N'],  ng.gNodes['main300W100N'], rgenv)
-    ng.GenerateResidential(ng.gNodes['main300W100N'],ng.gNodes['main300W200N'], rgenv)
-
-    ng.GenerateResidential(ng.gNodes['main300E200S'],ng.gNodes['main300E100S'], rgenv)
-    ng.GenerateResidential(ng.gNodes['main300E100S'],ng.gNodes['main300E0N'], rgenv)
-    ng.GenerateResidential(ng.gNodes['main300E0N'],  ng.gNodes['main300E100N'], rgenv)
-    ng.GenerateResidential(ng.gNodes['main300E100N'],ng.gNodes['main300E200N'], rgenv)
-
-    ng.GenerateResidential(ng.gNodes['main300W400N'],ng.gNodes['main200W400N'], rgenv)
-    ng.GenerateResidential(ng.gNodes['main200W400N'],ng.gNodes['main100W400N'], rgenv)
-
-    ng.GenerateResidential(ng.gNodes['main300W400S'],  ng.gNodes['main200W400S'], rgenv)
-    ng.GenerateResidential(ng.gNodes['main200W400S'],  ng.gNodes['main100W400S'], rgenv)
-
-    ng.GenerateResidential(ng.gNodes['main300E400N'],ng.gNodes['main200E400N'], rgenv)
-    ng.GenerateResidential(ng.gNodes['main200E400N'],ng.gNodes['main100E400N'], rgenv)
-
-    ng.GenerateResidential(ng.gNodes['main300E400S'],ng.gNodes['main200E400S'], rgenv)
-    ng.GenerateResidential(ng.gNodes['main200E400S'],ng.gNodes['main100E400S'], rgenv)
+    for nw in [-400, 400] :
+        for ew in [-300, -200, 100, 200] :
+            node1 = ng.gNodes[ConvertNodeCoordinate('main', (ew, nw))]
+            node2 = ng.gNodes[ConvertNodeCoordinate('main', (ew + 100, nw))]
+            TagPod('respod', ng.GenerateResidential(node1, node2, rgenv))
 
     rgenv.BothSides = False
-    ng.GenerateResidential(ng.gNodes['main300W200N'],ng.gNodes['main400W200N'], rgenv)
-    ng.GenerateResidential(ng.gNodes['main300E200N'],ng.gNodes['main400E200N'], rgenv)
+    TagPod('respod', ng.GenerateResidential(ng.gNodes['main300W200N'],ng.gNodes['main400W200N'], rgenv))
+    TagPod('respod', ng.GenerateResidential(ng.gNodes['main300E200N'],ng.gNodes['main400E200N'], rgenv))
 
     rgenv.DrivewayLength = - rgenv.DrivewayLength
-    ng.GenerateResidential(ng.gNodes['main400W200S'],ng.gNodes['main300W200S'], rgenv)
-    ng.GenerateResidential(ng.gNodes['main400E200S'],ng.gNodes['main300E200S'], rgenv)
+    TagPod('respod', ng.GenerateResidential(ng.gNodes['main400W200S'],ng.gNodes['main300W200S'], rgenv))
+    TagPod('respod', ng.GenerateResidential(ng.gNodes['main400E200S'],ng.gNodes['main300E200S'], rgenv))
 
     # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     # BUILD THE BUSINESS NEIGHBORHOODS
