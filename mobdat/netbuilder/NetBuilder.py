@@ -72,6 +72,7 @@ class Node :
 
         self.Name = self._GenerateNodeName(prefix)
         self.NodeType = ntype
+        self.Tags = []
 
         self.OEdges = []
         self.IEdges = []
@@ -433,44 +434,49 @@ class Network :
 
         if node1.X == node2.X :
             if node1.Y < node2.Y :
-                self._GenerateResidentialYAxis(node1,node2,rgen,prefix)
+                return self._GenerateResidentialYAxis(node1,node2,rgen,prefix)
             else :
                 # reverse direction, reverse sense of left and right
                 rgenp.DrivewayLength = -rgenp.DrivewayLength
-                self._GenerateResidentialYAxis(node2,node1,rgen,prefix)
+                return self._GenerateResidentialYAxis(node2,node1,rgen,prefix)
         else :
             if node1.X < node2.X :
-                self._GenerateResidentialXAxis(node1,node2,rgen,prefix)
+                return self._GenerateResidentialXAxis(node1,node2,rgen,prefix)
             else :
                 # reverse direction, reverse sense of left and right
                 rgenp.DrivewayLength = -rgenp.DrivewayLength
-                self._GenerateResidentialXAxis(node2,node1,rgen,prefix)
+                return self._GenerateResidentialXAxis(node2,node1,rgen,prefix)
 
     # -----------------------------------------------------------------
     def _GenerateResidentialYAxis(self, node1, node2, rgen, prefix) :
         lastnode = node1
 
+        resnodes = []
         cury = node1.Y + rgen.DrivewayBuffer
         while cury + rgen.DrivewayBuffer <= node2.Y :
             node = self.AddNode(node1.X, cury, rgen.IntersectionType, prefix)
             self.ConnectNodes(node,lastnode,rgen.EdgeType)
-
+            
             enode = self.AddNode(node1.X + rgen.DrivewayLength, cury, rgen.ResidentialType, self.InjectPrefix + prefix)
             self.ConnectNodes(node,enode,rgen.DrivewayType)
+            resnodes.append(enode)
 
             if rgen.BothSides :
                 wnode = self.AddNode(node1.X - rgen.DrivewayLength, cury, rgen.ResidentialType, self.InjectPrefix + prefix)
                 self.ConnectNodes(node,wnode,rgen.DrivewayType)
+                resnodes.append(wnode)
 
             lastnode = node
             cury += rgen.Spacing
 
         self.ConnectNodes(lastnode,node2,rgen.EdgeType)
+        return resnodes
 
     # -----------------------------------------------------------------
     def _GenerateResidentialXAxis(self, node1, node2, rgen, prefix) :
         lastnode = node1
 
+        resnodes = []
         curx = node1.X + rgen.DrivewayBuffer
         while curx + rgen.DrivewayBuffer <= node2.X :
             node = self.AddNode(curx, node1.Y, rgen.IntersectionType, prefix)
@@ -478,15 +484,18 @@ class Network :
 
             nnode = self.AddNode(curx, node1.Y + rgen.DrivewayLength, rgen.ResidentialType, self.InjectPrefix + prefix)
             self.ConnectNodes(node,nnode,rgen.DrivewayType)
+            resnodes.append(nnode)
 
             if rgen.BothSides :
                 snode = self.AddNode(curx, node1.Y - rgen.DrivewayLength, rgen.ResidentialType, self.InjectPrefix + prefix)
                 self.ConnectNodes(node,snode,rgen.DrivewayType)
+                resnodes.append(snode)
 
             lastnode = node
             curx += rgen.Spacing
 
         self.ConnectNodes(lastnode,node2,rgen.EdgeType)
+        return resnodes
 
     # -----------------------------------------------------------------
     def _FindNodeClosestToLocation(self, node) :
@@ -545,7 +554,7 @@ class Network :
 
         self.ConnectNodes(cnode1, dnode1, rgen.EdgeType)
         self.ConnectNodes(cnode2, dnode2, rgen.EdgeType)
-        self._GenerateResidentialYAxis(dnode1, dnode2, rgen, prefix)
+        return self._GenerateResidentialYAxis(dnode1, dnode2, rgen, prefix)
 
     # -----------------------------------------------------------------
     def BuildSimpleParkingLotSN(self, origin, itype, rgen, prefix = 'tile', slength = 30, elength = 70, offset = 25) :
@@ -579,7 +588,7 @@ class Network :
 
         self.ConnectNodes(cnode1, dnode1, rgen.EdgeType)
         self.ConnectNodes(cnode2, dnode2, rgen.EdgeType)
-        self._GenerateResidentialYAxis(dnode2, dnode1, rgen, prefix)
+        return self._GenerateResidentialYAxis(dnode2, dnode1, rgen, prefix)
 
     # -----------------------------------------------------------------
     def BuildSimpleParkingLotEW(self, origin, itype, rgen, prefix = 'tile', slength = 30, elength = 70, offset = 25) :
@@ -613,4 +622,4 @@ class Network :
 
         self.ConnectNodes(cnode1, dnode1, rgen.EdgeType)
         self.ConnectNodes(cnode2, dnode2, rgen.EdgeType)
-        self._GenerateResidentialXAxis(dnode1, dnode2, rgen, prefix)
+        return self._GenerateResidentialXAxis(dnode1, dnode2, rgen, prefix)

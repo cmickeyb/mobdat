@@ -85,6 +85,9 @@ class SocialBuilder :
             ninfo["Type"] = node.NodeType.Name
             ninfo["InEdge"] = node.IEdges[0].Name
             ninfo["OutRoute"] = "r" + node.Name
+            ninfo["Position"] = [ node.X, node.Y ]
+            ninfo["Tags"] = node.Tags
+
             nlist.append(ninfo)
 
         with open(self.InjectionFile,"w") as fp :
