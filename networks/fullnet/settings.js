@@ -30,7 +30,8 @@
     "OpenSimConnector" :
     {
         "WorldSize" : [810.0, 810.0, 100.0],
-        "WorldOffset" : [107.0, 107.0, 26.0],
+        "WorldOffset" : [363.0, 363.0, 26.0],
+        "WorldCenter" : [768.0, 768.0, 26.0],
         "PositionDelta" : 0.1,
         "VelocityDelta" : 0.1,
         "AccelerationDelta" : 0.05,
