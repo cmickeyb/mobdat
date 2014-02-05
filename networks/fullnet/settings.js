@@ -14,6 +14,11 @@
 	"ExtensionFiles" : ["networks/fullnet/builder.py"]
     },
 
+    "SocialBuilder" :
+    {
+	"ExtensionFiles" : ["networks/fullnet/social.py"]
+    },
+
     "SocialConnector" :
     {
 	"NodeDataFile" : "networks/fullnet/nodedata.js",
