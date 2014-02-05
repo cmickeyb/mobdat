@@ -65,6 +65,12 @@ class OpenSimBuilder :
             self.OpenSimConnector = OpenSimRemoteControl.OpenSimRemoteControl(settings["OpenSimConnector"]["EndPoint"])
             self.OpenSimConnector.Capability = uuid.UUID(settings["OpenSimConnector"]["Capability"])
             self.OpenSimConnector.Scene = settings["OpenSimConnector"]["Scene"]
+
+            woffs = settings["OpenSimConnector"]["WorldCenter"]
+            self.WorldCenterX = woffs[0]
+            self.WorldCenterY = woffs[1]
+            self.WorldCenterZ = woffs[2]
+
         except NameError as detail: 
             self.Logger.warn("Failed processing OpenSim configuration; name error %s", (str(detail)))
             sys.exit(-1)
@@ -161,7 +167,7 @@ class OpenSimBuilder :
             self.Logger.warn('something went wrong computing the signature')
             return(0,0,0,0)
 
-        return (s1x + 512, s1y + 512, e1x + 512, e1y + 512)
+        return (s1x + self.WorldCenterX, s1y + self.WorldCenterY, e1x + self.WorldCenterX, e1y + self.WorldCenterY)
 
 
     # -----------------------------------------------------------------
@@ -195,7 +201,7 @@ class OpenSimBuilder :
                 startparms = "{ 'spoint' : '<%f, %f, %f>', 'epoint' : '<%f, %f, %f>' }" % (p1x, p1y, zoff, p2x, p2y, zoff)
 
                 if abs(p1x - p2x) > 0.1 or abs(p1y - p2y) > 0.1 :
-                    result = self.OpenSimConnector.CreateObject(asset, pos=[p1x, p1y, 20.5], name=e, parm=startparms)
+                    result = self.OpenSimConnector.CreateObject(asset, pos=[p1x, p1y, zoff], name=e, parm=startparms)
 
             self.EdgeMap[edge.Name] = True
             self.EdgeMap[edge.ReverseName()] = True
@@ -220,8 +226,8 @@ class OpenSimBuilder :
                 if rot >= 0 :
                     self.NodeMap[n] = itype
 
-                    p1x = node.X + 512
-                    p1y = node.Y + 512
+                    p1x = node.X + self.WorldCenterX
+                    p1y = node.Y + self.WorldCenterY
                     p1z = itype.ZOffset
                     asset = itype.AssetID
                     if type(asset) == dict :
