@@ -63,6 +63,7 @@ AddJobProfile('manager',   60000,  True,  (8.0, 17.0))
 AddJobProfile('seniormgr', 90000,  True,  (7.0, 18.0))
 AddJobProfile('exec',      120000, True,  (6.0, 18.0))
 
+AddJobProfile('student',       0,  False, (8.0, 15.0))
 AddJobProfile('teacher',   40000,  False, (7.5, 15.5))
 AddJobProfile('admin',     30000,  False, (7.5, 15.5))
 AddJobProfile('principal', 80000,  True,  (7.0, 16.5))
@@ -97,16 +98,31 @@ def AddService(name, joblist, bizhours, customers, stime = 0.5) :
     
     AddCompany(company, joblist)
 
+def AddFood(name, joblist, bizhours, customers, stime = 1.5) :
+    company = BusinessProfile(name, BusinessProfile.BusinessType.Food)
+    company.ServiceProfile = ServiceProfile(bizhours, customers, stime)
+    
+    AddCompany(company, joblist)
+
+def AddSchool(name, joblist)
+    company = BusinessProfile(name, BusinessProfile.BusinessType.School)
+    AddCompany(company, joblist)
+
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
 AddFactory("small-factory", {'worker' : 20, 'manager' : 2, 'seniormgr' : 1})
 AddFactory("large-factory", {'shift1' : 30, 'shift2' : 30, 'shift3' : 30, 'worker' : 20, 'manager' : 20, 'seniormgr' : 5, 'exec' : 2})
+
 AddService("bank-branch", {'worker' : 8, 'seniorwrk' : 5, 'seniormgr' : 3, 'exec' : 1}, (9.0, 16.0), 20, 0.25)
 AddService("bank-central", {'worker' : 20, 'seniorwrk' : 20, 'seniormgr' : 5, 'exec' : 1}, (9.0, 16.0), 20, 0.50)
 AddService("small-service", {'parttime1' : 5, 'parttime2' : 5, 'parttime3' : 5, 'manager' : 3, 'exec' : 1}, (9.0, 21.00), 20, 0.5)
 AddService("large-service", {'parttime1' : 15, 'parttime2' : 15, 'parttime3' : 15, 'manager' : 10, 'seniormgr' : 4, 'exec' : 1}, (9.0, 21.00), 60, 1.0)
 
-# AddCompany(BusinessProfile("coffee",BusinessProfile.BusinessType.Food, (6.0, 22.0), 10), ['barrista1', 'barrista2', 'barrista3', 'barrista4', 'storemgr1', 'storemgr2'])
-# AddCompany(BusinessProfile("fastfood",BusinessProfile.BusinessType.Food, (8.0, 24.0), 30), ['parttime1', 'parttime2', 'parttime3', 'parttime4', 'manager'])
-# AddCompany(BusinessProfile("restaurant",BusinessProfile.BusinessType.Food, (12.0, 24.0), 30), ['parttime2', 'parttime3', 'parttime4', 'manager'])
-# AddCompany(BusinessProfile("school",BusinessProfile.BusinessType.School, (8.0, 14.5), 100), ['teacher', 'admin', 'principal'])
+AddFood("coffee", { 'barrista1' : 3, 'barrista2' : 3, 'barrista3' : 2, 'barrista4' : 2, 'storemgr1' : 1, 'storemgr2' : 1}, (6.0, 22.0), 10, 0.25)
+AddFood("fastfood", {'parttime1' : 5, 'parttime2' : 8, 'parttime3' : 8, 'parttime4' : 5, 'manager' : 2}, (8.0, 24.0), 30, 0.5)
+AddFood("small-restaurant", {'parttime2' : 4, 'parttime3' : 6, 'parttime4' : 4, 'manager' : 2}, (12.0, 24.0), 20, 1.5)
+AddFood("large-restaurant", {'parttime2' : 8, 'parttime3' : 12, 'parttime4' : 12, 'manager' : 3}, (12.0, 24.0), 40, 1.5)
+
+AddSchool("elem-school", { 'student' : 200, 'teacher' : 10, 'admin' : 2, 'principal' : 1})
+AddSchool("middle-school", { 'student' : 300, 'teacher' : 20, 'admin' : 4, 'principal' : 2})
+AddSchool("high-school", { 'student' : 400, 'teacher' : 30, 'admin' : 8, 'principal' : 4})
