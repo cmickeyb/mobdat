@@ -47,12 +47,41 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-def enum(*sequential, **named):
-    enums = dict(zip(sequential, range(len(sequential))), **named)
-    return type('Enum', (), enums)
-
-# -----------------------------------------------------------------
-# -----------------------------------------------------------------
 class PlaceProfile :
-    def __init__(self) :
+
+    def __init__(self, profiles) :
+        self.TargetProfiles = profiles
+
+    def AddProfile(self, *profiles) :
+        self.TargetProfiles.extend(profiles)
+    
+
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+class ResidentialProfile(PlaceProfile) :
+    
+    def __init__(self, profiles = []) :
+        PlaceProfile.__init__(self, profiles)
+
+    def GenerateResident(self, pod) :
         pass
+
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+class BusinessProfile(PlaceProfile) :
+    
+    def __init__(self, profiles = []) :
+        PlaceProfile.__init__(self, profiles)
+
+    def GenerateResident(self, pod) :
+        pass
+
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+class Place :
+
+    def __init__(self, pod, profile) :
+        self.PlaceProfile = profile
+        self.Pod = pod
+
+        self.ResidentList = []

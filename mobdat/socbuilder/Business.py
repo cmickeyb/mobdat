@@ -45,72 +45,176 @@ sys.path.append(os.path.join(os.environ.get("OPENSIM","/share/opensim"),"lib","p
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-def enum(*sequential, **named):
-    enums = dict(zip(sequential, range(len(sequential))), **named)
-    return type('Enum', (), enums)
+from mobdat.ValueTypes import MakeEnum, DaysOfTheWeek
 
-# -----------------------------------------------------------------
-# -----------------------------------------------------------------
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+BusinessType = MakeEnum('Unknown', 'Factory', 'Service', 'Civic', 'Entertainment', 'School', 'Retail', 'Food')
+
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class JobProfile :
-    def __init__(self, name, salary, flexible, workday, demand = 0) :
+
+    # -------------------------------------------------------
+    def __init__(self, name, salary, flexible, schedule, demand = 0) :
         self.ProfileName = name
         self.Salary = salary
         self.FlexibleHours = flexible
-        self.StartOfWorkDay = workday[0]
-        self.EndOfWorkDay = workday[1]
+        self.Schedule = schedule
         self.Demand = demand
 
+    # -------------------------------------------------------
     def Copy(self) :
-        hours = (self.StartOfWorkDay, self.EndOfWorkDay)
-        return JobProfile(self.ProfileName, self.Salary, self.FlexibleHours, hours, self.Demand)
+        return JobProfile(self.ProfileName, self.Salary, self.FlexibleHours, self.Schedule, self.Demand)
 
+    # -------------------------------------------------------
     def Dump(self) :
-        return self.__dict__
+        result = self.__dict__.copy()
+        result['Schedule'] = self.Schedule.Dump()
+        return result
 
-# -----------------------------------------------------------------
-# -----------------------------------------------------------------
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class ServiceProfile :
+
+    # -------------------------------------------------------
     def __init__(self, bizhours, capacity, servicetime) :
-        self.OpenTime = bizhours[0]
-        self.CloseTime = bizhours[1]
+        self.Schedule = bizhours
         self.CustomerCapacity = capacity
         self.ServiceTime = servicetime
 
+    # -------------------------------------------------------
     def Dump(self) :
-        return self.__dict__
+        result = self.__dict__.copy()
+        result['Schedule'] = self.Schedule.Dump()
+        return result
 
-# -----------------------------------------------------------------
-# -----------------------------------------------------------------
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class BusinessProfile :
-    BusinessType = enum('Unknown', 'Factory', 'Service', 'Civic', 'Entertainment', 'School', 'Retail', 'Food')
 
-    def __init__(self, bizname, biztype) :
-        self.BusinessName = bizname
+    # -------------------------------------------------------
+    def __init__(self, name, biztype) :
+        """
+        The business profile class captures the structure of a 
+        generic business pattern. The profile can be used to
+        create specific businesses that match the pattern.
+        
+        name -- name of the profile
+        biztype -- BusinessType enum
+        """
+
+        self.ProfileName = name
         self.BusinessType = biztype
 
         self.ServiceProfile = None
         self.JobList = []
 
+    # -------------------------------------------------------
+    def PeakEmployeeCount(self, day = DaysOfTheWeek.Mon) :
+        """
+        Compute the peak hourly employee count over the
+        course of a day.
+
+        day -- DaysOfTheWeek enum
+        """
+        
+        # this is the *ugliest* worst performing version of this computation
+        # i can imagine. just dont feel the need to do anything more clever
+        # right now
+        peak = 0
+        for hour in range(0, 24) :
+            count = 0
+            for jp in self.JobList :
+                count += demand if jp.Schedule.ScheduledAtTime(day, hour) else 0
+
+            peak = count if peak < count else peak
+
+        return peak
+
+
+    # -------------------------------------------------------
+    def PeakServiceCount(self, day = DaysOfTheWeek.Mon) :
+        """
+        Compute the peak number of customers expected during the
+        day. Given that the duration of visits impacts this, the
+        number is really a conservative guess.
+
+        day -- DaysOfTheWeek enum
+        """
+        
+        # this is the *ugliest* worst performing version of this computation
+        # i can imagine. just dont feel the need to do anything more clever
+        # right now
+        peak = 0
+        for hour in range(0, 24) :
+            count = self.ServiceProfile.Schedule.ScheduledAtTime(day, hour)
+            peak = count if peak < count else peak
+
+        return peak
+
+    # -------------------------------------------------------
+    def Generate(self, name, location) :
+        """
+        Create a business object from the profile and place it in the
+        specified location.
+        
+        name -- name of the business
+        location -- the pod in which the business is located
+        """
+
+        return Business(name, self, location)
+        
+        
+    # -------------------------------------------------------
     def Dump(self) :
-        result = dict()
-        result['BusinessName'] = self.BusinessName
-        result['BusinessType'] = self.BusinessType
-        result['JobList'] = []
+        result = self.__dict__.copy()
 
         if self.ServiceProfile :
             result['ServiceProfile'] = self.ServiceProfile.Dump()
-
+            
+        result['JobList'] = []
         for j in self.JobList :
             result['JobList'].append(j.Dump())
 
         return result
 
-# -----------------------------------------------------------------
-# -----------------------------------------------------------------
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+class Business :
+
+    # -------------------------------------------------------
+    def __init__(self, name, profile, location) :
+        """
+        The Business class captures data about a specific business
+        that operates in the simulation.
+
+        name -- name of the business
+        profile -- a BusinessProfile
+        location -- a Pod
+        """
+
+        self.Name = name
+        self.Profile = profile
+        self.Location = location
+        self.PeakEmployeeCount = self.Profile.PeakEmployeeCount()
+        self.PeakCustomerCount = self.Profile.PeakCustomerCount()
+
+        self.Location.AddBusiness(self, self.PeakEmployeeCount)
+
+    # -------------------------------------------------------
+    def Dump(self) :
+        result = dict()
+        result["Name"] = self.Name
+        result["Profile"] = self.Profile.ProfileName
+        result["Location"] = self.Location.LocationName
+        return result
+
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class BusinessData :
     def __init__(self) :
+        self.BusinessProfiles = []
         self.CompanyList = []
 
     def Dump(self) :
@@ -118,5 +222,9 @@ class BusinessData :
         result['CompanyList'] = []
         for c in self.CompanyList :
             result['CompanyList'].append(c.Dump())
-            
+
+        result['BusinessProfiles'] = []
+        for p in self.BusinessProfiles :
+            result['BusinessProfiles'].append(p.Dump())
+
         return result
