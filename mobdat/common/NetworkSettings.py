@@ -48,7 +48,7 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class NodeInfo :
+class IntersectionInfo :
 
     # -----------------------------------------------------------------
     def __init__(self, settings) :
@@ -57,7 +57,7 @@ class NodeInfo :
         self.Padding = settings["Padding"]
         self.ZOffset = settings["ZOffset"]
         self.Signature = settings["Signature"]
-        self.NodeTypes = settings["NodeTypes"]
+        self.IntersectionTypes = settings["IntersectionTypes"]
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -66,7 +66,7 @@ class RoadInfo :
     # -----------------------------------------------------------------
     def __init__(self, settings) :
         self.Name = settings["Name"]
-        self.EdgeTypes = settings["EdgeTypes"]
+        self.RoadTypes = settings["RoadTypes"]
         self.AssetID = settings["AssetID"]
         self.ZOffset = settings["ZOffset"]
 
@@ -86,8 +86,8 @@ class VehicleInfo :
         self.MaxSpeed = settings["MaxSpeed"]
         self.AssetID = settings["AssetID"]
         self.StartParameter = settings["StartParameter"]
-        self.SourceNodeTypes = vinfo["SourceNodeTypes"]
-        self.DestinationNodeTypes = vinfo["DestinationNodeTypes"]
+        self.SourceIntersectionTypes = vinfo["SourceIntersectionTypes"]
+        self.DestinationIntersectionTypes = vinfo["DestinationIntersectionTypes"]
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -96,11 +96,11 @@ class NetworkSettings :
     # -----------------------------------------------------------------
     def __init__(self, settings) :
         self.RoadTypes = {}
-        self.NodeTypes = {}
+        self.IntersectionTypes = {}
         self.VehicleTypes = {}
 
-        self.NodeTypeMap = {}
-        self.EdgeTypeMap = {}
+        self.IntersectionTypeMap = {}
+        self.RoadTypeMap = {}
 
         self.ProcessSettings(settings)
 
@@ -110,19 +110,19 @@ class NetworkSettings :
             rinfo = RoadInfo(rtype)
             self.RoadTypes[rinfo.Name] = rinfo
         
-            for et in rinfo.EdgeTypes :
-                if et not in self.EdgeTypeMap :
-                    self.EdgeTypeMap[et] = []
-                self.EdgeTypeMap[et].append(rinfo)
+            for et in rinfo.RoadTypes :
+                if et not in self.RoadTypeMap :
+                    self.RoadTypeMap[et] = []
+                self.RoadTypeMap[et].append(rinfo)
 
-        for ntype in settings["NodeTypes"] :
-            ninfo = NodeInfo(ntype)
-            self.NodeTypes[ninfo.Name] = ninfo
+        for ntype in settings["IntersectionTypes"] :
+            ninfo = IntersectionInfo(ntype)
+            self.IntersectionTypes[ninfo.Name] = ninfo
 
-            for nt in ninfo.NodeTypes :
-                if nt not in self.NodeTypeMap :
-                    self.NodeTypeMap[nt] = []
-                self.NodeTypeMap[nt].append(ninfo)
+            for nt in ninfo.IntersectionTypes :
+                if nt not in self.IntersectionTypeMap :
+                    self.IntersectionTypeMap[nt] = []
+                self.IntersectionTypeMap[nt].append(ninfo)
 
         for vtype in settings["VehicleTypes"] :
             vinfo = VehicleInfo(vtype)

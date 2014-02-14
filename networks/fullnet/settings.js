@@ -56,49 +56,49 @@
     [
 	{
 	    "Name" : "One Lane Road Segment",
-	    "EdgeTypes" : [ "etype1A", "etype1B", "etype1C" ],
+	    "RoadTypes" : [ "etype1A", "etype1B", "etype1C" ],
 	    "ZOffset" : 20.5,
 	    "AssetID" : "7c3df98d-4b1e-4d35-92ec-f5bbad5f4596"
 	},
 
 	{
 	    "Name" : "Two Lane Road Segment",
-	    "EdgeTypes" : [ "etype2A", "etype2B", "etype2C" ],
+	    "RoadTypes" : [ "etype2A", "etype2B", "etype2C" ],
 	    "ZOffset" : 20.5,
 	    "AssetID" : "ee4f62a8-3311-4808-86f0-b6caa4d62ecc"
 	},
 
 	{
 	    "Name" : "Road [20L]",
-	    "EdgeTypes" : [ "1way2lane" ],
+	    "RoadTypes" : [ "1way2lane" ],
 	    "ZOffset" : 20.5,
 	    "AssetID" : { "ObjectName" : "SumoAssets Edges", "ItemName" : "Road [20L]" }
 	},
 
 	{
 	    "Name" : "Parking Lot Segment",
-	    "EdgeTypes" : ["parking_entry"],
+	    "RoadTypes" : ["parking_entry"],
 	    "ZOffset" : 25.25,
 	    "AssetID" : "b2b6c88f-e044-493e-a922-7da651138aae"
 	},
 
 	{
 	    "Name" : "Marble Driveway",
-	    "EdgeTypes" : ["driveway"],
+	    "RoadTypes" : ["driveway"],
 	    "ZOffset" : 20.5,
 	    "AssetID" : "6d5ad1c2-54db-42a2-8544-b9117d3b1db5"
 	},
 
 	{
 	    "Name" : "Asphalt Driveway",
-	    "EdgeTypes" : ["parking_drive"],
+	    "RoadTypes" : ["parking_drive"],
 	    "ZOffset" : 25.25,
 	    "AssetID" : "5147e8cf-41e5-480c-b9c3-0282bdb3867c"
 	}
 
     ],
 
-    "NodeTypes" :
+    "IntersectionTypes" :
     [
 	{
 	    "Name" : "Parking Lot Intersection [* P * P]",
@@ -106,7 +106,7 @@
 	    "ZOffset" : 20.50,
 	    "Padding" : 2.5,
 	    "Signature" : ["*/*", "*/*", "*/*", "*/*"],
-            "NodeTypes" : [ "parking_drive_intersection" ]
+            "IntersectionTypes" : [ "parking_drive_intersection" ]
 	},
 
 	{
@@ -115,7 +115,7 @@
 	    "ZOffset" : 20.5,
 	    "Padding" : 5,
 	    "Signature" : ["0L/2L", "P/P", "2L/0L", "0L/0L"],
-            "NodeTypes" : [ "priority" ]
+            "IntersectionTypes" : [ "priority" ]
 	},
 
 	{
@@ -124,7 +124,7 @@
 	    "ZOffset" : 20.5,
 	    "Padding" : 5,
 	    "Signature" : ["P/P", "2L/2L", "P/P", "2L/2L"],
-            "NodeTypes" : [ "priority" ]
+            "IntersectionTypes" : [ "priority" ]
 	},
 
 	{
@@ -133,7 +133,7 @@
 	    "ZOffset" : 20.5,
 	    "Padding" : 5,
 	    "Signature" : ["2L/2L", "0L/0L", "2L/2L", "P/P"],
-            "NodeTypes" : [ "priority" ]
+            "IntersectionTypes" : [ "priority" ]
 	},
 
 	{
@@ -142,7 +142,7 @@
 	    "ZOffset" : 20.5,
 	    "Padding" : 5,
 	    "Signature" : ["1L/1L", "P/P", "1L/1L", "P/P"],
-            "NodeTypes" : [ "priority" ]
+            "IntersectionTypes" : [ "priority" ]
 	},
 
 	{
@@ -151,7 +151,7 @@
 	    "ZOffset" : 20.5,
 	    "Padding" : 5,
 	    "Signature" : ["1L/1L", "P/P", "1L/1L", "0L/0L"],
-            "NodeTypes" : [ "priority" ]
+            "IntersectionTypes" : [ "priority" ]
 	},
 
 	{
@@ -160,7 +160,7 @@
 	    "ZOffset" : 20.5,
 	    "Padding" : 5,
 	    "Signature" : ["0L/0L", "0L/2L", "1L/1L", "2L/0L"],
-            "NodeTypes" : [ "stoplight", "priority" ]
+            "IntersectionTypes" : [ "stoplight", "priority" ]
 	},
 
 	{
@@ -169,7 +169,7 @@
 	    "ZOffset" : 20.5,
 	    "Padding" : 5,
 	    "Signature" : ["0L/0L", "2L/0L", "0L/2L", "0L/0L"],
-            "NodeTypes" : [ "stoplight", "priority" ]
+            "IntersectionTypes" : [ "stoplight", "priority" ]
 	},
 
 	{
@@ -178,7 +178,7 @@
 	    "ZOffset" : 20.5,
 	    "Padding" : 5,
 	    "Signature" : ["0L/0L", "1L/1L", "0L/2L", "0L/0L"],
-            "NodeTypes" : [ "stoplight", "priority" ]
+            "IntersectionTypes" : [ "stoplight", "priority" ]
 	},
 
 	{
@@ -187,7 +187,7 @@
 	    "ZOffset" : 20.5,
 	    "Padding" : 5,
 	    "Signature" : ["0L/0L", "1L/1L", "2L/0L", "0L/0L"],
-            "NodeTypes" : [ "stoplight", "priority" ]
+            "IntersectionTypes" : [ "stoplight", "priority" ]
 	},
 
 	{
@@ -196,7 +196,7 @@
 	    "ZOffset" : 20.5,
 	    "Padding" : 5,
 	    "Signature" : ["0L/0L", "0L/2L", "1L/1L", "0L/0L"],
-            "NodeTypes" : [ "stoplight", "priority" ]
+            "IntersectionTypes" : [ "stoplight", "priority" ]
 	},
 
 	{
@@ -205,7 +205,7 @@
 	    "ZOffset" : 20.5,
 	    "Padding" : 5,
 	    "Signature" : ["0L/0L", "0L/2L", "2L/0L", "0L/0L"],
-            "NodeTypes" : [ "stoplight", "priority" ]
+            "IntersectionTypes" : [ "stoplight", "priority" ]
 	},
 
 	{
@@ -214,7 +214,7 @@
 	    "ZOffset" : 20.5,
 	    "Padding" : 7.5,
 	    "Signature" : ["2L/0L", "0L/0L", "0L/2L", "2L/2L"],
-            "NodeTypes" : [ "stoplight", "priority" ]
+            "IntersectionTypes" : [ "stoplight", "priority" ]
 	},
 
 	{
@@ -223,7 +223,7 @@
 	    "ZOffset" : 20.5,
 	    "Padding" : 7.5,
 	    "Signature" : ["2L/2L", "0L/2L", "2L/2L", "2L/0L"],
-            "NodeTypes" : [ "stoplight", "priority" ]
+            "IntersectionTypes" : [ "stoplight", "priority" ]
 	},
 
 	{
@@ -232,7 +232,7 @@
 	    "ZOffset" : 20.5,
 	    "Padding" : 7.5,
 	    "Signature" : ["0L/0L", "0L/0L", "1L/1L", "2L/2L"],
-            "NodeTypes" : [ "stoplight", "priority" ]
+            "IntersectionTypes" : [ "stoplight", "priority" ]
 	},
 
 	{
@@ -241,7 +241,7 @@
 	    "ZOffset" : 20.5,
 	    "Padding" : 7.5,
 	    "Signature" : ["0L/0L", "0L/0L", "2L/2L", "1L/1L"],
-            "NodeTypes" : [ "stoplight", "priority" ]
+            "IntersectionTypes" : [ "stoplight", "priority" ]
 	},
 
 	{
@@ -250,7 +250,7 @@
 	    "ZOffset" : 20.5,
 	    "Padding" : 7.5,
 	    "Signature" : ["0L/0L", "1L/1L", "1L/1L", "1L/1L"],
-            "NodeTypes" : [ "stoplight", "priority" ]
+            "IntersectionTypes" : [ "stoplight", "priority" ]
 	},
 
 	{
@@ -259,7 +259,7 @@
 	    "ZOffset" : 20.5,
 	    "Padding" : 7.5,
 	    "Signature" : ["0L/0L", "2L/2L", "1L/1L", "2L/2L"],
-            "NodeTypes" : [ "stoplight", "priority" ]
+            "IntersectionTypes" : [ "stoplight", "priority" ]
 	},
 
 	{
@@ -268,7 +268,7 @@
 	    "ZOffset" : 20.5,
 	    "Padding" : 7.5,
 	    "Signature" : ["0L/0L", "2L/2L", "2L/2L", "2L/2L"],
-            "NodeTypes" : [ "stoplight", "priority" ]
+            "IntersectionTypes" : [ "stoplight", "priority" ]
 	},
 
 	{
@@ -277,7 +277,7 @@
 	    "ZOffset" : 20.5,
 	    "Padding" : 7.5,
 	    "Signature" : ["1L/1L", "2L/2L", "1L/1L", "2L/2L"],
-            "NodeTypes" : [ "stoplight", "priority" ]
+            "IntersectionTypes" : [ "stoplight", "priority" ]
 	},
 
 	{
@@ -286,7 +286,7 @@
 	    "ZOffset" : 20.5,
 	    "Padding" : 7.5,
 	    "Signature" : ["1L/1L", "2L/2L", "2L/2L", "2L/2L"],
-            "NodeTypes" : [ "stoplight", "priority" ]
+            "IntersectionTypes" : [ "stoplight", "priority" ]
 	},
 
 	{
@@ -295,7 +295,7 @@
 	    "ZOffset" : 20.5,
 	    "Padding" : 7.5,
 	    "Signature" : ["2L/2L", "2L/2L", "2L/2L", "2L/2L"],
-            "NodeTypes" : [ "stoplight", "priority" ]
+            "IntersectionTypes" : [ "stoplight", "priority" ]
 	},
 
 	{
@@ -304,7 +304,7 @@
 	    "ZOffset" : 20.5,
 	    "Padding" : 7.5,
 	    "Signature" : ["1L/1L", "1L/1L", "1L/1L", "1L/1L"],
-            "NodeTypes" : [ "stoplight", "priority" ]
+            "IntersectionTypes" : [ "stoplight", "priority" ]
 	},
 	    
 	{
@@ -313,7 +313,7 @@
 	    "ZOffset" : 20.5,
 	    "Padding" : 7.5,
 	    "Signature" : ["1L/1L", "0L/0L", "1L/1L", "2L/2L"],
-            "NodeTypes" : [ "stoplight", "priority" ]
+            "IntersectionTypes" : [ "stoplight", "priority" ]
 	},
 	
 	{
@@ -322,7 +322,7 @@
 	    "ZOffset" : 20.5,
 	    "Padding" : 7.5,
 	    "Signature" : ["1L/1L", "1L/1L", "1L/1L", "2L/2L"],
-            "NodeTypes" : [ "stoplight", "priority" ]
+            "IntersectionTypes" : [ "stoplight", "priority" ]
 	},
 
 	{
@@ -331,7 +331,7 @@
 	    "ZOffset" : 20.5,
 	    "Padding" : 7.5,
 	    "Signature" : ["0L/0L", "0L/0L", "1L/1L", "1L/1L"],
-            "NodeTypes" : [ "stoplight", "priority" ]
+            "IntersectionTypes" : [ "stoplight", "priority" ]
 	},
 
 	{
@@ -340,7 +340,7 @@
 	    "ZOffset" : 20.5,
 	    "Padding" : 7.5,
 	    "Signature" : ["0L/0L", "0L/0L", "2L/2L", "2L/2L"],
-            "NodeTypes" : [ "stoplight", "priority" ]
+            "IntersectionTypes" : [ "stoplight", "priority" ]
 	},
 
 	{
@@ -349,7 +349,7 @@
 	    "ZOffset" : 25.0,
 	    "Padding" : 0,
 	    "Signature" : ["0L/0L", "0L/0L", "D/D", "0L/0L"],
-            "NodeTypes" : [ "residence" ]
+            "IntersectionTypes" : [ "residence" ]
 	},
 
 	{
@@ -358,8 +358,8 @@
 	    "ZOffset" : 25.4,
 	    "Padding" : 0,
 	    "Signature" : ["0L/0L", "0L/0L", "D/D", "0L/0L"],
-            "NodeTypes" : [ ],
-            "xNodeTypes" : [ "residence" ]
+            "IntersectionTypes" : [ ],
+            "xIntersectionTypes" : [ "residence" ]
 	},
 
         {
@@ -368,7 +368,7 @@
             "ZOffset" : 26.0,
             "Padding" : 0,
             "Signature" : ["D/D", "0L/0L", "0L/0L", "0L/0L"],
-            "NodeTypes" : ["business"]
+            "IntersectionTypes" : ["business"]
         },
 
 	{
@@ -377,7 +377,7 @@
 	    "ZOffset" : 20.5,
 	    "Padding" : 2.5,
 	    "Signature" : ["1L/1L", "D/D", "1L/1L", "D/D"],
-            "NodeTypes" : [ "driveway" ]
+            "IntersectionTypes" : [ "driveway" ]
 	},
 
 	{
@@ -386,7 +386,7 @@
 	    "ZOffset" : 20.5,
 	    "Padding" : 2.5,
 	    "Signature" : ["1L/1L", "0L/0L", "1L/1L", "D/D"],
-            "NodeTypes" : [ "driveway" ]
+            "IntersectionTypes" : [ "driveway" ]
 	},
 
 	{
@@ -395,7 +395,7 @@
 	    "ZOffset" : 20.5,
 	    "Padding" : 2.5,
 	    "Signature" : ["1L/1L", "0L/0L", "1L/1L", "0L/0L"],
-            "NodeTypes" : [ "driveway" ]
+            "IntersectionTypes" : [ "driveway" ]
 	},
 
 	{
@@ -404,7 +404,7 @@
 	    "ZOffset" : 20.5,
 	    "Padding" : 2.5,
 	    "Signature" : ["1L/1L", "0L/0L", "0L/0L", "1L/1L"],
-            "NodeTypes" : [ "driveway" ]
+            "IntersectionTypes" : [ "driveway" ]
 	},
 
 	{
@@ -413,7 +413,7 @@
 	    "ZOffset" : 20.5,
 	    "Padding" : 2.5,
 	    "Signature" : ["1L/1L", "1L/1L", "0L", "1L/1L"],
-            "NodeTypes" : [ "driveway" ]
+            "IntersectionTypes" : [ "driveway" ]
 	},
 
 	{
@@ -422,7 +422,7 @@
 	    "ZOffset" : 20.5,
 	    "Padding" : 5,
 	    "Signature" : ["2L/2L", "D/D", "2L/2L", "D/D"],
-            "NodeTypes" : [ "driveway" ]
+            "IntersectionTypes" : [ "driveway" ]
 	}
     ],
 
@@ -432,8 +432,8 @@
             "Name" : "Police Car",
             "Description" : "A blue car",
             "Rate" : 15,
-	    "SourceNodeTypes" : [],
-	    "DestinationNodeTypes" : [],
+	    "SourceIntersectionTypes" : [],
+	    "DestinationIntersectionTypes" : [],
 	    "Acceleration" : 0.3,
 	    "Deceleration" : 0.3,
 	    "Sigma" : 0.5,
@@ -448,8 +448,8 @@
             "Name" : "Trolly",
             "Description" : "A blue car",
             "Rate" : 15,
-	    "SourceNodeTypes" : [],
-	    "DestinationNodeTypes" : [],
+	    "SourceIntersectionTypes" : [],
+	    "DestinationIntersectionTypes" : [],
 	    "Acceleration" : 0.3,
 	    "Deceleration" : 0.3,
 	    "Sigma" : 0.5,
@@ -464,8 +464,8 @@
             "Name" : "Train",
             "Description" : "A one car train",
             "Rate" : 0,
-	    "SourceNodeTypes" : ["station"],
-	    "DestinationNodeTypes" : ["station"],
+	    "SourceIntersectionTypes" : ["station"],
+	    "DestinationIntersectionTypes" : ["station"],
 	    "Acceleration" : 0.1,
 	    "Deceleration" : 0.1,
 	    "Sigma" : 0.1,
@@ -480,8 +480,8 @@
             "Name" : "BlueCar",
             "Description" : "A blue car",
             "Rate" : 15,
-	    "SourceNodeTypes" : ["residence", "business"],
-	    "DestinationNodeTypes" : ["residence", "business"],
+	    "SourceIntersectionTypes" : ["residence", "business"],
+	    "DestinationIntersectionTypes" : ["residence", "business"],
 	    "Acceleration" : 0.3,
 	    "Deceleration" : 0.3,
 	    "Sigma" : 0.5,
@@ -496,8 +496,8 @@
             "Name" : "OrangeCar",
             "Description" : "An orange car",
             "Rate" : 15,
-	    "SourceNodeTypes" : ["residence", "business"],
-	    "DestinationNodeTypes" : ["residence", "business"],
+	    "SourceIntersectionTypes" : ["residence", "business"],
+	    "DestinationIntersectionTypes" : ["residence", "business"],
 	    "Acceleration" : 0.8,
 	    "Deceleration" : 0.8,
 	    "Sigma" : 0.5,
@@ -512,8 +512,8 @@
             "Name" : "PurpleCar",
             "Description" : "A purple car",
             "Rate" : 15,
-	    "SourceNodeTypes" : ["residence", "business"],
-	    "DestinationNodeTypes" : ["residence", "business"],
+	    "SourceIntersectionTypes" : ["residence", "business"],
+	    "DestinationIntersectionTypes" : ["residence", "business"],
 	    "Acceleration" : 0.2,
 	    "Deceleration" : 0.2,
 	    "Sigma" : 0.5,
@@ -528,8 +528,8 @@
             "Name" : "RedCar",
             "Description" : "A red car",
             "Rate" : 15,
-	    "SourceNodeTypes" : ["residence", "business"],
-	    "DestinationNodeTypes" : ["residence", "business"],
+	    "SourceIntersectionTypes" : ["residence", "business"],
+	    "DestinationIntersectionTypes" : ["residence", "business"],
 	    "Acceleration" : 0.4,
 	    "Deceleration" : 0.4,
 	    "Sigma" : 0.5,
@@ -544,8 +544,8 @@
             "Name" : "Van",
             "Description" : "A green van",
             "Rate" : 5,
-	    "SourceNodeTypes" : ["residence", "business"],
-	    "DestinationNodeTypes" : ["residence", "business"],
+	    "SourceIntersectionTypes" : ["residence", "business"],
+	    "DestinationIntersectionTypes" : ["residence", "business"],
 	    "Acceleration" : 0.2,
 	    "Deceleration" : 0.2,
 	    "Sigma" : 0.5,
