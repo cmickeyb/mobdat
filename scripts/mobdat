@@ -45,7 +45,7 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
 import time, json, argparse
-from mobdat import *
+from mobdat.simulator import Controller
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------

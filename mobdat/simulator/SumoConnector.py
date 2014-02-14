@@ -51,7 +51,7 @@ from sumolib import checkBinary
 import traci
 import traci.constants as tc
 import BaseConnector, EventRouter, EventHandler, EventTypes
-import ValueTypes
+from mobdat.common import ValueTypes
 
 import math
 

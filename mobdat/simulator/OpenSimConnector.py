@@ -49,7 +49,8 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "
 
 import uuid
 import OpenSimRemoteControl
-import BaseConnector, EventHandler, EventTypes, ValueTypes
+import BaseConnector, EventHandler, EventTypes
+from mobdat.common import ValueTypes
 
 from collections import deque
 import Queue, threading, time, platform
