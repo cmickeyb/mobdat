@@ -37,4 +37,4 @@ This package defines modules for the mobdat simulation environment
 
 """
 
-__all__ = ['NetworkInfo', 'NetworkSettings']
+__all__ = ['NetworkInfo', 'NetworkSettings', 'ValueTypes']
