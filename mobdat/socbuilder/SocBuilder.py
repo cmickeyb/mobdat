@@ -44,7 +44,7 @@ sys.path.append(os.path.join(os.environ.get("OPENSIM","/share/opensim"),"lib","p
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
-from mobdat.ValueTypes import DaysOfTheWeek
+from mobdat.common.ValueTypes import DaysOfTheWeek
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------

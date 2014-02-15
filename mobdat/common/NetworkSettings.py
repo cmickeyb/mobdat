@@ -86,8 +86,8 @@ class VehicleInfo :
         self.MaxSpeed = settings["MaxSpeed"]
         self.AssetID = settings["AssetID"]
         self.StartParameter = settings["StartParameter"]
-        self.SourceIntersectionTypes = vinfo["SourceIntersectionTypes"]
-        self.DestinationIntersectionTypes = vinfo["DestinationIntersectionTypes"]
+        self.SourceIntersectionTypes = settings["SourceIntersectionTypes"]
+        self.DestinationIntersectionTypes = settings["DestinationIntersectionTypes"]
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

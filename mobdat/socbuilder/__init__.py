@@ -38,4 +38,4 @@ mobdat simulator. The modules in this package generate profiles
 for people and places.
 """
 
-__all__ = ['SocBuilder', 'Business', 'Person', 'Place']
+__all__ = ['SocBuilder', 'Business', 'Person', 'Location']
