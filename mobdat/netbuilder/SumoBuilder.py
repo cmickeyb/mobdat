@@ -46,8 +46,9 @@ sys.path.append(os.path.join(os.environ.get("OPENSIM","/share/opensim"),"lib","p
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
-import uuid, string
-import OpenSimRemoteControl
+import string
+
+from mobdat.common import Decoration
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -86,8 +87,8 @@ class SumoBuilder :
         with open(fname, 'w') as fp :
             fp.write("<edges>\n")
 
-            for e in self.Network.gEdges :
-                edge = self.Network.gEdges[e]
+            for e in self.Network.Edges :
+                edge = self.Network.Edges[e]
                 sn = edge.StartNode.Name
                 en = edge.EndNode.Name
                 etype = edge.EdgeType.Name
@@ -103,10 +104,10 @@ class SumoBuilder :
         with open(fname, 'w') as fp :
             fp.write("<nodes>\n")
 
-            for n in self.Network.gNodes :
-                node = self.Network.gNodes[n]
-                ntype = node.NodeType.NType
-                fp.write("  <node id=\"%s\" x=\"%d\" y=\"%d\" z=\"0\"  type=\"%s\" />\n" % (n, self.Scale(node.X), self.Scale(node.Y), ntype))
+            for n in self.Network.Nodes :
+                node = self.Network.Nodes[n]
+                itype = node.NodeType.IntersectionType
+                fp.write("  <node id=\"%s\" x=\"%d\" y=\"%d\" z=\"0\"  type=\"%s\" />\n" % (n, self.Scale(node.X), self.Scale(node.Y), itype))
 
             fp.write("</nodes>\n")
 
@@ -118,8 +119,8 @@ class SumoBuilder :
         with open(fname, 'w') as fp :
             fp.write("<connections>\n")
             
-            for n in self.Network.gNodes :
-                node = self.Network.gNodes[n]
+            for n in self.Network.Nodes :
+                node = self.Network.Nodes[n]
                 if not node.Signature() == ['2L/2L', '2L/2L', '2L/2L', '2L/2L' ] :
                     continue
 
@@ -144,10 +145,11 @@ class SumoBuilder :
         with open(fname, 'w') as fp :
             fp.write("<types>\n")
 
-            for et in self.Network.gEdgeTypes :
-                etype = self.Network.gEdgeTypes[et]
-                fp.write("  <type id=\"%s\" priority=\"%d\" numLanes=\"%d\" speed=\"%f\" width=\"%f\" />\n" %
-                         (et, etype.Priority, etype.Lanes, self.Scale(etype.Speed), self.Scale(etype.Width)))
+            for collection in self.Network.Collections.itervalues() :
+                if Decoration.EdgeTypeDecoration.DecorationName in collection.Decorations :
+                    etype = collection.EdgeType
+                    fp.write("  <type id=\"%s\" priority=\"%d\" numLanes=\"%d\" speed=\"%f\" width=\"%f\" />\n" %
+                             (etype.Name, etype.Priority, etype.Lanes, self.Scale(etype.Speed), self.Scale(etype.Width)))
 
             fp.write("</types>\n")
 
@@ -167,9 +169,9 @@ class SumoBuilder :
 
             fp.write("\n")
 
-            for n in self.Network.gNodes :
+            for n in self.Network.Nodes :
                 if string.find(n,self.InjectPrefix) == 0 :
-                    node = self.Network.gNodes[n]
+                    node = self.Network.Nodes[n]
                     for edge in node.OEdges :
                         for redge in edge.EndNode.OEdges :
                             if redge.EndNode == node :

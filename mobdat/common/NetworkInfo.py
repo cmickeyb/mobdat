@@ -29,7 +29,7 @@ LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
 
-@file    NetBuilder.py
+@file    NetworkInfo.py
 @author  Mic Bowman
 @date    2013-12-03
 
@@ -38,36 +38,17 @@ network such as building a grid of roads.
 
 """
 
-import os, sys, warnings, copy
+import os, sys
 
 # we need to import python modules from the $SUMO_HOME/tools directory
 sys.path.append(os.path.join(os.environ.get("OPENSIM","/share/opensim"),"lib","python"))
+sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
-import uuid
+from mobdat.common.Decoration import Decoration
+import uuid, re
 import json
-
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class Decoration :
-    DecorationName = 'Decoration'
-
-    # -----------------------------------------------------------------
-    @staticmethod
-    def Load(graph, info) :
-        return(Decoration())
-
-    # -----------------------------------------------------------------
-    def __init__(self) : 
-        pass
-        
-    # -----------------------------------------------------------------
-    def Dump(self) : 
-        result = dict()
-        result['__TYPE__'] = self.DecorationName
-
-        return result
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -330,13 +311,15 @@ class Network :
 
     # -----------------------------------------------------------------
     def DropNode(self, node) :
-        for collection in node.Collections.itervalues() :
+        # need to use values because dropping the member in the collection
+        # will change the list of connections here
+        for collection in node.Collections.values() :
             collection.DropMember(node)
 
-        for edge in node.InputEdges.itervalues() :
+        for edge in node.InputEdges :
             self.DropEdge(edge)
 
-        for edge in node.OutputEdges.itervalues() :
+        for edge in node.OutputEdges :
             self.DropEdge(edge)
 
         del self.Nodes[node.Name]
@@ -344,7 +327,7 @@ class Network :
     # -----------------------------------------------------------------
     def DropNodeByName(self, name) :
         if name not in self.Nodes :
-            print 'unable to drop unknown node %s' % (name)
+            # print 'unable to drop unknown node %s' % (name)
             return False
 
         self.DropNode(self.Nodes[name])
@@ -352,10 +335,9 @@ class Network :
 
     # -----------------------------------------------------------------
     def DropNodeByPattern(self, pattern) :
-        names = self.Nodes.iterkeys()
-        for name in names :
+        for name, node in self.Nodes.items() :
             if re.match(pattern, name) :
-                self.DropNodeByName(name)
+                self.DropNode(node)
 
         return True
 
@@ -383,7 +365,9 @@ class Network :
 
     # -----------------------------------------------------------------
     def DropEdge(self, edge) :
-        for collection in edge.Collections.itervalues() :
+        # need to use values because dropping the member in the collection
+        # will change the list of connections here
+        for collection in edge.Collections.values() :
             collection.DropMember(edge)
 
         edge.StartNode.OutputEdges.remove(edge)
@@ -401,10 +385,11 @@ class Network :
 
     # -----------------------------------------------------------------
     def DropEdgeByPattern(self, pattern) :
-        names = self.Edges.iterkeys()
-        for name in names :
+        # need to use items because dropping the member in the collection
+        # will change the list of connections here
+        for name, edge in self.Edges.items() :
             if re.match(pattern, name) :
-                self.DropEdgeByName(name)
+                self.DropEdge(edge)
         
         return True
 

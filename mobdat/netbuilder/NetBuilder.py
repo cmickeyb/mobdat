@@ -45,7 +45,7 @@ sys.path.append(os.path.join(os.environ.get("OPENSIM","/share/opensim"),"lib","p
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
-import mobdat.common
+from mobdat.common import NetworkInfo, Decoration
 import re
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -62,31 +62,6 @@ class ResidentialGenerator :
         self.DrivewayBuffer = bspace
         self.Spacing = spacing
         self.BothSides = both
-
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class NodeTypeDecoration(NetworkInfo.Decoration) :
-    DecorationName = 'NodeType'
-
-    # -----------------------------------------------------------------
-    @staticmethod
-    def Load(graph, info) :
-        return NodeTypeDecoration(info['Name'], info['IntersectionType'], info['Render'])
-
-    # -----------------------------------------------------------------
-    def __init__(self, name, itype = 'priority', render = True) :
-        NetworkInfo.Decoration.__init__(self)
-
-        self.Name = name
-        self.IntersectionType = itype
-        self.Render = render
-
-    # -----------------------------------------------------------------
-    def Dump(self) :
-        result = NetworkInfo.Decoration.Dump(self)
-        result['Name'] = self.Name
-        result['IntersectionType'] = self.IntersectionType
-        result['Render'] = self.Render
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -179,53 +154,6 @@ class Node(NetworkInfo.Node) :
 
         return signature
 
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class EdgeTypeDecoration(NetworkInfo.Decoration) :
-    DecorationName = 'EdgeType'
-
-    # -----------------------------------------------------------------
-    @staticmethod
-    def Load(graph, info) :
-        etype = EdgeTypeDecoration(info['Name'])
-
-        self.Lanes = info['Lanes']
-        self.Priority = info['Priority']
-        self.Speed = info['Speed']
-        self.Width = info['Width']
-        self.Signature = info['Signature']
-        self.Render = info['Render']
-        self.Center = info['Center']
-
-        return etype
-
-    # -----------------------------------------------------------------
-    def __init__(self, name, lanes = 1, pri = 70, speed = 2.0, wid = 2.5, sig = '1L', render = True, center = False) :
-        NetworkInfo.Decoration.__init__(self)
-        self.Name = name
-        self.Lanes = lanes
-        self.Priority = pri
-        self.Speed = speed
-        self.Width = wid
-        self.Signature = sig
-        self.Render = render
-        self.Center = center
-
-
-    # -----------------------------------------------------------------
-    def Dump(self) :
-        result = NetworkInfo.Decoration.Dump(self)
-        
-        result['Name'] = self.Name
-        result['Lanes'] = self.Lanes
-        result['Priority'] = self.Priority
-        result['Speed'] = self.Speed
-        result['Width'] = self.Width
-        result['Signature'] = self.Signature
-        result['Render'] = self.Render
-        result['Center'] = self.Center
-
-        return result
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -233,7 +161,7 @@ class Edge(NetworkInfo.Edge) :
     
     # -----------------------------------------------------------------
     def __init__(self, snode, enode, etype) :
-        NetworkInfo.Edge.__init__(snode, enode)
+        NetworkInfo.Edge.__init__(self, snode, enode)
         etype.AddMember(self)
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -244,13 +172,14 @@ class Network(NetworkInfo.Network) :
     def __init__(self) :
         NetworkInfo.Network.__init__(self)
 
-        self.AddDecorationHandler(NodeTypeDecoration)
-        self.AddDecorationHandler(EdgeTypeDecoration)
+        self.AddDecorationHandler(Decoration.NodeTypeDecoration)
+        self.AddDecorationHandler(Decoration.EdgeTypeDecoration)
+        self.AddDecorationHandler(Decoration.EndPointDecoration)
 
     # -----------------------------------------------------------------
     def AddEdgeType(self, name, lanes = 1, pri = 70, speed = 2.0, wid = 2.5, sig = '1L', render = True, center = False) :
         etype = NetworkInfo.Collection(name = name)
-        etype.AddDecoration(EdgeTypeDecoration(name, lanes, pri, speed, wid, sig, render, center))
+        etype.AddDecoration(Decoration.EdgeTypeDecoration(name, lanes, pri, speed, wid, sig, render, center))
 
         self.AddCollection(etype)
         return etype
@@ -258,7 +187,7 @@ class Network(NetworkInfo.Network) :
     # -----------------------------------------------------------------
     def AddNodeType(self, name, itype = 'priority', render = True) :
         ntype = NetworkInfo.Collection(name = name)
-        ntype.AddDecoration(NodeTypeDecoration(name, itype, render))
+        ntype.AddDecoration(Decoration.NodeTypeDecoration(name, itype, render))
 
         self.AddCollection(ntype)
         return ntype
@@ -308,14 +237,14 @@ class Network(NetworkInfo.Network) :
         nnode = self.AddNode(curx, cury, ntype, prefix)
 
         if edge1 :
-            etype1 = edge1.FindDecorationProvider(EdgeTypeDecoration.DecorationName)
-            self.DropEdgeByName(edge1.Name)
+            etype1 = edge1.FindDecorationProvider(Decoration.EdgeTypeDecoration.DecorationName)
+            self.DropEdge(edge1)
             self.AddEdge(node1,nnode,etype1)
             self.AddEdge(nnode,node2,etype1)
 
         if edge2 :
-            etype2 = edge1.FindDecorationProvider(EdgeTypeDecoration.DecorationName)
-            self.DropEdgeByName(edge2.Name)
+            etype2 = edge2.FindDecorationProvider(Decoration.EdgeTypeDecoration.DecorationName)
+            self.DropEdge(edge2)
             self.AddEdge(node2,nnode,etype2)
             self.AddEdge(nnode,node1,etype2)
 
@@ -327,7 +256,7 @@ class Network(NetworkInfo.Network) :
             if re.match(pattern, name) :
                 # the node type is actually a decorated collection, need to remove it
                 # from the current type collection before adding it to the new one
-                curtype = node.FindDecorationProvider(NodeTypeDecoration.DecorationName)
+                curtype = node.FindDecorationProvider(Decoration.NodeTypeDecoration.DecorationName)
                 if curtype : curtype.DropMember(node)
                 
                 # and add it to the new collection
@@ -341,7 +270,7 @@ class Network(NetworkInfo.Network) :
             if re.match(pattern, name) :
                 # the edge type is actually a decorated collection, need to remove it
                 # from the current type collection before adding it to the new one
-                curtype = edge.FindDecorationProvider(EdgeTypeDecoration.DecorationName)
+                curtype = edge.FindDecorationProvider(Decoration.EdgeTypeDecoration.DecorationName)
                 if curtype : curtype.DropMember(edge)
                 
                 # and add it to the new collection
@@ -406,12 +335,12 @@ class Network(NetworkInfo.Network) :
             node = self.AddNode(node1.X, cury, rgen.IntersectionType, prefix)
             self.ConnectNodes(node,lastnode,rgen.EdgeType)
             
-            enode = self.AddNode(node1.X + rgen.DrivewayLength, cury, rgen.ResidentialType, self.InjectPrefix + prefix)
+            enode = self.AddNode(node1.X + rgen.DrivewayLength, cury, rgen.ResidentialType, prefix)
             self.ConnectNodes(node,enode,rgen.DrivewayType)
             resnodes.append(enode)
 
             if rgen.BothSides :
-                wnode = self.AddNode(node1.X - rgen.DrivewayLength, cury, rgen.ResidentialType, self.InjectPrefix + prefix)
+                wnode = self.AddNode(node1.X - rgen.DrivewayLength, cury, rgen.ResidentialType, prefix)
                 self.ConnectNodes(node,wnode,rgen.DrivewayType)
                 resnodes.append(wnode)
 
@@ -431,12 +360,12 @@ class Network(NetworkInfo.Network) :
             node = self.AddNode(curx, node1.Y, rgen.IntersectionType, prefix)
             self.ConnectNodes(node,lastnode,rgen.EdgeType)
 
-            nnode = self.AddNode(curx, node1.Y + rgen.DrivewayLength, rgen.ResidentialType, self.InjectPrefix + prefix)
+            nnode = self.AddNode(curx, node1.Y + rgen.DrivewayLength, rgen.ResidentialType, prefix)
             self.ConnectNodes(node,nnode,rgen.DrivewayType)
             resnodes.append(nnode)
 
             if rgen.BothSides :
-                snode = self.AddNode(curx, node1.Y - rgen.DrivewayLength, rgen.ResidentialType, self.InjectPrefix + prefix)
+                snode = self.AddNode(curx, node1.Y - rgen.DrivewayLength, rgen.ResidentialType, prefix)
                 self.ConnectNodes(node,snode,rgen.DrivewayType)
                 resnodes.append(snode)
 
