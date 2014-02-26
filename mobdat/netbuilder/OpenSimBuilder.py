@@ -203,8 +203,8 @@ class OpenSimBuilder :
                 if abs(p1x - p2x) > 0.1 or abs(p1y - p2y) > 0.1 :
                     result = self.OpenSimConnector.CreateObject(asset, pos=[p1x, p1y, zoff], name=e, parm=startparms)
 
-            self.EdgeMap[edge.Name] = True
-            self.EdgeMap[edge.ReverseName()] = True
+            self.EdgeMap[edge.GenEdgeName(edge.StartNode, edge.EndNode)] = True
+            self.EdgeMap[edge.GenEdgeName(edge.EndNode, edge.StartNode)] = True
     
     # -----------------------------------------------------------------
     def CreateNodes(self) :
