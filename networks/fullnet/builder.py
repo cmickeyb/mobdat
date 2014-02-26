@@ -40,7 +40,9 @@ mobdat.
 """
 
 import os, sys
+
 from mobdat.netbuilder import *
+from mobdat.common import NetworkInfo, Decoration
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
@@ -59,14 +61,22 @@ def ConvertEdgeCoordinate(prefix, p1, p2) :
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
 PodIdentifier = {}
-def TagPod(prefix, nlist) :
+def TagPod(ng, prefix, nlist) :
     global PodIdentifier
     if prefix not in PodIdentifier :
         PodIdentifier[prefix] = 0
     PodIdentifier[prefix] += 1
 
+    podname = prefix + str(PodIdentifier[prefix])
+    pod = NetworkInfo.Collection(name = podname)
+
     for n in nlist :
-        n.Tags.append(prefix + str(PodIdentifier[prefix]))
+        pod.AddMember(n)
+
+        ep = Decoration.EndPointDecoration.GenFromNode(n)
+        n.AddDecoration(ep)
+
+    ng.AddCollection(pod)
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
@@ -168,22 +178,22 @@ def BuildNetwork(ng) :
     ng.AddNode(0, 300, sntype, 'main')  # north end of the plaza
 
     # And connect them to the east and west main grids
-    ng.ConnectNodes(ng.gNodes['main100W300N'],ng.gNodes['main0E300N'],e2A)
-    ng.ConnectNodes(ng.gNodes['main100E300N'],ng.gNodes['main0E300N'],e2A)
-    ng.ConnectNodes(ng.gNodes['main100W300S'],ng.gNodes['main0E300S'],e2A)
-    ng.ConnectNodes(ng.gNodes['main100E300S'],ng.gNodes['main0E300S'],e2A)
+    ng.ConnectNodes(ng.Nodes['main100W300N'],ng.Nodes['main0E300N'],e2A)
+    ng.ConnectNodes(ng.Nodes['main100E300N'],ng.Nodes['main0E300N'],e2A)
+    ng.ConnectNodes(ng.Nodes['main100W300S'],ng.Nodes['main0E300S'],e2A)
+    ng.ConnectNodes(ng.Nodes['main100E300S'],ng.Nodes['main0E300S'],e2A)
 
     # Connect the plaza nodes to the north & south ends
-    ng.ConnectNodes(ng.gNodes['plaza0E250S'],ng.gNodes['main0E300S'],e2A)
-    ng.ConnectNodes(ng.gNodes['plaza0E250N'],ng.gNodes['main0E300N'],e2A)
+    ng.ConnectNodes(ng.Nodes['plaza0E250S'],ng.Nodes['main0E300S'],e2A)
+    ng.ConnectNodes(ng.Nodes['plaza0E250N'],ng.Nodes['main0E300N'],e2A)
 
     # Connect the plaza nodes to the east and west roads
-    ng.ConnectNodes(ng.gNodes['main100W100N'],ng.gNodes['plaza50W100N'],e2A)
-    ng.ConnectNodes(ng.gNodes['main100W100S'],ng.gNodes['plaza50W100S'],e2A)
-    ng.ConnectNodes(ng.gNodes['main100E100N'],ng.gNodes['plaza50E100N'],e2A)
-    ng.ConnectNodes(ng.gNodes['main100E100S'],ng.gNodes['plaza50E100S'],e2A)
-    ng.ConnectNodes(ng.gNodes['main100W0N'],ng.gNodes['plaza50W0N'],e2A)
-    ng.ConnectNodes(ng.gNodes['main100E0N'],ng.gNodes['plaza50E0N'],e2A)
+    ng.ConnectNodes(ng.Nodes['main100W100N'],ng.Nodes['plaza50W100N'],e2A)
+    ng.ConnectNodes(ng.Nodes['main100W100S'],ng.Nodes['plaza50W100S'],e2A)
+    ng.ConnectNodes(ng.Nodes['main100E100N'],ng.Nodes['plaza50E100N'],e2A)
+    ng.ConnectNodes(ng.Nodes['main100E100S'],ng.Nodes['plaza50E100S'],e2A)
+    ng.ConnectNodes(ng.Nodes['main100W0N'],ng.Nodes['plaza50W0N'],e2A)
+    ng.ConnectNodes(ng.Nodes['main100E0N'],ng.Nodes['plaza50E0N'],e2A)
 
     # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     # BUILD THE RESIDENTIAL NEIGHBORHOODS
@@ -194,23 +204,23 @@ def BuildNetwork(ng) :
 
     for ew in [-400, -300, 300, 400] :
         for nw in range (-200, 200, 100) :
-            node1 = ng.gNodes[ConvertNodeCoordinate('main', (ew, nw))]
-            node2 = ng.gNodes[ConvertNodeCoordinate('main', (ew, nw + 100))]
-            TagPod('respod', ng.GenerateResidential(node1, node2, rgenv))
+            node1 = ng.Nodes[ConvertNodeCoordinate('main', (ew, nw))]
+            node2 = ng.Nodes[ConvertNodeCoordinate('main', (ew, nw + 100))]
+            TagPod(ng, 'respod', ng.GenerateResidential(node1, node2, rgenv))
 
     for nw in [-400, 400] :
         for ew in [-300, -200, 100, 200] :
-            node1 = ng.gNodes[ConvertNodeCoordinate('main', (ew, nw))]
-            node2 = ng.gNodes[ConvertNodeCoordinate('main', (ew + 100, nw))]
-            TagPod('respod', ng.GenerateResidential(node1, node2, rgenv))
+            node1 = ng.Nodes[ConvertNodeCoordinate('main', (ew, nw))]
+            node2 = ng.Nodes[ConvertNodeCoordinate('main', (ew + 100, nw))]
+            TagPod(ng, 'respod', ng.GenerateResidential(node1, node2, rgenv))
 
     rgenv.BothSides = False
-    TagPod('respod', ng.GenerateResidential(ng.gNodes['main300W200N'],ng.gNodes['main400W200N'], rgenv))
-    TagPod('respod', ng.GenerateResidential(ng.gNodes['main300E200N'],ng.gNodes['main400E200N'], rgenv))
+    TagPod(ng, 'respod', ng.GenerateResidential(ng.Nodes['main300W200N'],ng.Nodes['main400W200N'], rgenv))
+    TagPod(ng, 'respod', ng.GenerateResidential(ng.Nodes['main300E200N'],ng.Nodes['main400E200N'], rgenv))
 
     rgenv.DrivewayLength = - rgenv.DrivewayLength
-    TagPod('respod', ng.GenerateResidential(ng.gNodes['main400W200S'],ng.gNodes['main300W200S'], rgenv))
-    TagPod('respod', ng.GenerateResidential(ng.gNodes['main400E200S'],ng.gNodes['main300E200S'], rgenv))
+    TagPod(ng, 'respod', ng.GenerateResidential(ng.Nodes['main400W200S'],ng.Nodes['main300W200S'], rgenv))
+    TagPod(ng, 'respod', ng.GenerateResidential(ng.Nodes['main400E200S'],ng.Nodes['main300E200S'], rgenv))
 
     # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     # BUILD THE BUSINESS NEIGHBORHOODS
@@ -223,42 +233,42 @@ def BuildNetwork(ng) :
 
     # these are the small "strip malls in the residential areas
     for n in ['main300W200S', 'main200W200S', 'main100E200S', 'main200E200S'] :
-        TagPod('civic', ng.BuildSimpleParkingLotEW(ng.gNodes[n], pntype, rgenplR, "civic", offset=-15, slength=40, elength=60))
-        TagPod('civic', ng.BuildSimpleParkingLotEW(ng.gNodes[n], pntype, rgenplL, "civic", offset=15, slength=40, elength=60))
+        TagPod(ng, 'civic', ng.BuildSimpleParkingLotEW(ng.Nodes[n], pntype, rgenplR, "civic", offset=-15, slength=40, elength=60))
+        TagPod(ng, 'civic', ng.BuildSimpleParkingLotEW(ng.Nodes[n], pntype, rgenplL, "civic", offset=15, slength=40, elength=60))
 
     for n in ['main300W200N', 'main200W200N', 'main100E200N', 'main200E200N'] :
-        TagPod('civic', ng.BuildSimpleParkingLotEW(ng.gNodes[n], pntype, rgenplR, "civic", offset=-15, slength=40, elength=60))
-        TagPod('civic', ng.BuildSimpleParkingLotEW(ng.gNodes[n], pntype, rgenplL, "civic", offset=15, slength=40, elength=60))
+        TagPod(ng, 'civic', ng.BuildSimpleParkingLotEW(ng.Nodes[n], pntype, rgenplR, "civic", offset=-15, slength=40, elength=60))
+        TagPod(ng, 'civic', ng.BuildSimpleParkingLotEW(ng.Nodes[n], pntype, rgenplL, "civic", offset=15, slength=40, elength=60))
 
     # these are the downtown work and shopping plazas
     for n in ['plaza50W200S', 'plaza50W150S', 'plaza50W100S', 'plaza50W50S' ] :
-        TagPod('plaza', ng.BuildSimpleParkingLotSN(ng.gNodes[n], pntype, rgenplL, "plaza", offset=15, slength = 17.5, elength=32.5))
+        TagPod(ng, 'plaza', ng.BuildSimpleParkingLotSN(ng.Nodes[n], pntype, rgenplL, "plaza", offset=15, slength = 17.5, elength=32.5))
  
     for n in ['plaza50W0N', 'plaza50W50N', 'plaza50W100N', 'plaza50W150N', 'plaza50W200N', 'plaza50W250N' ] :
-        TagPod('plaza', ng.BuildSimpleParkingLotSN(ng.gNodes[n], pntype, rgenplL, "plaza", offset=15, slength = 17.5, elength=32.5))
+        TagPod(ng, 'plaza', ng.BuildSimpleParkingLotSN(ng.Nodes[n], pntype, rgenplL, "plaza", offset=15, slength = 17.5, elength=32.5))
 
     for n in ['plaza50E250S', 'plaza50E200S', 'plaza50E150S', 'plaza50E100S', 'plaza50E50S'] :
-        TagPod('plaza', ng.BuildSimpleParkingLotNS(ng.gNodes[n], pntype, rgenplR, "plaza", offset=-15, slength = 17.5, elength=32.5))
+        TagPod(ng, 'plaza', ng.BuildSimpleParkingLotNS(ng.Nodes[n], pntype, rgenplR, "plaza", offset=-15, slength = 17.5, elength=32.5))
 
     for n in ['plaza50E0N', 'plaza50E50N', 'plaza50E100N', 'plaza50E150N', 'plaza50E200N'] :
-        TagPod('plaza', ng.BuildSimpleParkingLotNS(ng.gNodes[n], pntype, rgenplR, "plaza", offset=-15, slength = 17.5, elength=32.5))
+        TagPod(ng, 'plaza', ng.BuildSimpleParkingLotNS(ng.Nodes[n], pntype, rgenplR, "plaza", offset=-15, slength = 17.5, elength=32.5))
         
     # these are 
     for n in ['main200W300S', 'main200W200S', 'main200W100S', 'main200W0N', 'main200W100N', 'main200W200N'] : 
-        TagPod('mall', ng.BuildSimpleParkingLotNS(ng.gNodes[n], pntype, rgenplR, "mall", offset=-30))
-        TagPod('mall', ng.BuildSimpleParkingLotNS(ng.gNodes[n], pntype, rgenplL, "mall", offset=30))
+        TagPod(ng, 'mall', ng.BuildSimpleParkingLotNS(ng.Nodes[n], pntype, rgenplR, "mall", offset=-30))
+        TagPod(ng, 'mall', ng.BuildSimpleParkingLotNS(ng.Nodes[n], pntype, rgenplL, "mall", offset=30))
 
     for n in ['main200E300S', 'main200E200S', 'main200E100S', 'main200E0N', 'main200E100N', 'main200E200N'] : 
-        TagPod('mall', ng.BuildSimpleParkingLotNS(ng.gNodes[n], pntype, rgenplR, "mall", offset=-30))
-        TagPod('mall', ng.BuildSimpleParkingLotNS(ng.gNodes[n], pntype, rgenplL, "mall", offset=30))
+        TagPod(ng, 'mall', ng.BuildSimpleParkingLotNS(ng.Nodes[n], pntype, rgenplR, "mall", offset=-30))
+        TagPod(ng, 'mall', ng.BuildSimpleParkingLotNS(ng.Nodes[n], pntype, rgenplL, "mall", offset=30))
 
-    # ng.GenerateResidential(ng.gNodes['main400W200S'],ng.gNodes['main300W200S'], rgenh)
-    # ng.GenerateResidential(ng.gNodes['main400W0N'],  ng.gNodes['main300W0N'], rgenh)
-    # ng.GenerateResidential(ng.gNodes['main400W200N'],ng.gNodes['main300W200N'], rgenh)
+    # ng.GenerateResidential(ng.Nodes['main400W200S'],ng.Nodes['main300W200S'], rgenh)
+    # ng.GenerateResidential(ng.Nodes['main400W0N'],  ng.Nodes['main300W0N'], rgenh)
+    # ng.GenerateResidential(ng.Nodes['main400W200N'],ng.Nodes['main300W200N'], rgenh)
 
-    # ng.GenerateResidential(ng.gNodes['main400E200S'],ng.gNodes['main300E200S'], rgenh)
-    # ng.GenerateResidential(ng.gNodes['main400E0N'],  ng.gNodes['main300E0N'], rgenh)
-    # ng.GenerateResidential(ng.gNodes['main400E200N'],ng.gNodes['main300E200N'], rgenh)
+    # ng.GenerateResidential(ng.Nodes['main400E200S'],ng.Nodes['main300E200S'], rgenh)
+    # ng.GenerateResidential(ng.Nodes['main400E0N'],  ng.Nodes['main300E0N'], rgenh)
+    # ng.GenerateResidential(ng.Nodes['main400E200N'],ng.Nodes['main300E200N'], rgenh)
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

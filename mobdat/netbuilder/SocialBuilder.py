@@ -76,7 +76,7 @@ class SocialBuilder :
     def PushNetworkToSocial(self) :
         nlist = []
 
-        for node in self.Network.gNodes.itervalues() :
+        for node in self.Network.Nodes.itervalues() :
             if string.find(node.Name,self.InjectPrefix) != 0 :
                 continue
 
