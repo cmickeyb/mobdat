@@ -45,21 +45,52 @@ sys.path.append(os.path.join(os.environ.get("OPENSIM","/share/opensim"),"lib","p
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
+import mobdat.common
 import re
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class NodeType :
+class ResidentialGenerator :
 
     # -----------------------------------------------------------------
-    def __init__(self, name, ntype = 'priority', render = True) :
-        self.Name = name
-        self.NType = ntype
-        self.Render = render
+    def __init__(self, etype, itype, dtype, rtype, driveway = 10, bspace = 20, spacing = 20, both = True) :
+        self.EdgeType = etype
+        self.IntersectionType = itype
+        self.DrivewayType = dtype
+        self.ResidentialType = rtype
+        self.DrivewayLength = driveway
+        self.DrivewayBuffer = bspace
+        self.Spacing = spacing
+        self.BothSides = both
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class Node :
+class NodeTypeDecoration(NetworkInfo.Decoration) :
+    DecorationName = 'NodeType'
+
+    # -----------------------------------------------------------------
+    @staticmethod
+    def Load(graph, info) :
+        return NodeTypeDecoration(info['Name'], info['IntersectionType'], info['Render'])
+
+    # -----------------------------------------------------------------
+    def __init__(self, name, itype = 'priority', render = True) :
+        NetworkInfo.Decoration.__init__(self)
+
+        self.Name = name
+        self.IntersectionType = itype
+        self.Render = render
+
+    # -----------------------------------------------------------------
+    def Dump(self) :
+        result = NetworkInfo.Decoration.Dump(self)
+        result['Name'] = self.Name
+        result['IntersectionType'] = self.IntersectionType
+        result['Render'] = self.Render
+
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+class Node(NetworkInfo.Node) :
     WEST  = 0
     NORTH = 1
     EAST  = 2
@@ -67,31 +98,8 @@ class Node :
 
     # -----------------------------------------------------------------
     def __init__(self, x, y, ntype, prefix) :
-        self.X = int(x)
-        self.Y = int(y)
-
-        self.Name = self._GenerateNodeName(prefix)
-        self.NodeType = ntype
-        self.Tags = []
-
-        self.OEdges = []
-        self.IEdges = []
-
-    # -----------------------------------------------------------------
-    def _GenerateNodeName(self, prefix) :
-        ewdir = 'E'
-        x = self.X
-        if x < 0 :
-            ewdir = 'W'
-            x = abs(self.X)
-
-        nsdir = 'N'
-        y = self.Y
-        if y < 0 :
-            nsdir = 'S'
-            y = abs(y)
-
-        return "%s%d%s%d%s" % (prefix, int(x), ewdir, int(y), nsdir)
+        NetworkInfo.Node.__init__(self, x, y, prefix = prefix)
+        ntype.AddMember(self)
 
     # -----------------------------------------------------------------
     def _EdgeMapPosition(self, node) :
@@ -112,23 +120,6 @@ class Node :
 
         # this means that self & node are at the same location
         return -1 
-
-    # -----------------------------------------------------------------
-    def __str__(self) :
-        out = "%s, %s, %d, %d" % (self.Name, self.NodeType.Name, self.X, self.Y)
-        for e in self.OEdges :
-            out += ", "
-            out += str(e.EdgeType.Lanes)
-
-        return out
-
-    # -----------------------------------------------------------------
-    def AddIEdge(self, edge) :
-        self.IEdges.append(edge)
-
-    # -----------------------------------------------------------------
-    def AddOEdge(self, edge) :
-        self.OEdges.append(edge)
 
     # -----------------------------------------------------------------
     def WestEdge(self) :
@@ -153,7 +144,7 @@ class Node :
     # -----------------------------------------------------------------
     def OutputEdgeMap(self) :
         edgemap = [None, None, None, None]
-        for e in self.OEdges :
+        for e in self.OutputEdges :
             position = self._EdgeMapPosition(e.EndNode)
             edgemap[position] = e
 
@@ -162,7 +153,7 @@ class Node :
     # -----------------------------------------------------------------
     def InputEdgeMap(self) :
         edgemap = [None, None, None, None]
-        for e in self.IEdges :
+        for e in self.InputEdges :
             position = self._EdgeMapPosition(e.StartNode)
             edgemap[position] = e
 
@@ -190,10 +181,27 @@ class Node :
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class EdgeType :
+class EdgeTypeDecoration(NetworkInfo.Decoration) :
+    DecorationName = 'EdgeType'
+
+    # -----------------------------------------------------------------
+    @staticmethod
+    def Load(graph, info) :
+        etype = EdgeTypeDecoration(info['Name'])
+
+        self.Lanes = info['Lanes']
+        self.Priority = info['Priority']
+        self.Speed = info['Speed']
+        self.Width = info['Width']
+        self.Signature = info['Signature']
+        self.Render = info['Render']
+        self.Center = info['Center']
+
+        return etype
 
     # -----------------------------------------------------------------
     def __init__(self, name, lanes = 1, pri = 70, speed = 2.0, wid = 2.5, sig = '1L', render = True, center = False) :
+        NetworkInfo.Decoration.__init__(self)
         self.Name = name
         self.Lanes = lanes
         self.Priority = pri
@@ -203,88 +211,71 @@ class EdgeType :
         self.Render = render
         self.Center = center
 
+
+    # -----------------------------------------------------------------
+    def Dump(self) :
+        result = NetworkInfo.Decoration.Dump(self)
+        
+        result['Name'] = self.Name
+        result['Lanes'] = self.Lanes
+        result['Priority'] = self.Priority
+        result['Speed'] = self.Speed
+        result['Width'] = self.Width
+        result['Signature'] = self.Signature
+        result['Render'] = self.Render
+        result['Center'] = self.Center
+
+        return result
+
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class Edge :
+class Edge(NetworkInfo.Edge) :
     
     # -----------------------------------------------------------------
     def __init__(self, snode, enode, etype) :
-        self.Name = "%s=O=%s" % (snode.Name, enode.Name)
-        self.EdgeType = etype
-        self.StartNode = snode
-        self.EndNode = enode
-
-        snode.AddOEdge(self)
-        enode.AddIEdge(self)
-
-    # -----------------------------------------------------------------
-    def ReverseName(self) :
-        return "%s=O=%s" % (self.EndNode.Name, self.StartNode.Name)
+        NetworkInfo.Edge.__init__(snode, enode)
+        etype.AddMember(self)
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class ResidentialGenerator :
-
-    # -----------------------------------------------------------------
-    def __init__(self, etype, itype, dtype, rtype, driveway = 10, bspace = 20, spacing = 20, both = True) :
-        self.EdgeType = etype
-        self.IntersectionType = itype
-        self.DrivewayType = dtype
-        self.ResidentialType = rtype
-        self.DrivewayLength = driveway
-        self.DrivewayBuffer = bspace
-        self.Spacing = spacing
-        self.BothSides = both
-
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class Network :
+class Network(NetworkInfo.Network) :
 
     # -----------------------------------------------------------------
     def __init__(self) :
-        self.gEdgeTypes = {}
-        self.gNodeTypes = {}
-        self.gNodes = {}
-        self.gEdges = {}
-        self.InjectPrefix = "IN"
+        NetworkInfo.Network.__init__(self)
+
+        self.AddDecorationHandler(NodeTypeDecoration)
+        self.AddDecorationHandler(EdgeTypeDecoration)
 
     # -----------------------------------------------------------------
     def AddEdgeType(self, name, lanes = 1, pri = 70, speed = 2.0, wid = 2.5, sig = '1L', render = True, center = False) :
-        if name not in self.gEdgeTypes :
-            self.gEdgeTypes[name] = EdgeType(name, lanes, pri, speed, wid, sig, render, center)
-            
-        return self.gEdgeTypes[name]
+        etype = NetworkInfo.Collection(name = name)
+        etype.AddDecoration(EdgeTypeDecoration(name, lanes, pri, speed, wid, sig, render, center))
+
+        self.AddCollection(etype)
+        return etype
 
     # -----------------------------------------------------------------
-    def AddNodeType(self, name, ntype = 'priority', render = True) :
-        if name not in self.gNodeTypes :
-            self.gNodeTypes[name] = NodeType(name,ntype,render)
+    def AddNodeType(self, name, itype = 'priority', render = True) :
+        ntype = NetworkInfo.Collection(name = name)
+        ntype.AddDecoration(NodeTypeDecoration(name, itype, render))
 
-        return self.gNodeTypes[name]
+        self.AddCollection(ntype)
+        return ntype
 
     # -----------------------------------------------------------------
     def AddNode(self, curx, cury, ntype, prefix) :
         node = Node(curx, cury, ntype, prefix)
-        if node.Name in self.gNodes :
-            print 'duplicate node %s' % (node.Name)
-            return self.gNodes[node.Name]
+        NetworkInfo.Network.AddNode(self, node)
 
-        self.gNodes[node.Name] = node
         return node
 
     # -----------------------------------------------------------------
     def AddEdge(self, snode, enode, etype) :
         edge = Edge(snode, enode, etype)
-        self.gEdges[edge.Name] = edge
+        NetworkInfo.Network.AddEdge(self, edge)
         
         return edge
-
-    # -----------------------------------------------------------------
-    def FindEdgeBetweenNodes(self, node1, node2) :
-        for e in node1.OEdges :
-            if e.EndNode == node2 :
-                return e
-        return None
 
     # -----------------------------------------------------------------
     def ConnectNodes(self, node1, node2, etype) :
@@ -317,13 +308,13 @@ class Network :
         nnode = self.AddNode(curx, cury, ntype, prefix)
 
         if edge1 :
-            etype1 = edge1.EdgeType
+            etype1 = edge1.FindDecorationProvider(EdgeTypeDecoration.DecorationName)
             self.DropEdgeByName(edge1.Name)
             self.AddEdge(node1,nnode,etype1)
             self.AddEdge(nnode,node2,etype1)
 
         if edge2 :
-            etype2 = edge2.EdgeType
+            etype2 = edge1.FindDecorationProvider(EdgeTypeDecoration.DecorationName)
             self.DropEdgeByName(edge2.Name)
             self.AddEdge(node2,nnode,etype2)
             self.AddEdge(nnode,node1,etype2)
@@ -331,74 +322,32 @@ class Network :
         return nnode
 
     # -----------------------------------------------------------------
-    def DropNodeByName(self, name) :
-        if name not in self.gNodes :
-            print 'unable to drop unknown node %s' % (name)
-            return False
-
-        node = self.gNodes[name]
-
-        for e in node.OEdges :
-            n = e.EndNode
-            n.IEdges.remove(e)
-            if e.Name in self.gEdges :
-                del self.gEdges[e.Name]
-
-        for e in node.IEdges :
-            n = e.StartNode
-            n.OEdges.remove(e)
-            if e.Name in self.gEdges :
-                del self.gEdges[e.Name]
-
-        del self.gNodes[node.Name]
-        return True
-
-    # -----------------------------------------------------------------
-    def DropNodeByPattern(self, pattern) :
-        names = self.gNodes.keys()
-        for name in names :
+    def SetNodeTypeByPattern(self, pattern, newtype) :
+        for name, node in self.Nodes.iteritems() :
             if re.match(pattern, name) :
-                self.DropNodeByName(name)
+                # the node type is actually a decorated collection, need to remove it
+                # from the current type collection before adding it to the new one
+                curtype = node.FindDecorationProvider(NodeTypeDecoration.DecorationName)
+                if curtype : curtype.DropMember(node)
+                
+                # and add it to the new collection
+                newtype.AddMember(node)
 
         return True
 
     # -----------------------------------------------------------------
-    def SetNodeTypeByPattern(self, pattern, ntype) :
-        names = self.gNodes.keys()
-        for name in names :
+    def SetEdgeTypeByPattern(self, pattern, newtype) :
+        for name, edge in self.Edges.iteritems() :
             if re.match(pattern, name) :
-                self.gNodes[name].NodeType = ntype
+                # the edge type is actually a decorated collection, need to remove it
+                # from the current type collection before adding it to the new one
+                curtype = edge.FindDecorationProvider(EdgeTypeDecoration.DecorationName)
+                if curtype : curtype.DropMember(edge)
+                
+                # and add it to the new collection
+                newtype.AddMember(edge)
 
         return True
-
-    # -----------------------------------------------------------------
-    def DropEdgeByName(self, name) :
-        if name not in self.gEdges :
-            print 'unable to drop unknown edge %s' % (name)
-            return False
-
-        edge = self.gEdges[name]
-        edge.StartNode.OEdges.remove(edge)
-        edge.EndNode.IEdges.remove(edge)
-
-        del self.gEdges[name]
-        return True
-
-    # -----------------------------------------------------------------
-    def DropEdgeByPattern(self, pattern) :
-        names = self.gEdges.keys()
-        for name in names :
-            if re.match(pattern, name) :
-                self.DropEdgeByName(name)
-        
-        return True
-
-    # -----------------------------------------------------------------
-    def SetEdgeTypeByPattern(self, pattern, etype) :
-        names = self.gEdges.keys()
-        for name in names :
-            if re.match(pattern, name) :
-                self.gEdges[name].EdgeType = etype
 
     # -----------------------------------------------------------------
     def GenerateGrid(self, x0, y0, x1, y1, stepx, stepy, ntype, etype, prefix = 'node') :
@@ -496,31 +445,6 @@ class Network :
 
         self.ConnectNodes(lastnode,node2,rgen.EdgeType)
         return resnodes
-
-    # -----------------------------------------------------------------
-    def _FindNodeClosestToLocation(self, node) :
-        cnode = None
-        cdist = 0
-
-        for n in self.gNodes.itervalues() :
-            if cnode== None :
-                cnode = n
-                cdist = (cnode.X - node.X)**2 + (cnode.Y - node.Y)**2
-                continue
-            dist = (n.X - node.X)**2 + (n.Y - node.Y)**2
-            if (dist < cdist) :
-                cnode = n
-                cdist = dist
-
-        return cnode
-
-    # -----------------------------------------------------------------
-    def _FindNodeNearLocation(self, node, margin = 1.0) :
-        for n in self.gNodes.itervalues() :
-            if abs(n.X - node.X) < margin and abs(n.Y - node.Y) < margin :
-                return n
-
-        return None
 
     # -----------------------------------------------------------------
     def BuildSimpleParkingLotNS(self, origin, itype, rgen, prefix = 'tile', slength = 30, elength = 70, offset = 25) :
