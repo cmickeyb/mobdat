@@ -38,7 +38,7 @@ network such as building a grid of roads.
 
 """
 
-import os, sys, warnings, copy
+import os, sys
 
 # we need to import python modules from the $SUMO_HOME/tools directory
 sys.path.append(os.path.join(os.environ.get("OPENSIM","/share/opensim"),"lib","python"))
@@ -93,6 +93,8 @@ class NodeTypeDecoration(Decoration) :
         result['IntersectionType'] = self.IntersectionType
         result['Render'] = self.Render
 
+        return result
+
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class EdgeTypeDecoration(Decoration) :
@@ -103,13 +105,13 @@ class EdgeTypeDecoration(Decoration) :
     def Load(graph, info) :
         etype = EdgeTypeDecoration(info['Name'])
 
-        self.Lanes = info['Lanes']
-        self.Priority = info['Priority']
-        self.Speed = info['Speed']
-        self.Width = info['Width']
-        self.Signature = info['Signature']
-        self.Render = info['Render']
-        self.Center = info['Center']
+        etype.Lanes = info['Lanes']
+        etype.Priority = info['Priority']
+        etype.Speed = info['Speed']
+        etype.Width = info['Width']
+        etype.Signature = info['Signature']
+        etype.Render = info['Render']
+        etype.Center = info['Center']
 
         return etype
 

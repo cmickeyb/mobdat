@@ -39,6 +39,7 @@ network such as building a grid of roads.
 """
 
 import os, sys
+import logging
 
 # we need to import python modules from the $SUMO_HOME/tools directory
 sys.path.append(os.path.join(os.environ.get("OPENSIM","/share/opensim"),"lib","python"))
@@ -49,6 +50,8 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "
 from mobdat.common.Decoration import Decoration
 import uuid, re
 import json
+
+logger = logging.getLogger(__name__)
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -327,7 +330,7 @@ class Network :
     # -----------------------------------------------------------------
     def DropNodeByName(self, name) :
         if name not in self.Nodes :
-            # print 'unable to drop unknown node %s' % (name)
+            logger.info('unable to drop unknown node %s', name)
             return False
 
         self.DropNode(self.Nodes[name])
@@ -418,8 +421,11 @@ class Network :
     # -----------------------------------------------------------------
     def LoadDecoration(self, dinfo) :
         handler = self.DecorationMap[dinfo['__TYPE__']]
-        return handler.Load(self, dinfo)
+        if handler :
+            return handler.Load(self, dinfo)
 
+        logger.warn('no decoration handler found for type %s', dinfo['__TYPE__'])
+        return None
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
