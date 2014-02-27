@@ -53,13 +53,14 @@ import OpenSimRemoteControl
 class OpenSimBuilder :
 
     # -----------------------------------------------------------------
-    def __init__(self, settings, net, netinfo) :
+    def __init__(self, settings, netinfo, netsettings) :
+        self.Logger = logging.getLogger(__name__)
 
-        self.Network = net
         self.NetworkInfo = netinfo
+        self.NetworkSettings = netsettings
+
         self.EdgeMap = {}
         self.NodeMap = {}
-        self.Logger = logging.getLogger(__name__)
 
         try :
             self.OpenSimConnector = OpenSimRemoteControl.OpenSimRemoteControl(settings["OpenSimConnector"]["EndPoint"])
@@ -178,53 +179,49 @@ class OpenSimBuilder :
     # -----------------------------------------------------------------
     def CreateEdges(self) :
 
-        for e in self.Network.gEdges :
-            edge = self.Network.gEdges[e]
-
+        for edge in self.NetworkInfo.Edges.itervalues() :
             if edge.Name in self.EdgeMap :
                 continue
 
-            if edge.EdgeType.Name not in self.NetworkInfo.RoadTypeMap :
+            if edge.EdgeType.Name not in self.NetworkSettings.RoadTypeMap :
                 self.Logger.warn('Failed to find asset for %s' % (edge.EdgeType.Name))
                 continue 
 
             # check to see if we need to render this edge at all
             if edge.EdgeType.Render :
-                asset = self.NetworkInfo.RoadTypeMap[edge.EdgeType.Name][0].AssetID
-                zoff = self.NetworkInfo.RoadTypeMap[edge.EdgeType.Name][0].ZOffset
+                asset = self.NetworkSettings.RoadTypeMap[edge.EdgeType.Name][0].AssetID
+                zoff = self.NetworkSettings.RoadTypeMap[edge.EdgeType.Name][0].ZOffset
 
                 if type(asset) == dict :
                     asset = self.FindAssetInObject(asset)
-                    self.NetworkInfo.RoadTypeMap[edge.EdgeType.Name][0].AssetID = asset
+                    self.NetworkSettings.RoadTypeMap[edge.EdgeType.Name][0].AssetID = asset
 
                 (p1x, p1y, p2x, p2y) = self.ComputeLocation(edge.StartNode, edge.EndNode)
                 startparms = "{ 'spoint' : '<%f, %f, %f>', 'epoint' : '<%f, %f, %f>' }" % (p1x, p1y, zoff, p2x, p2y, zoff)
 
                 if abs(p1x - p2x) > 0.1 or abs(p1y - p2y) > 0.1 :
-                    result = self.OpenSimConnector.CreateObject(asset, pos=[p1x, p1y, zoff], name=e, parm=startparms)
+                    result = self.OpenSimConnector.CreateObject(asset, pos=[p1x, p1y, zoff], name=edge.Name, parm=startparms)
 
-            self.EdgeMap[edge.GenEdgeName(edge.StartNode, edge.EndNode)] = True
-            self.EdgeMap[edge.GenEdgeName(edge.EndNode, edge.StartNode)] = True
+            self.EdgeMap[edge.GenName(edge.StartNode, edge.EndNode)] = True
+            self.EdgeMap[edge.GenName(edge.EndNode, edge.StartNode)] = True
     
     # -----------------------------------------------------------------
     def CreateNodes(self) :
-        for n in self.Network.gNodes :
-            node = self.Network.gNodes[n]
-
+        for node in self.NetworkInfo.Nodes.itervalues() :
             tname = node.NodeType.Name
             sig1 = node.Signature()
 
-            if tname not in self.NetworkInfo.IntersectionTypeMap :
+            if tname not in self.NetworkSettings.IntersectionTypeMap :
                 self.Logger.warn('Unable to locate node type %s' % (tname))
                 continue
 
             success = False
-            for itype in self.NetworkInfo.IntersectionTypeMap[tname] :
+            for itype in self.NetworkSettings.IntersectionTypeMap[tname] :
                 sig2 = itype.Signature
 
                 rot = self.ComputeRotation(sig1, sig2)
                 if rot >= 0 :
-                    self.NodeMap[n] = itype
+                    self.NodeMap[node.Name] = itype
 
                     p1x = node.X + self.WorldCenterX
                     p1y = node.Y + self.WorldCenterY
@@ -237,11 +234,11 @@ class OpenSimBuilder :
                     startparms = "{ 'center' : '<%f, %f, %f>', 'angle' : %f }" % (p1x, p1y, p1z, 90.0 * rot)
 
                     if node.NodeType.Render :
-                        result = self.OpenSimConnector.CreateObject(asset, pos=[p1x, p1y, p1z], name=n, parm=startparms)
+                        result = self.OpenSimConnector.CreateObject(asset, pos=[p1x, p1y, p1z], name=node.Name, parm=startparms)
 
                     success = True
                     break
 
             if not success :
-                self.NodeMap[n] = self.NetworkInfo.IntersectionTypeMap[tname][0]
+                self.NodeMap[n] = self.NetworkSettings.IntersectionTypeMap[tname][0]
                 self.Logger.warn("No match for node %s with type %s and signature %s" % (n, tname, sig1))

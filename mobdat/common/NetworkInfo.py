@@ -316,10 +316,10 @@ class Network :
         for collection in node.Collections.values() :
             collection.DropMember(node)
 
-        for edge in node.InputEdges :
+        for edge in node.InputEdges[:] :
             self.DropEdge(edge)
 
-        for edge in node.OutputEdges :
+        for edge in node.OutputEdges[:] :
             self.DropEdge(edge)
 
         del self.Nodes[node.Name]
@@ -406,7 +406,7 @@ class Network :
 
     # -----------------------------------------------------------------
     def DropCollection(self, collection) :
-        for obj in collection.Members :
+        for obj in collection.Members[:] :
             obj.DropFromCollection(collection)
 
         del self.Collections[collection.Name]

@@ -39,7 +39,8 @@ traffic simulator.
 
 """
 
-import os, sys, warnings
+import os, sys
+import logging
 
 # we need to import python modules from the $SUMO_HOME/tools directory
 sys.path.append(os.path.join(os.environ.get("OPENSIM","/share/opensim"),"lib","python"))
@@ -55,25 +56,26 @@ from mobdat.common import Decoration
 class SumoBuilder :
 
     # -----------------------------------------------------------------
-    def __init__(self, settings, net, netinfo) :
+    def __init__(self, settings, netinfo, netsettings) :
+        self.Logger = logging.getLogger(__name__)
 
-        self.Network = net
         self.NetworkInfo = netinfo
+        self.NetworkSettings = netsettings
+
         self.ScaleValue = 3.0
 
         try :
-            self.InjectPrefix = settings["NetworkBuilder"].get("InjectionPrefix","IN")
             self.Path = settings["SumoConnector"].get("SumoNetworkPath",".")
             self.Prefix = settings["SumoConnector"].get("SumoDataFilePrefix","network")
             self.ScaleValue = settings["SumoConnector"].get("NetworkScaleFactor",3.0)
         except NameError as detail: 
-            warnings.warn("Failed processing sumo configuration; name error %s" % (str(detail)))
+            self.Logger.warn("Failed processing sumo configuration; name error %s", (str(detail)))
             sys.exit(-1)
         except KeyError as detail: 
-            warnings.warn("unable to locate sumo configuration value for %s" % (str(detail)))
+            self.Logger.warn("unable to locate sumo configuration value for %s", (str(detail)))
             sys.exit(-1)
         except :
-            warnings.warn("SumoBuilder configuration failed; %s" % (sys.exc_info()[0]))
+            self.Logger.warn("SumoBuilder configuration failed; %s", (sys.exc_info()[0]))
             sys.exit(-1)
 
     # -----------------------------------------------------------------
@@ -87,8 +89,8 @@ class SumoBuilder :
         with open(fname, 'w') as fp :
             fp.write("<edges>\n")
 
-            for e in self.Network.Edges :
-                edge = self.Network.Edges[e]
+            for edge in self.NetworkInfo.Edges.itervalues() :
+                e = edge.Name
                 sn = edge.StartNode.Name
                 en = edge.EndNode.Name
                 etype = edge.EdgeType.Name
@@ -104,10 +106,9 @@ class SumoBuilder :
         with open(fname, 'w') as fp :
             fp.write("<nodes>\n")
 
-            for n in self.Network.Nodes :
-                node = self.Network.Nodes[n]
+            for node in self.NetworkInfo.Nodes.itervalues() :
                 itype = node.NodeType.IntersectionType
-                fp.write("  <node id=\"%s\" x=\"%d\" y=\"%d\" z=\"0\"  type=\"%s\" />\n" % (n, self.Scale(node.X), self.Scale(node.Y), itype))
+                fp.write("  <node id=\"%s\" x=\"%d\" y=\"%d\" z=\"0\"  type=\"%s\" />\n" % (node.Name, self.Scale(node.X), self.Scale(node.Y), itype))
 
             fp.write("</nodes>\n")
 
@@ -119,8 +120,7 @@ class SumoBuilder :
         with open(fname, 'w') as fp :
             fp.write("<connections>\n")
             
-            for n in self.Network.Nodes :
-                node = self.Network.Nodes[n]
+            for node in self.NetworkInfo.Nodes.itervalues() :
                 if not node.Signature() == ['2L/2L', '2L/2L', '2L/2L', '2L/2L' ] :
                     continue
 
@@ -145,7 +145,7 @@ class SumoBuilder :
         with open(fname, 'w') as fp :
             fp.write("<types>\n")
 
-            for collection in self.Network.Collections.itervalues() :
+            for collection in self.NetworkInfo.Collections.itervalues() :
                 if Decoration.EdgeTypeDecoration.DecorationName in collection.Decorations :
                     etype = collection.EdgeType
                     fp.write("  <type id=\"%s\" priority=\"%d\" numLanes=\"%d\" speed=\"%f\" width=\"%f\" />\n" %
@@ -162,20 +162,19 @@ class SumoBuilder :
         with open(fname, 'w') as fp :
             fp.write("<routes>\n")
             
-            for v in self.NetworkInfo.VehicleTypes :
-                vtype = self.NetworkInfo.VehicleTypes[v]
+            for v in self.NetworkSettings.VehicleTypes :
+                vtype = self.NetworkSettings.VehicleTypes[v]
                 fp.write(vtfmt.format(v, self.Scale(vtype.Acceleration), self.Scale(vtype.Deceleration),
                                       vtype.Sigma, self.Scale(vtype.Length), self.Scale(vtype.MinGap), self.Scale(vtype.MaxSpeed)) + "\n")
 
             fp.write("\n")
 
-            for n in self.Network.Nodes :
-                if string.find(n,self.InjectPrefix) == 0 :
-                    node = self.Network.Nodes[n]
-                    for edge in node.OEdges :
-                        for redge in edge.EndNode.OEdges :
+            for node in self.NetworkInfo.Nodes.itervalues() :
+                if Decoration.EndPointDecoration.DecorationName in node.Decorations :
+                    for edge in node.OutputEdges :
+                        for redge in edge.EndNode.OutputEdges :
                             if redge.EndNode == node :
-                                name = "r" + n
+                                name = node.EndPoint.DestinationName
                                 edges = edge.Name + " " + redge.Name
                                 fp.write("  <route id=\"%s\" edges=\"%s\" />\n" % (name, edges))
                                 break

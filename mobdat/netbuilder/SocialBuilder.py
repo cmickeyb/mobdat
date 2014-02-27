@@ -52,15 +52,14 @@ import json, string
 class SocialBuilder :
 
     # -----------------------------------------------------------------
-    def __init__(self, settings, net, netinfo) :
+    def __init__(self, settings, netinfo, netsettings) :
 
-        self.Network = net
         self.NetworkInfo = netinfo
+        self.NetworkSettings = netsettings
         self.EdgeMap = {}
         self.NodeMap = {}
 
         try :
-            self.InjectPrefix = settings["NetworkBuilder"].get("InjectionPrefix","IN")
             self.InjectionFile = settings["SocialConnector"]["NodeDataFile"]
         except NameError as detail: 
             warnings.warn("Failed processing social configuration; name error %s" % (str(detail)))
@@ -74,23 +73,7 @@ class SocialBuilder :
 
     # -----------------------------------------------------------------
     def PushNetworkToSocial(self) :
-        nlist = []
-
-        for node in self.Network.Nodes.itervalues() :
-            if string.find(node.Name,self.InjectPrefix) != 0 :
-                continue
-
-            ninfo = {}
-            ninfo["Name"] = node.Name
-            ninfo["Type"] = node.NodeType.Name
-            ninfo["InEdge"] = node.IEdges[0].Name
-            ninfo["OutRoute"] = "r" + node.Name
-            ninfo["Position"] = [ node.X, node.Y ]
-            ninfo["Tags"] = node.Tags
-
-            nlist.append(ninfo)
-
         with open(self.InjectionFile,"w") as fp :
-            json.dump(nlist,fp,indent=2)
+            json.dump(self.NetworkInfo.Dump(), fp, indent=2)
 
 

@@ -149,35 +149,40 @@ class EndPointDecoration(Decoration) :
     # -----------------------------------------------------------------
     @staticmethod
     def GenFromNode(node) :
-        return EndPointDecoration(EndPointDecoration.GenOutboundName(node), EndPointDecoration.GenInboundName(node))
+        sname = EndPointDecoration.GenSourceName(node)
+        dname = EndPointDecoration.GenDestinationName(node)
+
+        return EndPointDecoration(sname, dname)
 
     # -----------------------------------------------------------------
     @staticmethod
-    def GenOutboundName(node) :
-        return 'r' + node.Name
-
-    # -----------------------------------------------------------------
-    @staticmethod
-    def GenInboundName(node) :
+    def GenSourceName(node) :
+        """Generate the name to be used when vehicles leave this node"""
         return node.InputEdges[0].Name
 
     # -----------------------------------------------------------------
     @staticmethod
-    def Load(graph, info) :
-        return EndPointDecoration(info['InboundEdgeName'], info['OutboundRounteName'])
+    def GenDestinationName(node) :
+        """Generate the name to be used for vehicles headed to this node"""
+        return 'r' + node.Name
 
     # -----------------------------------------------------------------
-    def __init__(self, iname, rname) :
+    @staticmethod
+    def Load(graph, info) :
+        return EndPointDecoration(info['SourceName'], info['DestinationName'])
+
+    # -----------------------------------------------------------------
+    def __init__(self, sname, dname) :
         Decoration.__init__(self)
 
-        self.InboundEdgeName = iname
-        self.OutboundRouteName = rname
+        self.SourceName = sname
+        self.DestinationName = dname
 
     # -----------------------------------------------------------------
     def Dump(self) :
         result = Decoration.Dump(self)
         
-        result['InboundEdgeName'] = self.InboundEdgeName
-        result['OutboundRounteName'] = self.OutboundRouteName
+        result['SourceName'] = self.SourceName
+        result['DestinationName'] = self.DestinationName
 
         return result
