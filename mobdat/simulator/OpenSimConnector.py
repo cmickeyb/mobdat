@@ -215,7 +215,7 @@ class OpenSimVehicle :
 class OpenSimConnector(EventHandler.EventHandler, BaseConnector.BaseConnector) :
 
     # -----------------------------------------------------------------
-    def __init__(self, evrouter, settings) :
+    def __init__(self, evrouter, settings, netinfo, netsettings) :
         """Initialize the OpenSimConnector by creating the opensim remote control handlers.
 
         Keyword arguments:
@@ -228,6 +228,10 @@ class OpenSimConnector(EventHandler.EventHandler, BaseConnector.BaseConnector) :
 
         self.__Logger = logging.getLogger(__name__)
 
+        # Save network information
+        self.NetInfo = netinfo
+        self.NetSettings = netsettings
+
         # Get the world size
         wsize =  settings["OpenSimConnector"]["WorldSize"]
         self.WorldSize = ValueTypes.Vector3(wsize[0], wsize[1], wsize[2])
@@ -238,10 +242,10 @@ class OpenSimConnector(EventHandler.EventHandler, BaseConnector.BaseConnector) :
         # Initialize the vehicle and vehicle types
         self.Vehicles = {}
         self.VehicleReuseList = {}
-        self.VehicleTypes = {}
-        for vtype in settings["VehicleTypes"] :
-            self.VehicleReuseList[vtype["Name"]] = deque([])
-            self.VehicleTypes[vtype["Name"]] = vtype
+        self.VehicleTypes = self.NetSettings.VehicleTypes
+        for vname, vinfo in self.VehicleTypes.iteritems() :
+            self.VehicleReuseList[vname] = deque([])
+            self.VehicleTypes[vname] = vinfo
 
         # Initialize some of the update control variables
         self.PositionDelta = settings["OpenSimConnector"].get("PositionDelta",0.1)
@@ -300,7 +304,7 @@ class OpenSimConnector(EventHandler.EventHandler, BaseConnector.BaseConnector) :
     # -----------------------------------------------------------------
     def HandleCreateObjectEvent(self,event) :
         vtype = self.VehicleTypes[event.ObjectType]
-        vtypename = vtype["Name"]
+        vtypename = vtype.Name
         vname = event.ObjectIdentity
 
         self.__Logger.debug("create vehicle %s with type %s", vname, vtypename)
@@ -320,12 +324,12 @@ class OpenSimConnector(EventHandler.EventHandler, BaseConnector.BaseConnector) :
         vuuid = str(uuid.uuid4())
         self.Vehicles[vname] = OpenSimVehicle(vname, vtypename, vuuid)
 
-        assetid = vtype["AssetID"]
+        assetid = vtype.AssetID
         if type(assetid) == dict :
             assetid = self._FindAssetInObject(assetid)
-            vtype["AssetID"] = assetid
+            vtype.AssetID = assetid
 
-        result = self.OpenSimConnector.CreateObject(vtype["AssetID"], objectid=vuuid, name="car", parm=vtype.get("StartParameter","{}"))
+        result = self.OpenSimConnector.CreateObject(vtype.AssetID, objectid=vuuid, name="car", parm=vtype.StartParameter)
  
         # self.__Logger.debug("create new vehicle %s with id %s", vname, vuuid)
         return True

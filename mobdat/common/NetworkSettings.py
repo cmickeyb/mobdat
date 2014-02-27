@@ -85,7 +85,7 @@ class VehicleInfo :
         self.MinGap = settings["MinGap"]
         self.MaxSpeed = settings["MaxSpeed"]
         self.AssetID = settings["AssetID"]
-        self.StartParameter = settings["StartParameter"]
+        self.StartParameter = settings.get("StartParameter","{}")
         self.SourceIntersectionTypes = settings["SourceIntersectionTypes"]
         self.DestinationIntersectionTypes = settings["DestinationIntersectionTypes"]
 

@@ -48,6 +48,7 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "
 
 import platform, time, threading, cmd, readline
 import EventRouter, EventTypes
+from mobdat.common import NetworkInfo, NetworkSettings
 from multiprocessing import Process
 
 # -----------------------------------------------------------------
@@ -184,6 +185,10 @@ def Controller(settings) :
     settings -- nested dictionary with variables for configuring the connectors
     """
 
+    netinfofile = settings["General"].get("NetworkInfoFile","netinfo.js")
+    netinfo = NetworkInfo.Network.LoadFromFile(netinfofile)
+    netsettings = NetworkSettings.NetworkSettings(settings)
+
     cnames = settings["General"].get("Connectors",['sumo', 'opensim', 'social', 'stats'])
 
     evrouter = EventRouter.EventRouter()
@@ -195,7 +200,7 @@ def Controller(settings) :
             logger.warn('skipping unknown simulation connector; %s' % (cname))
             continue
 
-        connector = _SimulationControllers[cname](evrouter, settings)
+        connector = _SimulationControllers[cname](evrouter, settings, netinfo, netsettings)
         connproc = Process(target=connector.SimulationStart, args=())
         connproc.start()
         connectors.append(connproc)

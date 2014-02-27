@@ -60,11 +60,15 @@ import math
 class SumoConnector(EventHandler.EventHandler, BaseConnector.BaseConnector) :
 
     # -----------------------------------------------------------------
-    def __init__(self, evrouter, settings) :
+    def __init__(self, evrouter, settings, netinfo, netsettings) :
         EventHandler.EventHandler.__init__(self, evrouter)
         BaseConnector.BaseConnector.__init__(self, settings)
 
         self.__Logger = logging.getLogger(__name__)
+
+        # Save network information
+        self.NetInfo = netinfo
+        self.NetSettings = netsettings
 
         # the sumo time scale is 1sec per iteration so we need to scale
         # to the 100ms target for our iteration time, this probably 

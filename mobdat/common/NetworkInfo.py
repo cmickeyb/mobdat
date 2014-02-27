@@ -47,7 +47,7 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
-from mobdat.common.Decoration import Decoration
+from Decoration import *
 import uuid, re
 import json
 
@@ -257,6 +257,20 @@ class Collection(_NetworkObject) :
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class Network :
+
+    # -----------------------------------------------------------------
+    @staticmethod
+    def LoadFromFile(filename) :
+        with open(filename, 'r') as fp :
+            netdata = json.load(fp)
+
+        netinfo = Network()
+        netinfo.AddDecorationHandler(NodeTypeDecoration)
+        netinfo.AddDecorationHandler(EdgeTypeDecoration)
+        netinfo.AddDecorationHandler(EndPointDecoration)
+        netinfo.Load(netdata)
+
+        return netinfo
 
     # -----------------------------------------------------------------
     @staticmethod
