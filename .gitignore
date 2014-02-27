@@ -3,4 +3,5 @@
 *.out
 *.xml
 build
-nodedata.js
+netinfo.js
+socinfo.js

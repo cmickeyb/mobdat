@@ -48,8 +48,7 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
 import time, argparse, json
-from mobdat.netbuilder import *
-from mobdat.common import *
+from mobdat.netbuilder import Controller
 
 logger = logging.getLogger()
 
@@ -152,28 +151,7 @@ def Main() :
     ParseEnvironment(settings)
     pushlist = ParseCommandLine(settings,remainder)
 
-    netsettings = NetworkSettings.NetworkSettings(settings)
-    netgen = NetBuilder.Network()
-
-    for cf in settings["NetworkBuilder"].get("ExtensionFiles",[]) :
-        execfile(cf,{"netgen" : netgen})
-        try :
-            print cf
-        except :
-            exctype, value =  sys.exc_info()[:2]
-            logger.warn('unhandled error processing extension file %s: %s/%s', cf, exctype, str(value))
-            sys.exit(-1)
-
-    for push in pushlist :
-        if push == 'opensim' :
-            os = OpenSimBuilder.OpenSimBuilder(settings, netgen, netsettings)
-            os.PushNetworkToOpenSim()
-        elif push == 'sumo' :
-            sc = SumoBuilder.SumoBuilder(settings, netgen, netsettings)
-            sc.PushNetworkToSumo()
-        elif push == 'social' :
-            soc = SocialBuilder.SocialBuilder(settings, netgen, netsettings)
-            soc.PushNetworkToSocial()
+    Controller.Controller(settings, pushlist)
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

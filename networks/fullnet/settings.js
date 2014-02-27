@@ -5,6 +5,7 @@
         "Interval" : 0.150,
         "SecondsPerStep" : 2.0,
         "StartTimeOfDay" : 8.0,
+	"NetworkInfoFile" : "networks/fullnet/netinfo.js",
         "Connectors" : ["opensim", "sumo", "social", "stats"]
     },
 
@@ -21,7 +22,6 @@
 
     "SocialConnector" :
     {
-	"NodeDataFile" : "networks/fullnet/nodedata.js",
         "WaitMean" : 1000.0,
         "WaitSigma" : 200.0,
         "PeopleCount" : 1200

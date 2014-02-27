@@ -38,4 +38,4 @@ mobdat simulator. The modules in this package enable programmatic
 construction of traffic networks for the various mobdat connectors.
 """
 
-__all__ = ['NetBuilder', 'OpenSimBuilder', 'SocialBuilder', 'SumoBuilder']
+__all__ = ['Controller', 'NetBuilder', 'OpenSimBuilder', 'SumoBuilder']
