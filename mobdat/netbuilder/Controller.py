@@ -85,4 +85,4 @@ def Controller(settings, pushlist) :
     # write the network information back out to the netinfo file
     netinfofile = settings["General"].get("NetworkInfoFile","netinfo.js")
     with open(netinfofile, "w") as fp :
-        json.dump(netinfo.Dump(), fp, indent=2)
+        json.dump(netinfo.Dump(), fp, indent=2, ensure_ascii=True)

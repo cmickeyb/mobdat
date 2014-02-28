@@ -72,22 +72,29 @@ class RoadInfo :
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class VehicleInfo :
+class VehicleTypeInfo :
 
     # -----------------------------------------------------------------
     def __init__(self, settings) :
         self.Name = settings["Name"]
         self.Description = settings["Description"]
+
+        # Social connector attributes
+        self.Rate = settings["Rate"]
+        self.SourceIntersectionTypes = settings["SourceIntersectionTypes"]
+        self.DestinationIntersectionTypes = settings["DestinationIntersectionTypes"]
+
+        # Sumo connector attributes
         self.Acceleration = settings["Acceleration"]
         self.Deceleration = settings["Deceleration"]
         self.Sigma = settings["Sigma"]
         self.Length = settings["Length"]
         self.MinGap = settings["MinGap"]
         self.MaxSpeed = settings["MaxSpeed"]
+
+        # OpenSim connector attributes
         self.AssetID = settings["AssetID"]
         self.StartParameter = settings.get("StartParameter","{}")
-        self.SourceIntersectionTypes = settings["SourceIntersectionTypes"]
-        self.DestinationIntersectionTypes = settings["DestinationIntersectionTypes"]
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -125,5 +132,5 @@ class NetworkSettings :
                 self.IntersectionTypeMap[nt].append(ninfo)
 
         for vtype in settings["VehicleTypes"] :
-            vinfo = VehicleInfo(vtype)
+            vinfo = VehicleTypeInfo(vtype)
             self.VehicleTypes[vinfo.Name] = vinfo

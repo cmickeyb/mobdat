@@ -49,31 +49,7 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "
 
 import math, random, json, heapq
 import BaseConnector, EventRouter, EventHandler, EventTypes
-
-
-# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class VehicleType :
-    
-    def __init__(self, vinfo) :
-        self.Name = vinfo["Name"]
-        self.Rate = vinfo["Rate"]
-        self.SourceNodeTypes = vinfo["SourceNodeTypes"]
-        self.DestinationNodeTypes = vinfo["DestinationNodeTypes"]
-
-# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class InjectionNode :
-    def __init__(self, info) :
-        try :
-            self.Name = info["Name"]
-            self.Type = info["Type"]
-            self.InEdge = info["InEdge"]
-            self.OutRoute = info["OutRoute"]
-            self.Capacity = 1
-        except :
-            warnings.warn('failed to extract injection point data; %s' % (sys.exc_info()[0]))
-            sys.exit(-1)
+from mobdat.common import NetworkInfo, Decoration
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -117,34 +93,37 @@ class Trip :
 class SocialConnector(EventHandler.EventHandler, BaseConnector.BaseConnector) :
            
     # -----------------------------------------------------------------
-    def __init__(self, evrouter, settings) :
+    def __init__(self, evrouter, settings, netinfo, netsettings) :
         EventHandler.EventHandler.__init__(self, evrouter)
         BaseConnector.BaseConnector.__init__(self, settings)
 
         self.__Logger = logging.getLogger(__name__)
 
+        # Save network information
+        self.NetInfo = netinfo
+        self.NetSettings = netsettings
+
         self.VehicleNumber = 1
         self.VehicleMap = {}
+        self.VehicleTypeMap = {}
+        self.NodeTypeMap = {}
 
         self.InjectionRate = settings["SocialConnector"].get("InjectionRate",1.0)
         self.PeopleCount = settings["SocialConnector"].get("PeopleCount",300)
         self.WaitMean = settings["SocialConnector"].get("WaitMean",300.0)
         self.WaitSigma = settings["SocialConnector"].get("WaitSigma",50.0)
 
-        self._CreateVehicleTypeMap(settings["VehicleTypes"])
-        self._CreateNodeTypeMap(settings["SocialConnector"]["NodeDataFile"])
+        self._CreateVehicleTypeMap()
+        self._CreateNodeTypeMap()
         self._CreatePeople()
 
         self.CurrentStep = 0
 
     # -----------------------------------------------------------------
-    def _CreateVehicleTypeMap(self, vtypes) :
-        self.VehicleTypeMap = {}
+    def _CreateVehicleTypeMap(self) :
+        for vtype in self.NetSettings.VehicleTypes.itervalues() :
 
-        for vinfo in vtypes :
-            vtype = VehicleType(vinfo)
-            
-            for ntype in vtype.SourceNodeTypes :
+            for ntype in vtype.SourceIntersectionTypes :
                 if ntype not in self.VehicleTypeMap :
                     self.VehicleTypeMap[ntype] = []
 
@@ -156,18 +135,16 @@ class SocialConnector(EventHandler.EventHandler, BaseConnector.BaseConnector) :
                     count = count - 1
 
     # -----------------------------------------------------------------
-    def _CreateNodeTypeMap(self, nfile) :
-        self.NodeTypeMap = {}
-        self.NodeNameMap = {}
+    def _CreateNodeTypeMap(self) :
+        for node in self.NetInfo.Nodes.itervalues() :
+            if Decoration.EndPointDecoration.DecorationName not in node.Decorations :
+                continue
 
-        with open(nfile, 'r') as fp :
-            nlist = json.load(fp)
-            for ninfo in nlist :
-                node = InjectionNode(ninfo)
-                self.NodeNameMap[node.Name] = node
-                if node.Type not in self.NodeTypeMap :
-                    self.NodeTypeMap[node.Type] = []
-                self.NodeTypeMap[node.Type].append(node)
+            ntname = node.NodeType.Name
+            if ntname not in self.NodeTypeMap :
+                self.NodeTypeMap[ntname] = []
+
+            self.NodeTypeMap[ntname].append(node)
 
         # make sure the people are more or less distributed evenly through the residences
         rescapacity = 1 + int(self.PeopleCount / len(self.NodeTypeMap['residence']))
@@ -209,8 +186,8 @@ class SocialConnector(EventHandler.EventHandler, BaseConnector.BaseConnector) :
         self.VehicleNumber += 1
         vname = "car%i" % (self.VehicleNumber)
         vtype = str(person.VehicleType.Name)
-        rname = str(person.CurrentLocation.OutRoute)
-        tname = str(dnode.InEdge)
+        rname = str(person.CurrentLocation.EndPoint.SourceName)
+        tname = str(dnode.EndPoint.DestinationName)
 
         self.VehicleMap[vname] = Trip(self.CurrentStep, vname, person, person.CurrentLocation, dnode)
 
