@@ -53,7 +53,7 @@ import EventHandler, EventTypes
 class StatsConnector(EventHandler.EventHandler) :
 
     # -----------------------------------------------------------------
-    def __init__(self, evrouter, settings) :
+    def __init__(self, evrouter, settings, netinfo, netsettings) :
         """Initialize the StatsConnector
 
         Keyword arguments:
@@ -63,6 +63,10 @@ class StatsConnector(EventHandler.EventHandler) :
 
         EventHandler.EventHandler.__init__(self, evrouter)
         self.Logger = logging.getLogger(__name__)
+
+        # Save network information
+        self.NetInfo = netinfo
+        self.NetSettings = netsettings
 
         self.CurrentStep = 0
         self.CurrentTime = 0

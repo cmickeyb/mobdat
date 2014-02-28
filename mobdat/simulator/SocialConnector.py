@@ -186,8 +186,8 @@ class SocialConnector(EventHandler.EventHandler, BaseConnector.BaseConnector) :
         self.VehicleNumber += 1
         vname = "car%i" % (self.VehicleNumber)
         vtype = str(person.VehicleType.Name)
-        rname = str(person.CurrentLocation.EndPoint.SourceName)
-        tname = str(dnode.EndPoint.DestinationName)
+        rname = str(person.CurrentLocation.EndPoint.DestinationName)
+        tname = str(dnode.EndPoint.SourceName)
 
         self.VehicleMap[vname] = Trip(self.CurrentStep, vname, person, person.CurrentLocation, dnode)
 
