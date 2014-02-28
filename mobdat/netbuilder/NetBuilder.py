@@ -172,10 +172,6 @@ class Network(NetworkInfo.Network) :
     def __init__(self) :
         NetworkInfo.Network.__init__(self)
 
-        self.AddDecorationHandler(Decoration.NodeTypeDecoration)
-        self.AddDecorationHandler(Decoration.EdgeTypeDecoration)
-        self.AddDecorationHandler(Decoration.EndPointDecoration)
-
     # -----------------------------------------------------------------
     def AddEdgeType(self, name, lanes = 1, pri = 70, speed = 2.0, wid = 2.5, sig = '1L', render = True, center = False) :
         etype = NetworkInfo.Collection(name = name)

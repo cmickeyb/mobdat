@@ -46,8 +46,8 @@ sys.path.append(os.path.join(os.environ.get("OPENSIM","/share/opensim"),"lib","p
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
-import time, argparse, json
-from mobdat.socbuilder import *
+import argparse, json
+from mobdat.socbuilder import Controller
 
 logger = logging.getLogger()
 
@@ -100,18 +100,7 @@ def Main() :
     
     settings = ParseConfigurationFile(options.config)
 
-    bizdata = Business.BusinessData()
-
-    for cf in settings["SocialBuilder"].get("ExtensionFiles",[]) :
-        execfile(cf,{"bizdata" : bizdata})
-        try :
-            print cf
-        except :
-            exctype, value =  sys.exc_info()[:2]
-            logger.warn('unhandled error processing extension file %s: %s/%s', cf, exctype, str(value))
-            sys.exit(-1)
-        
-    print json.dumps(bizdata.Dump(), indent=2)
+    Controller.Controller(settings)
         
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

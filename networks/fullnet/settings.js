@@ -6,6 +6,7 @@
         "SecondsPerStep" : 2.0,
         "StartTimeOfDay" : 8.0,
 	"NetworkInfoFile" : "networks/fullnet/netinfo.js",
+        "SocialInfoFile" : "networks/fullnet/socinfo.js",
         "Connectors" : ["opensim", "sumo", "social", "stats"]
     },
 

@@ -188,3 +188,33 @@ class EndPointDecoration(Decoration) :
         result['DestinationName'] = self.DestinationName
 
         return result
+
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+class CapsuleTypeDecoration(Decoration) :
+    DecorationName = 'CapsuleType'
+
+    # -----------------------------------------------------------------
+    @staticmethod
+    def Load(graph, info) :
+        ctype = CapsuleTypeDecoration(info['Name'])
+
+        return ctype
+
+    # -----------------------------------------------------------------
+    def __init__(self, name) :
+        Decoration.__init__(self)
+        self.Name = name
+
+    # -----------------------------------------------------------------
+    def Dump(self) :
+        result = Decoration.Dump(self)
+        
+        result['Name'] = self.Name
+
+        return result
+
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+CommonDecorations = [Decoration, NodeTypeDecoration, EdgeTypeDecoration, CapsuleTypeDecoration, EndPointDecoration]
+

@@ -47,11 +47,7 @@ from mobdat.common import NetworkInfo, Decoration
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
 def ConvertNodeCoordinate(prefix, p) :
-    x1 = abs(p[0])
-    dx = 'W' if p[0] < 0 else 'E'
-    y1 = abs(p[1])
-    dy = 'S' if p[1] < 0 else 'N'
-    return prefix + str(x1) + dx + str(y1) + dy
+    return NetworkInfo.Node.GenName(p[0], p[1], prefix)
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
@@ -60,23 +56,25 @@ def ConvertEdgeCoordinate(prefix, p1, p2) :
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
-PodIdentifier = {}
-def TagPod(ng, prefix, nlist) :
-    global PodIdentifier
-    if prefix not in PodIdentifier :
-        PodIdentifier[prefix] = 0
-    PodIdentifier[prefix] += 1
+CapsuleIdentifier = {}
+def TagCapsule(ng, prefix, nlist) :
+    global CapsuleIdentifier
+    if prefix not in CapsuleIdentifier :
+        CapsuleIdentifier[prefix] = 0
+    CapsuleIdentifier[prefix] += 1
 
-    podname = prefix + str(PodIdentifier[prefix])
-    pod = NetworkInfo.Collection(name = podname)
+    capsulename = prefix + str(CapsuleIdentifier[prefix])
+    capsuletype = Decoration.CapsuleTypeDecoration(prefix)
+    capsule = NetworkInfo.Collection(name = capsulename)
+    capsule.AddDecoration(capsuletype)
 
     for n in nlist :
-        pod.AddMember(n)
+        capsule.AddMember(n)
 
         ep = Decoration.EndPointDecoration.GenFromNode(n)
         n.AddDecoration(ep)
 
-    ng.AddCollection(pod)
+    ng.AddCollection(capsule)
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
@@ -128,10 +126,6 @@ def BuildNetwork(ng) :
 
     # And then set a bunch of the edges to be two lane instead
     # of the four lane edges we created for the rest of the grid
-    # ng.SetEdgeTypeByPattern('main.*[EW]0N:main.*[EW]0N',e1A)
-    # ng.SetEdgeTypeByPattern('main[0-9]*[EW][24]00[NS]:main[0-9]*[EW][24]00[NS]',e1A)
-    # ng.SetEdgeTypeByPattern('main[24]00[EW][0-9]*[NS]:main[24]00[EW][0-9]*[NS]',e1A)
-
     ng.SetEdgeTypeByPattern('main[0-9]*[EW]200[NS]=O=main[0-9]*[EW]200[NS]',e1A)
     ng.SetEdgeTypeByPattern('main[0-9]*[EW]400[NS]=O=main[0-9]*[EW]400[NS]',e1A)
 
@@ -146,7 +140,7 @@ def BuildNetwork(ng) :
     ng.GenerateGrid(-50, -250, 50, 250, 50, 50, sntype, e1B, 'plaza')
 
     # Make the east and west edges one way
-    pattern = 'plaza50W{0}{2}=O=plaza50W{1}{3}'
+    # pattern = 'plaza50W{0}{2}=O=plaza50W{1}{3}'
     for ns in range(-250, 250, 50) :
         ng.DropEdgeByName(ConvertEdgeCoordinate('plaza', (-50, ns), (-50, ns + 50)))
 
@@ -206,21 +200,21 @@ def BuildNetwork(ng) :
         for nw in range (-200, 200, 100) :
             node1 = ng.Nodes[ConvertNodeCoordinate('main', (ew, nw))]
             node2 = ng.Nodes[ConvertNodeCoordinate('main', (ew, nw + 100))]
-            TagPod(ng, 'respod', ng.GenerateResidential(node1, node2, rgenv))
+            TagCapsule(ng, 'respod', ng.GenerateResidential(node1, node2, rgenv))
 
     for nw in [-400, 400] :
         for ew in [-300, -200, 100, 200] :
             node1 = ng.Nodes[ConvertNodeCoordinate('main', (ew, nw))]
             node2 = ng.Nodes[ConvertNodeCoordinate('main', (ew + 100, nw))]
-            TagPod(ng, 'respod', ng.GenerateResidential(node1, node2, rgenv))
+            TagCapsule(ng, 'respod', ng.GenerateResidential(node1, node2, rgenv))
 
     rgenv.BothSides = False
-    TagPod(ng, 'respod', ng.GenerateResidential(ng.Nodes['main300W200N'],ng.Nodes['main400W200N'], rgenv))
-    TagPod(ng, 'respod', ng.GenerateResidential(ng.Nodes['main300E200N'],ng.Nodes['main400E200N'], rgenv))
+    TagCapsule(ng, 'respod', ng.GenerateResidential(ng.Nodes['main300W200N'],ng.Nodes['main400W200N'], rgenv))
+    TagCapsule(ng, 'respod', ng.GenerateResidential(ng.Nodes['main300E200N'],ng.Nodes['main400E200N'], rgenv))
 
     rgenv.DrivewayLength = - rgenv.DrivewayLength
-    TagPod(ng, 'respod', ng.GenerateResidential(ng.Nodes['main400W200S'],ng.Nodes['main300W200S'], rgenv))
-    TagPod(ng, 'respod', ng.GenerateResidential(ng.Nodes['main400E200S'],ng.Nodes['main300E200S'], rgenv))
+    TagCapsule(ng, 'respod', ng.GenerateResidential(ng.Nodes['main400W200S'],ng.Nodes['main300W200S'], rgenv))
+    TagCapsule(ng, 'respod', ng.GenerateResidential(ng.Nodes['main400E200S'],ng.Nodes['main300E200S'], rgenv))
 
     # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     # BUILD THE BUSINESS NEIGHBORHOODS
@@ -231,44 +225,31 @@ def BuildNetwork(ng) :
     rgenplR = NetBuilder.ResidentialGenerator(plotentry, plotnode, plotdrive, bntype, driveway = 8, bspace = 5, spacing = 5, both = False)
     rgenplL = NetBuilder.ResidentialGenerator(plotentry, plotnode, plotdrive, bntype, driveway = -8, bspace = 5, spacing = 5, both = False)
 
-    # these are the small "strip malls in the residential areas
+    # these are the small "strip malls" in the residential areas
     for n in ['main300W200S', 'main200W200S', 'main100E200S', 'main200E200S'] :
-        TagPod(ng, 'civic', ng.BuildSimpleParkingLotEW(ng.Nodes[n], pntype, rgenplR, "civic", offset=-15, slength=40, elength=60))
-        TagPod(ng, 'civic', ng.BuildSimpleParkingLotEW(ng.Nodes[n], pntype, rgenplL, "civic", offset=15, slength=40, elength=60))
+        TagCapsule(ng, 'civic', ng.BuildSimpleParkingLotEW(ng.Nodes[n], pntype, rgenplR, "civic", offset=-15, slength=40, elength=60))
+        TagCapsule(ng, 'civic', ng.BuildSimpleParkingLotEW(ng.Nodes[n], pntype, rgenplL, "civic", offset=15, slength=40, elength=60))
 
     for n in ['main300W200N', 'main200W200N', 'main100E200N', 'main200E200N'] :
-        TagPod(ng, 'civic', ng.BuildSimpleParkingLotEW(ng.Nodes[n], pntype, rgenplR, "civic", offset=-15, slength=40, elength=60))
-        TagPod(ng, 'civic', ng.BuildSimpleParkingLotEW(ng.Nodes[n], pntype, rgenplL, "civic", offset=15, slength=40, elength=60))
+        TagCapsule(ng, 'civic', ng.BuildSimpleParkingLotEW(ng.Nodes[n], pntype, rgenplR, "civic", offset=-15, slength=40, elength=60))
+        TagCapsule(ng, 'civic', ng.BuildSimpleParkingLotEW(ng.Nodes[n], pntype, rgenplL, "civic", offset=15, slength=40, elength=60))
 
     # these are the downtown work and shopping plazas
-    for n in ['plaza50W200S', 'plaza50W150S', 'plaza50W100S', 'plaza50W50S' ] :
-        TagPod(ng, 'plaza', ng.BuildSimpleParkingLotSN(ng.Nodes[n], pntype, rgenplL, "plaza", offset=15, slength = 17.5, elength=32.5))
- 
-    for n in ['plaza50W0N', 'plaza50W50N', 'plaza50W100N', 'plaza50W150N', 'plaza50W200N', 'plaza50W250N' ] :
-        TagPod(ng, 'plaza', ng.BuildSimpleParkingLotSN(ng.Nodes[n], pntype, rgenplL, "plaza", offset=15, slength = 17.5, elength=32.5))
+    for ns in range(-200, 300, 50) :
+        wname = ConvertNodeCoordinate('plaza', (-50, ns))
+        TagCapsule(ng, 'plaza', ng.BuildSimpleParkingLotSN(ng.Nodes[wname], pntype, rgenplL, "plaza", offset=25, slength = 17.5, elength=32.5))
 
-    for n in ['plaza50E250S', 'plaza50E200S', 'plaza50E150S', 'plaza50E100S', 'plaza50E50S'] :
-        TagPod(ng, 'plaza', ng.BuildSimpleParkingLotNS(ng.Nodes[n], pntype, rgenplR, "plaza", offset=-15, slength = 17.5, elength=32.5))
-
-    for n in ['plaza50E0N', 'plaza50E50N', 'plaza50E100N', 'plaza50E150N', 'plaza50E200N'] :
-        TagPod(ng, 'plaza', ng.BuildSimpleParkingLotNS(ng.Nodes[n], pntype, rgenplR, "plaza", offset=-15, slength = 17.5, elength=32.5))
+        ename = ConvertNodeCoordinate('plaza', (50, ns-50))
+        TagCapsule(ng, 'plaza', ng.BuildSimpleParkingLotNS(ng.Nodes[ename], pntype, rgenplR, "plaza", offset=-25, slength = 17.5, elength=32.5))
         
-    # these are 
+    # these are the main business areas
     for n in ['main200W300S', 'main200W200S', 'main200W100S', 'main200W0N', 'main200W100N', 'main200W200N'] : 
-        TagPod(ng, 'mall', ng.BuildSimpleParkingLotNS(ng.Nodes[n], pntype, rgenplR, "mall", offset=-30))
-        TagPod(ng, 'mall', ng.BuildSimpleParkingLotNS(ng.Nodes[n], pntype, rgenplL, "mall", offset=30))
+        TagCapsule(ng, 'mall', ng.BuildSimpleParkingLotNS(ng.Nodes[n], pntype, rgenplR, "mall", offset=-30))
+        TagCapsule(ng, 'mall', ng.BuildSimpleParkingLotNS(ng.Nodes[n], pntype, rgenplL, "mall", offset=30))
 
     for n in ['main200E300S', 'main200E200S', 'main200E100S', 'main200E0N', 'main200E100N', 'main200E200N'] : 
-        TagPod(ng, 'mall', ng.BuildSimpleParkingLotNS(ng.Nodes[n], pntype, rgenplR, "mall", offset=-30))
-        TagPod(ng, 'mall', ng.BuildSimpleParkingLotNS(ng.Nodes[n], pntype, rgenplL, "mall", offset=30))
-
-    # ng.GenerateResidential(ng.Nodes['main400W200S'],ng.Nodes['main300W200S'], rgenh)
-    # ng.GenerateResidential(ng.Nodes['main400W0N'],  ng.Nodes['main300W0N'], rgenh)
-    # ng.GenerateResidential(ng.Nodes['main400W200N'],ng.Nodes['main300W200N'], rgenh)
-
-    # ng.GenerateResidential(ng.Nodes['main400E200S'],ng.Nodes['main300E200S'], rgenh)
-    # ng.GenerateResidential(ng.Nodes['main400E0N'],  ng.Nodes['main300E0N'], rgenh)
-    # ng.GenerateResidential(ng.Nodes['main400E200N'],ng.Nodes['main300E200N'], rgenh)
+        TagCapsule(ng, 'mall', ng.BuildSimpleParkingLotNS(ng.Nodes[n], pntype, rgenplR, "mall", offset=-30))
+        TagCapsule(ng, 'mall', ng.BuildSimpleParkingLotNS(ng.Nodes[n], pntype, rgenplL, "mall", offset=30))
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

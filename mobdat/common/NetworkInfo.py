@@ -98,7 +98,10 @@ class _NetworkObject :
     # -----------------------------------------------------------------
     def LoadDecorations(self, graph, einfo) :
         for dinfo in einfo['Decorations'] :
-            self.AddDecoration(graph.LoadDecoration(dinfo))
+            # if a handler for the decoration doesn't exist, we just skip loading
+            decoration = graph.LoadDecoration(dinfo)
+            if decoration :
+                self.AddDecoration(decoration)
 
     # -----------------------------------------------------------------
     def Dump(self) :
@@ -265,9 +268,6 @@ class Network :
             netdata = json.load(fp)
 
         netinfo = Network()
-        netinfo.AddDecorationHandler(NodeTypeDecoration)
-        netinfo.AddDecorationHandler(EdgeTypeDecoration)
-        netinfo.AddDecorationHandler(EndPointDecoration)
         netinfo.Load(netdata)
 
         return netinfo
@@ -285,7 +285,8 @@ class Network :
         self.Edges = {}
         self.Nodes = {}
 
-        self.AddDecorationHandler(Decoration)
+        for dtype in CommonDecorations :
+            self.AddDecorationHandler(dtype)
 
     # -----------------------------------------------------------------
     def Dump(self) :
@@ -438,7 +439,9 @@ class Network :
         if handler :
             return handler.Load(self, dinfo)
 
-        logger.warn('no decoration handler found for type %s', dinfo['__TYPE__'])
+        # if we don't have a handler, thats ok we just dont load the 
+        # decoration, note the missing decoration in the logs however
+        logger.info('no decoration handler found for type %s', dinfo['__TYPE__'])
         return None
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
