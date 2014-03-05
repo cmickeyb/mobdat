@@ -47,41 +47,48 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class PlaceProfile :
+class Location :
 
-    def __init__(self, profiles) :
-        self.TargetProfiles = profiles
-
-    def AddProfile(self, *profiles) :
-        self.TargetProfiles.extend(profiles)
-    
-
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class ResidentialProfile(PlaceProfile) :
-    
-    def __init__(self, profiles = []) :
-        PlaceProfile.__init__(self, profiles)
-
-    def GenerateResident(self, pod) :
+    def __init__(self, capsule) :
         pass
 
+    def Dump(self) :
+        result = dict()
+        return result
+
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class BusinessProfile(PlaceProfile) :
+def restrict (val, minval, maxval):
+    if val < minval: return minval
+    if val > maxval: return maxval
+    return val
+
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+class BusinessLocation(Location) :
+    EmployeesPerNode = 20
+    CustomersPerNode = 50
+
+    def __init__(self, capsule) :
+        Location.__init__(self)
+
+        self.Capsule = capsule
+        self.Residents = []
+        self.PeakEmployeeCount = 0
+        self.PakeCustomerCount = 0
+        self.EmployeeCapacity = len(capsule.Members) * self.EmployeesPerNode
+        self.CustomerCapacity = len(capsule.Members) * self.CustomersPerNode
+
+    def Fitness(self, business) :
+        ecount = self.PeakEmployeeCount + business.PeakEmployeeCount
+        ccount = self.PeakCustomerCount + business.PeakCustomerCount
+
+        invweight = (ecount / self.EmployeeCapacity + ccount / self.CustomerCapacity) / 2.0
+        return restrict(1.0 - invweight, 0, 1.0)
+
+    def AddBusiness(self, business) :
+        self.PeakEmployeeCount += business.PeakEmployeeCount
+        self.PeakCustomerCount += business.PeakCustomerCount
+        self.Residents.append(business)
+
     
-    def __init__(self, profiles = []) :
-        PlaceProfile.__init__(self, profiles)
-
-    def GenerateResident(self, pod) :
-        pass
-
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class Place :
-
-    def __init__(self, pod, profile) :
-        self.PlaceProfile = profile
-        self.Pod = pod
-
-        self.ResidentList = []

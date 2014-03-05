@@ -65,33 +65,36 @@ class Location :
 class Residence(Location) :
     ResidentsPerNode = 5
 
-    def __init__(self, capsule) :
+    def __init__(self, capsule, node) :
         Location.__init__(self, capsule)
+
+        self.Node = node
         self.Capacity = len(capsule.Members) * Residence.ResidentsPerNode
 
+# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+CapsuleTypeMap = {}
+CapsuleMap = {}
 
-# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-def TagPlaceInfo(ng) :
-    capsuletypemap = {}
-    capsulemap = {}
+def BuildCapsuleMaps(ng) :
+    global CapsuleTypeMap
+    global CapsuleMap
+
     for collection in ng.Collections.itervalues() :
         if Decoration.CapsuleTypeDecoration.DecorationName not in collection.Decorations :
             continue
 
         typename = collection.CapsuleType.Name
-        if typename not in capsuletypemap :
-            capsuletypemap[typename] = []
+        if typename not in CapsuleTypeMap :
+            CapsuleTypeMap[typename] = []
 
-        capsuletypemap[typename].append(collection)
-        capsulemap[collection.Name] = collection
+        CapsuleTypeMap[typename].append(collection)
+        CapsuleMap[collection.Name] = collection
         print 'added %s to %s' % (collection.Name, typename)
 
-    
-                 
+# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+BuildCapsuleMaps(netinfo)
 
-# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-TagPlaceInfo(netinfo)
 
 print "Loaded fullnet builder extension file"
