@@ -13,7 +13,7 @@
     "NetworkBuilder" :
     {
 	"InjectionPrefix" : "IN",
-	"ExtensionFiles" : ["networks/fullnet/builder.py"]
+	"ExtensionFiles" : ["networks/fullnet/builder.py", "networks/fullnet/placeinfo.py"]
     },
 
     "SocialBuilder" :

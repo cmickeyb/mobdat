@@ -198,12 +198,12 @@ class CapsuleTypeDecoration(Decoration) :
     @staticmethod
     def Load(graph, info) :
         ctype = CapsuleTypeDecoration(info['Name'])
-
         return ctype
 
     # -----------------------------------------------------------------
     def __init__(self, name) :
         Decoration.__init__(self)
+
         self.Name = name
 
     # -----------------------------------------------------------------

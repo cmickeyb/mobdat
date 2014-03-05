@@ -200,21 +200,21 @@ def BuildNetwork(ng) :
         for nw in range (-200, 200, 100) :
             node1 = ng.Nodes[ConvertNodeCoordinate('main', (ew, nw))]
             node2 = ng.Nodes[ConvertNodeCoordinate('main', (ew, nw + 100))]
-            TagCapsule(ng, 'respod', ng.GenerateResidential(node1, node2, rgenv))
+            TagCapsule(ng, 'residence', ng.GenerateResidential(node1, node2, rgenv))
 
     for nw in [-400, 400] :
         for ew in [-300, -200, 100, 200] :
             node1 = ng.Nodes[ConvertNodeCoordinate('main', (ew, nw))]
             node2 = ng.Nodes[ConvertNodeCoordinate('main', (ew + 100, nw))]
-            TagCapsule(ng, 'respod', ng.GenerateResidential(node1, node2, rgenv))
+            TagCapsule(ng, 'residence', ng.GenerateResidential(node1, node2, rgenv))
 
     rgenv.BothSides = False
-    TagCapsule(ng, 'respod', ng.GenerateResidential(ng.Nodes['main300W200N'],ng.Nodes['main400W200N'], rgenv))
-    TagCapsule(ng, 'respod', ng.GenerateResidential(ng.Nodes['main300E200N'],ng.Nodes['main400E200N'], rgenv))
+    TagCapsule(ng, 'residence', ng.GenerateResidential(ng.Nodes['main300W200N'],ng.Nodes['main400W200N'], rgenv))
+    TagCapsule(ng, 'residence', ng.GenerateResidential(ng.Nodes['main300E200N'],ng.Nodes['main400E200N'], rgenv))
 
     rgenv.DrivewayLength = - rgenv.DrivewayLength
-    TagCapsule(ng, 'respod', ng.GenerateResidential(ng.Nodes['main400W200S'],ng.Nodes['main300W200S'], rgenv))
-    TagCapsule(ng, 'respod', ng.GenerateResidential(ng.Nodes['main400E200S'],ng.Nodes['main300E200S'], rgenv))
+    TagCapsule(ng, 'residence', ng.GenerateResidential(ng.Nodes['main400W200S'],ng.Nodes['main300W200S'], rgenv))
+    TagCapsule(ng, 'residence', ng.GenerateResidential(ng.Nodes['main400E200S'],ng.Nodes['main300E200S'], rgenv))
 
     # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     # BUILD THE BUSINESS NEIGHBORHOODS
