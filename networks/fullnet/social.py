@@ -179,4 +179,11 @@ for i in range(0,100) :
         print 'putting %s in %s with fitness %s' % (name, bestloc.Capsule.Name,str(bestfit))
         bestloc.AddBusiness(business)
 
+for location in BusinessLocations :
+    print "Location %s\n\t%s employees\n\t%s customers" % (location.Capsule.Name, location.PeakEmployeeCount, location.PeakCustomerCount)
+    for resident in location.Residents :
+        print "\t%s (%s)" % (resident.Name, resident.Profile.ProfileName)
+
+    print
+
 print "Loaded fullnet builder extension file"

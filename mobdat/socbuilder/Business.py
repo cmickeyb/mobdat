@@ -134,25 +134,30 @@ class BusinessProfile :
 
 
     # -------------------------------------------------------
-    def PeakServiceCount(self, day = DaysOfTheWeek.Mon) :
+    def PeakServiceCount(self, days = None) :
         """
         Compute the peak number of customers expected during the
         day. Given that the duration of visits impacts this, the
         number is really a conservative guess.
 
-        day -- DaysOfTheWeek enum
+        days -- list of DaysOfTheWeek 
         """
         
         if not self.ServiceProfile :
             return 0
 
+        if not days :
+            days = range(DaysOfTheWeek.Mon, DaysOfTheWeek.Sun + 1)
+
         # this is the *ugliest* worst performing version of this computation
         # i can imagine. just dont feel the need to do anything more clever
         # right now
         peak = 0
-        for hour in range(0, 24) :
-            count = self.ServiceProfile.Schedule.ScheduledAtTime(day, hour)
-            peak = count if peak < count else peak
+        for day in days :
+            for hour in range(0, 24) :
+                if self.ServiceProfile.Schedule.ScheduledAtTime(day, hour) :
+                    count = self.ServiceProfile.CustomerCapacity
+                    peak = count if peak < count else peak
 
         return peak
 
