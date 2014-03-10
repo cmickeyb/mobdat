@@ -42,34 +42,8 @@ mobdat.
 import os, sys
 
 from mobdat.netbuilder import *
+from mobdat.socbuilder import *
 from mobdat.common import NetworkInfo, Decoration
-
-# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class Location :
-    # -----------------------------------------------------------------
-    def __init__(self, capsule) :
-        self.Capsule = capsule
-        self.Capacity = 0
-
-    # -----------------------------------------------------------------
-    def Dump(self) :
-        result = dict()
-        result['Capsule'] = self.Capsule.Name
-        result['Capacity'] = self.Capacity
-
-        return result
-    
-# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class Residence(Location) :
-    ResidentsPerNode = 5
-
-    def __init__(self, capsule, node) :
-        Location.__init__(self, capsule)
-
-        self.Node = node
-        self.Capacity = len(capsule.Members) * Residence.ResidentsPerNode
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -95,6 +69,11 @@ def BuildCapsuleMaps(ng) :
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 BuildCapsuleMaps(netinfo)
+
+BusinessList = []
+for bcapsule in CapsuleTypeMap['plaza'] :
+    blocation = Location.BusinessLocation(bcapsule)
+    BusinessList.append(blocation)
 
 
 print "Loaded fullnet builder extension file"

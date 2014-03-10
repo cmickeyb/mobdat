@@ -39,8 +39,13 @@ social framework including people and businesses.
 """
 
 import os, sys
-from mobdat.socbuilder.Business import BusinessType, BusinessProfile, JobProfile, ServiceProfile
+from mobdat.socbuilder.Business import BusinessType, BusinessProfile, JobProfile, ServiceProfile, Business
 from mobdat.socbuilder.SocBuilder import WeeklySchedule
+from mobdat.socbuilder.Location import BusinessLocation
+
+from mobdat.common import NetworkInfo, Decoration
+import random
+
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
 JobProfiles = {}
@@ -126,3 +131,52 @@ AddFood("large-restaurant", {'parttime2' : 8, 'parttime3' : 12, 'parttime4' : 12
 AddSchool("elem-school", { 'student' : 200, 'teacher' : 10, 'admin' : 2, 'principal' : 1})
 AddSchool("middle-school", { 'student' : 300, 'teacher' : 20, 'admin' : 4, 'principal' : 2})
 AddSchool("high-school", { 'student' : 400, 'teacher' : 30, 'admin' : 8, 'principal' : 4})
+
+# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+CapsuleTypeMap = {}
+CapsuleMap = {}
+
+def BuildCapsuleMaps(ng) :
+    global CapsuleTypeMap
+    global CapsuleMap
+
+    for collection in ng.Collections.itervalues() :
+        if Decoration.CapsuleTypeDecoration.DecorationName not in collection.Decorations :
+            continue
+
+        typename = collection.CapsuleType.Name
+        if typename not in CapsuleTypeMap :
+            CapsuleTypeMap[typename] = []
+
+        CapsuleTypeMap[typename].append(collection)
+        CapsuleMap[collection.Name] = collection
+        print 'added %s to %s' % (collection.Name, typename)
+
+# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+BuildCapsuleMaps(netinfo)
+
+BusinessLocations = []
+for bcapsule in CapsuleTypeMap['plaza'] :
+    blocation = BusinessLocation(bcapsule)
+    BusinessLocations.append(blocation)
+
+for i in range(0,100) :
+    name = 'biz' + str(i)
+    profile = random.choice(bizdata.BusinessProfiles)
+    business = Business(name,profile)
+
+    bestloc = None
+    bestfit = 0
+    for location in BusinessLocations :
+        fitness = location.Fitness(business)
+        if fitness > bestfit :
+            bestfit = fitness
+            bestloc = location
+
+    if bestloc :
+        print 'putting %s in %s with fitness %s' % (name, bestloc.Capsule.Name,str(bestfit))
+        bestloc.AddBusiness(business)
+
+print "Loaded fullnet builder extension file"

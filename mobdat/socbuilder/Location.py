@@ -45,11 +45,13 @@ sys.path.append(os.path.join(os.environ.get("OPENSIM","/share/opensim"),"lib","p
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
+import random
+
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class Location :
 
-    def __init__(self, capsule) :
+    def __init__(self) :
         pass
 
     def Dump(self) :
@@ -75,7 +77,7 @@ class BusinessLocation(Location) :
         self.Capsule = capsule
         self.Residents = []
         self.PeakEmployeeCount = 0
-        self.PakeCustomerCount = 0
+        self.PeakCustomerCount = 0
         self.EmployeeCapacity = len(capsule.Members) * self.EmployeesPerNode
         self.CustomerCapacity = len(capsule.Members) * self.CustomersPerNode
 
@@ -84,7 +86,7 @@ class BusinessLocation(Location) :
         ccount = self.PeakCustomerCount + business.PeakCustomerCount
 
         invweight = (ecount / self.EmployeeCapacity + ccount / self.CustomerCapacity) / 2.0
-        return restrict(1.0 - invweight, 0, 1.0)
+        return restrict(random.gauss(1.0 - invweight, 0.1), 0, 1.0)
 
     def AddBusiness(self, business) :
         self.PeakEmployeeCount += business.PeakEmployeeCount

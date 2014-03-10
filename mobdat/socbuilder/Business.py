@@ -126,7 +126,7 @@ class BusinessProfile :
         for hour in range(0, 24) :
             count = 0
             for jp in self.JobList :
-                count += demand if jp.Schedule.ScheduledAtTime(day, hour) else 0
+                count += jp.Demand if jp.Schedule.ScheduledAtTime(day, hour) else 0
 
             peak = count if peak < count else peak
 
@@ -143,6 +143,9 @@ class BusinessProfile :
         day -- DaysOfTheWeek enum
         """
         
+        if not self.ServiceProfile :
+            return 0
+
         # this is the *ugliest* worst performing version of this computation
         # i can imagine. just dont feel the need to do anything more clever
         # right now
@@ -184,23 +187,21 @@ class BusinessProfile :
 class Business :
 
     # -------------------------------------------------------
-    def __init__(self, name, profile, location) :
+    def __init__(self, name, profile, location = None) :
         """
         The Business class captures data about a specific business
         that operates in the simulation.
 
         name -- name of the business
         profile -- a BusinessProfile
-        location -- a Pod
+        location -- a capsule object
         """
 
         self.Name = name
         self.Profile = profile
         self.Location = location
         self.PeakEmployeeCount = self.Profile.PeakEmployeeCount()
-        self.PeakCustomerCount = self.Profile.PeakCustomerCount()
-
-        self.Location.AddBusiness(self, self.PeakEmployeeCount)
+        self.PeakCustomerCount = self.Profile.PeakServiceCount()
 
     # -------------------------------------------------------
     def Dump(self) :
