@@ -49,17 +49,6 @@ import random
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class Location :
-
-    def __init__(self) :
-        pass
-
-    def Dump(self) :
-        result = dict()
-        return result
-
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 def restrict (val, minval, maxval):
     if val < minval: return minval
     if val > maxval: return maxval
@@ -67,20 +56,58 @@ def restrict (val, minval, maxval):
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class BusinessLocation(Location) :
-    EmployeesPerNode = 20
-    CustomersPerNode = 50
+class Location :
 
-    def __init__(self, capsule) :
+    # -----------------------------------------------------------------
+    def __init__(self) :
+        pass
+
+    # -----------------------------------------------------------------
+    def Dump(self) :
+        result = dict()
+        return result
+
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+class BusinessLocationProfile :
+    # -----------------------------------------------------------------
+    def __init__(self, employees = 20, customers = 50) :
+        self.EmployeesPerNode = employees
+        self.CustomersPerNode = customers
+
+    # -----------------------------------------------------------------
+    def Fitness(self, business) :
+        return 1
+
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+class ResidentialLocationProfile :
+    # -----------------------------------------------------------------
+    def __init__(self, residents = 5) :
+        self.ResidentsPerNode = residents
+        self.TargetSalary = 0
+
+    # -----------------------------------------------------------------
+    def Fitness(self, resident) :
+        return 1
+
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+class BusinessLocation(Location) :
+
+    # -----------------------------------------------------------------
+    def __init__(self, capsule, profile) :
         Location.__init__(self)
 
         self.Capsule = capsule
+        self.BusinessProfile = profile
         self.Residents = []
         self.PeakEmployeeCount = 0
         self.PeakCustomerCount = 0
-        self.EmployeeCapacity = len(capsule.Members) * self.EmployeesPerNode
-        self.CustomerCapacity = len(capsule.Members) * self.CustomersPerNode
+        self.EmployeeCapacity = len(capsule.Members) * self.BusinessProfile.EmployeesPerNode
+        self.CustomerCapacity = len(capsule.Members) * self.BusinessProfile.CustomersPerNode
 
+    # -----------------------------------------------------------------
     def Fitness(self, business) :
         ecount = self.PeakEmployeeCount + business.PeakEmployeeCount
         ccount = self.PeakCustomerCount + business.PeakCustomerCount
@@ -88,6 +115,35 @@ class BusinessLocation(Location) :
         invweight = (ecount / self.EmployeeCapacity + ccount / self.CustomerCapacity) / 2.0
         return restrict(random.gauss(1.0 - invweight, 0.1), 0, 1.0)
 
+    # -----------------------------------------------------------------
+    def AddBusiness(self, business) :
+        self.PeakEmployeeCount += business.PeakEmployeeCount
+        self.PeakCustomerCount += business.PeakCustomerCount
+        self.Residents.append(business)
+
+
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+class ResidentialLocation(Location) :
+
+    # -----------------------------------------------------------------
+    def __init__(self, capsule, profile) :
+        Location.__init__(self)
+
+        self.Capsule = capsule
+        self.ResidentialProfile = profile
+        self.Residents = {}
+        self.Capacity = len(capsule.Members) * self.ResidentialProfile.ResidentsPerNode
+
+    # -----------------------------------------------------------------
+    def Fitness(self, business) :
+        ecount = self.PeakEmployeeCount + business.PeakEmployeeCount
+        ccount = self.PeakCustomerCount + business.PeakCustomerCount
+
+        invweight = (ecount / self.EmployeeCapacity + ccount / self.CustomerCapacity) / 2.0
+        return restrict(random.gauss(1.0 - invweight, 0.1), 0, 1.0)
+
+    # -----------------------------------------------------------------
     def AddBusiness(self, business) :
         self.PeakEmployeeCount += business.PeakEmployeeCount
         self.PeakCustomerCount += business.PeakCustomerCount
