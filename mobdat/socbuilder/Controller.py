@@ -48,7 +48,7 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "
 
 import json
 
-from mobdat.common import NetworkInfo, NetworkSettings
+from mobdat.common import BusinessInfo, NetworkInfo, NetworkSettings
 from mobdat.socbuilder import *
 
 logger = logging.getLogger(__name__)
@@ -66,7 +66,7 @@ def Controller(settings) :
     netinfofile = settings["General"].get("NetworkInfoFile","netinfo.js")
     netinfo = NetworkInfo.Network.LoadFromFile(netinfofile)
     netsettings = NetworkSettings.NetworkSettings(settings)
-    bizdata = Business.BusinessData()
+    bizdata = BusinessInfo.BusinessInfo(netinfo)
 
     for cf in settings["SocialBuilder"].get("ExtensionFiles",[]) :
         try :

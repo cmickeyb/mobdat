@@ -41,7 +41,7 @@ social framework including people and businesses.
 import os, sys
 from mobdat.socbuilder.Business import BusinessType, BusinessProfile, JobProfile, ServiceProfile, Business
 from mobdat.socbuilder.SocBuilder import WeeklySchedule
-from mobdat.socbuilder.Location import BusinessLocation
+from mobdat.socbuilder.Location import BusinessLocation, BusinessLocationProfile
 
 from mobdat.common import NetworkInfo, Decoration
 import random
@@ -91,7 +91,7 @@ def AddCompanyProfile(company, joblist) :
         jp.Demand = joblist[j]
         company.JobList.append(jp)
 
-    bizdata.BusinessProfiles.append(company)
+    bizdata.BusinessProfiles[company.ProfileName] = company
 
 def AddFactory(name, joblist) :
     company = BusinessProfile(name, BusinessType.Factory)
@@ -109,8 +109,9 @@ def AddFood(name, joblist, bizhours, customers, stime = 1.5) :
     
     AddCompanyProfile(company, joblist)
 
-def AddSchool(name, joblist) :
+def AddSchool(name, joblist, students) :
     company = BusinessProfile(name, BusinessType.School)
+    company.ServiceProfile = ServiceProfile(WeeklySchedule.WorkWeekSchedule(8.0, 15.0), students, 7.0)
     AddCompanyProfile(company, joblist)
 
 # -----------------------------------------------------------------
@@ -128,62 +129,89 @@ AddFood("fastfood", {'parttime1' : 5, 'parttime2' : 8, 'parttime3' : 8, 'parttim
 AddFood("small-restaurant", {'parttime2' : 4, 'parttime3' : 6, 'parttime4' : 4, 'manager' : 2}, (12.0, 24.0), 20, 1.5)
 AddFood("large-restaurant", {'parttime2' : 8, 'parttime3' : 12, 'parttime4' : 12, 'manager' : 3}, (12.0, 24.0), 40, 1.5)
 
-AddSchool("elem-school", { 'student' : 200, 'teacher' : 10, 'admin' : 2, 'principal' : 1})
-AddSchool("middle-school", { 'student' : 300, 'teacher' : 20, 'admin' : 4, 'principal' : 2})
-AddSchool("high-school", { 'student' : 400, 'teacher' : 30, 'admin' : 8, 'principal' : 4})
+#AddSchool("elem-school", { 'student' : 200, 'teacher' : 10, 'admin' : 2, 'principal' : 1})
+#AddSchool("middle-school", { 'student' : 300, 'teacher' : 20, 'admin' : 4, 'principal' : 2})
+#AddSchool("high-school", { 'student' : 400, 'teacher' : 30, 'admin' : 8, 'principal' : 4})
+
+AddSchool("elem-school", { 'teacher' : 10, 'admin' : 2, 'principal' : 1}, 200)
+AddSchool("middle-school", { 'teacher' : 20, 'admin' : 4, 'principal' : 2}, 300)
+AddSchool("high-school", { 'teacher' : 30, 'admin' : 8, 'principal' : 4}, 400)
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-CapsuleTypeMap = {}
-CapsuleMap = {}
+def AddBizLocProfile(name, employees, customers, types) :
+    global bizdata
 
-def BuildCapsuleMaps(ng) :
-    global CapsuleTypeMap
-    global CapsuleMap
+    profile = BusinessLocationProfile(name, employees, customers, types)
+    bizdata.BusinessLocationProfiles[name] = profile
 
-    for collection in ng.Collections.itervalues() :
-        if Decoration.CapsuleTypeDecoration.DecorationName not in collection.Decorations :
-            continue
-
-        typename = collection.CapsuleType.Name
-        if typename not in CapsuleTypeMap :
-            CapsuleTypeMap[typename] = []
-
-        CapsuleTypeMap[typename].append(collection)
-        CapsuleMap[collection.Name] = collection
-        print 'added %s to %s' % (collection.Name, typename)
+AddBizLocProfile('plaza', 75, 25,  { BusinessType.Factory : 1.0, BusinessType.Service : 0.5, BusinessType.Food : 0.25 })
+AddBizLocProfile('mall',  20, 75,  { BusinessType.Factory : 0.1, BusinessType.Service : 1.0, BusinessType.Food : 1.0 })
+AddBizLocProfile('civic', 20, 150, { BusinessType.School : 1.0, BusinessType.Civic : 1.0 })
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-BuildCapsuleMaps(netinfo)
+for capsuletype in ['plaza', 'mall', 'civic'] :
+    for bcapsule in bizdata.CapsuleTypeMap[capsuletype] :
+        blocation = BusinessLocation(bcapsule, bizdata.BusinessLocationProfiles[capsuletype])
+        bizdata.BusinessLocations.append(blocation)
 
-BusinessLocations = []
-for bcapsule in CapsuleTypeMap['plaza'] :
-    blocation = BusinessLocation(bcapsule)
-    BusinessLocations.append(blocation)
+# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+def PlaceBusinesses() :
+    global bizdata
 
-for i in range(0,100) :
-    name = 'biz' + str(i)
-    profile = random.choice(bizdata.BusinessProfiles)
-    business = Business(name,profile)
+    profiles = {}
+    for profname, profile in bizdata.BusinessProfiles.iteritems() :
+        profiles[profname] = profile
 
-    bestloc = None
-    bestfit = 0
-    for location in BusinessLocations :
-        fitness = location.Fitness(business)
-        if fitness > bestfit :
-            bestfit = fitness
-            bestloc = location
+    for i in range(0,1000) :
+        pname = random.choice(profiles.keys())
+        profile = profiles[pname]
 
-    if bestloc :
-        print 'putting %s in %s with fitness %s' % (name, bestloc.Capsule.Name,str(bestfit))
-        bestloc.AddBusiness(business)
+        name = profile.ProfileName + str(i)
+        business = Business(name, profile)
 
-for location in BusinessLocations :
-    print "Location %s\n\t%s employees\n\t%s customers" % (location.Capsule.Name, location.PeakEmployeeCount, location.PeakCustomerCount)
-    for resident in location.Residents :
-        print "\t%s (%s)" % (resident.Name, resident.Profile.ProfileName)
+        bestloc = None
+        bestfit = 0
+        for location in bizdata.BusinessLocations :
+            fitness = location.Fitness(business)
+            # print 'view %s: %s = %s' % (name, location.Capsule.Name, fitness)
+            if fitness > bestfit :
+                bestfit = fitness
+                bestloc = location
 
-    print
+        if bestloc :
+            # print 'putting %s in %s with fitness %s' % (name, bestloc.Capsule.Name,str(bestfit))
+            bestloc.AddBusiness(business)
+            business.Location = bestloc
+            bizdata.CompanyList[name] = business
+        else :
+            # print 'could not find a location for %s' % name            
+            del profiles[pname]
+            if len(profiles) == 0 :
+                # print 'no more businesses fit'
+                break
 
+PlaceBusinesses()
+
+# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+JobCount = {}
+
+for biz in bizdata.CompanyList.itervalues() :
+    bprof = biz.Profile
+    for job in bprof.JobList :
+        if job.ProfileName not in JobCount :
+            JobCount[job.ProfileName] = 0
+        JobCount[job.ProfileName] += job.Demand
+
+people = 0
+names = sorted(JobCount.keys())
+for name in names :
+    count = JobCount[name]
+    print "%s \t %s" % (name, count)
+    people += count
+
+print "Total Jobs: " + str(people)
 print "Loaded fullnet builder extension file"

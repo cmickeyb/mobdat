@@ -213,24 +213,6 @@ class Business :
         result = dict()
         result["Name"] = self.Name
         result["Profile"] = self.Profile.ProfileName
-        result["Location"] = self.Location.LocationName
-        return result
-
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class BusinessData :
-    def __init__(self) :
-        self.BusinessProfiles = []
-        self.CompanyList = []
-
-    def Dump(self) :
-        result = dict()
-        result['CompanyList'] = []
-        for c in self.CompanyList :
-            result['CompanyList'].append(c.Dump())
-
-        result['BusinessProfiles'] = []
-        for p in self.BusinessProfiles :
-            result['BusinessProfiles'].append(p.Dump())
 
         return result
+

@@ -71,13 +71,26 @@ class Location :
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class BusinessLocationProfile :
     # -----------------------------------------------------------------
-    def __init__(self, employees = 20, customers = 50) :
+    def __init__(self, name, employees = 20, customers = 50, types = {}) :
+        self.ProfileName = name
         self.EmployeesPerNode = employees
         self.CustomersPerNode = customers
+        self.PreferredBusinessTypes = types
 
     # -----------------------------------------------------------------
     def Fitness(self, business) :
-        return 1
+        btype = business.Profile.BusinessType
+        return self.PreferredBusinessTypes[btype] if btype in self.PreferredBusinessTypes else 0.0
+
+    # -----------------------------------------------------------------
+    def Dump(self) :
+        result = dict()
+        result['Profile'] = self.ProfileName
+        result['EmployeesPerNode'] = self.EmployeesPerNode
+        result['CustomersPerNode'] = self.CustomersPerNode
+        result['PreferredBusinessTypes'] = self.PreferredBusinessTypes        
+
+        return result
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -100,20 +113,36 @@ class BusinessLocation(Location) :
         Location.__init__(self)
 
         self.Capsule = capsule
-        self.BusinessProfile = profile
+        self.LocationProfile = profile
         self.Residents = []
         self.PeakEmployeeCount = 0
         self.PeakCustomerCount = 0
-        self.EmployeeCapacity = len(capsule.Members) * self.BusinessProfile.EmployeesPerNode
-        self.CustomerCapacity = len(capsule.Members) * self.BusinessProfile.CustomersPerNode
+        self.EmployeeCapacity = len(capsule.Members) * self.LocationProfile.EmployeesPerNode
+        self.CustomerCapacity = len(capsule.Members) * self.LocationProfile.CustomersPerNode
+
+    # -----------------------------------------------------------------
+    @property
+    def SourceName(self) :
+        node = random.choice(self.Capsule.Members)
+        return node.EndPoint.SourceName
+
+    # -----------------------------------------------------------------
+    @property
+    def DestinationName(self) :
+        node = random.choice(self.Capsule.Members)
+        return node.EndPoint.DestinationName
 
     # -----------------------------------------------------------------
     def Fitness(self, business) :
         ecount = self.PeakEmployeeCount + business.PeakEmployeeCount
         ccount = self.PeakCustomerCount + business.PeakCustomerCount
 
+        if ecount >= self.EmployeeCapacity : return 0
+        if ccount >= self.CustomerCapacity : return 0
+
         invweight = (ecount / self.EmployeeCapacity + ccount / self.CustomerCapacity) / 2.0
-        return restrict(random.gauss(1.0 - invweight, 0.1), 0, 1.0)
+        fitness = restrict(random.gauss(1.0 - invweight, 0.1), 0, 1.0) * self.LocationProfile.Fitness(business) 
+        return fitness
 
     # -----------------------------------------------------------------
     def AddBusiness(self, business) :
@@ -121,6 +150,17 @@ class BusinessLocation(Location) :
         self.PeakCustomerCount += business.PeakCustomerCount
         self.Residents.append(business)
 
+    # -----------------------------------------------------------------
+    def Dump(self) :
+        result = Location.Dump(self)
+        result['Capsule'] = self.Capsule.Name
+        result['LocationProfile'] = self.LocationProfile.ProfileName
+        
+        result['Residents'] = []
+        for b in self.Residents :
+            result['Residents'].append(b.Name)
+
+        return result
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
