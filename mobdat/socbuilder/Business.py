@@ -64,8 +64,8 @@ class JobProfile :
         self.Demand = demand
 
     # -------------------------------------------------------
-    def Copy(self) :
-        return JobProfile(self.ProfileName, self.Salary, self.FlexibleHours, self.Schedule, self.Demand)
+    def Copy(self, demand = None) :
+        return JobProfile(self.ProfileName, self.Salary, self.FlexibleHours, self.Schedule, demand or self.Demand)
 
     # -------------------------------------------------------
     def Dump(self) :

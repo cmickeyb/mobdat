@@ -66,11 +66,11 @@ def Controller(settings) :
     netinfofile = settings["General"].get("NetworkInfoFile","netinfo.js")
     netinfo = NetworkInfo.Network.LoadFromFile(netinfofile)
     netsettings = NetworkSettings.NetworkSettings(settings)
-    bizdata = BusinessInfo.BusinessInfo(netinfo)
+    bizinfo = BusinessBuilder.BusinessBuilder(netinfo)
 
     for cf in settings["SocialBuilder"].get("ExtensionFiles",[]) :
         try :
-            execfile(cf,{"netinfo" : netinfo, "bizdata" : bizdata})
+            execfile(cf,{"netinfo" : netinfo, "bizinfo" : bizinfo})
             logger.info('loaded extension file %s', cf)
         except :
             exctype, value =  sys.exc_info()[:2]
@@ -82,4 +82,4 @@ def Controller(settings) :
     logger.info('saving business data to %s',socinfofile)
 
     with open(socinfofile, "w") as fp :
-        json.dump(bizdata.Dump(), fp, indent=2, ensure_ascii=True)
+        json.dump(bizinfo.Dump(), fp, indent=2, ensure_ascii=True)

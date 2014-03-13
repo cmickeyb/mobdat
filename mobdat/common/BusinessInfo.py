@@ -60,7 +60,7 @@ class BusinessInfo :
     def __init__(self, netinfo) :
         self.JobProfiles = {}
         self.BusinessProfiles = {}
-        self.CompanyList = {}
+        self.BusinessList = {}
 
         self.BusinessLocationProfiles = {}
         self.BusinessLocations = []
@@ -86,9 +86,9 @@ class BusinessInfo :
     # -----------------------------------------------------------------
     def Dump(self) :
         result = dict()
-        result['CompanyList'] = []
-        for c in self.CompanyList.itervalues() :
-            result['CompanyList'].append(c.Dump())
+        result['BusinessList'] = []
+        for c in self.BusinessList.itervalues() :
+            result['BusinessList'].append(c.Dump())
 
         result['BusinessProfiles'] = []
         for p in self.BusinessProfiles.itervalues() :
