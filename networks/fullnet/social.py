@@ -39,9 +39,10 @@ social framework including people and businesses.
 """
 
 import os, sys
-from mobdat.socbuilder.Business import BusinessType, Business
-from mobdat.socbuilder.BusinessBuilder import WeeklySchedule
-from mobdat.socbuilder.Location import BusinessLocation, BusinessLocationProfile
+
+from mobdat.common.BusinessInfo import WeeklySchedule
+from mobdat.common.Business import BusinessType, Business
+from mobdat.common.Location import BusinessLocation, BusinessLocationProfile
 
 from mobdat.common import NetworkInfo, Decoration
 import random
