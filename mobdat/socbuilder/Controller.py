@@ -48,8 +48,8 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "
 
 import json
 
-from mobdat.common import BusinessInfo, NetworkInfo, NetworkSettings
-from mobdat.socbuilder import BusinessBuilder
+from mobdat.common import NetworkInfo, NetworkSettings
+from mobdat.socbuilder import BusinessBuilder, PersonBuilder
 
 logger = logging.getLogger(__name__)
 
@@ -67,19 +67,27 @@ def Controller(settings) :
     netinfo = NetworkInfo.Network.LoadFromFile(netinfofile)
     netsettings = NetworkSettings.NetworkSettings(settings)
     bizinfo = BusinessBuilder.BusinessBuilder(netinfo)
+    perinfo = PersonBuilder.PersonBuilder(netinfo)
 
     for cf in settings["SocialBuilder"].get("ExtensionFiles",[]) :
         try :
-            execfile(cf,{"netinfo" : netinfo, "bizinfo" : bizinfo})
+            execfile(cf,{"netinfo" : netinfo, "bizinfo" : bizinfo, "perinfo" : perinfo})
             logger.info('loaded extension file %s', cf)
         except :
             exctype, value =  sys.exc_info()[:2]
             logger.warn('unhandled error processing extension file %s: %s/%s', cf, exctype, str(value))
             sys.exit(-1)
 
-    # write the network information back out to the netinfo file
-    socinfofile = settings["General"].get("SocialInfoFile","socinfo.js")
-    logger.info('saving business data to %s',socinfofile)
+    # write the business information out to the file
+    bizinfofile = settings["General"].get("BusinessInfoFile","bizinfo.js")
+    logger.info('saving business data to %s',bizinfofile)
 
-    with open(socinfofile, "w") as fp :
+    with open(bizinfofile, "w") as fp :
         json.dump(bizinfo.Dump(), fp, indent=2, ensure_ascii=True)
+
+    # write the person information out to the file
+    perinfofile = settings["General"].get("PersonInfoFile","perinfo.js")
+    logger.info('saving person data to %s',perinfofile)
+
+    with open(perinfofile, "w") as fp :
+        json.dump(perinfo.Dump(), fp, indent=2, ensure_ascii=True)

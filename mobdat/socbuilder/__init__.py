@@ -38,4 +38,4 @@ mobdat simulator. The modules in this package generate profiles
 for people and places.
 """
 
-__all__ = [ 'Controller', 'BusinessBuilder' ]
+__all__ = [ 'Controller', 'BusinessBuilder', 'PersonBuilder' ]

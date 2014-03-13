@@ -4,4 +4,5 @@
 *.xml
 build
 netinfo.js
-socinfo.js
+bizinfo.js
+perinfo.js

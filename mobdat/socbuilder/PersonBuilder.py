@@ -29,7 +29,7 @@ LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
 
-@file    SocBuilder.py
+@file    PersonBuilder.py
 @author  Mic Bowman
 @date    2014-02-04
 
@@ -37,25 +37,21 @@ This file defines routines used to build profiles for people and places.
 
 """
 
-import os, sys
-import logging
+import os, sys, warnings, copy
 
 # we need to import python modules from the $SUMO_HOME/tools directory
 sys.path.append(os.path.join(os.environ.get("OPENSIM","/share/opensim"),"lib","python"))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class PersonProfile :
-    def __init__(self, name) :
-        self.ProfileName = name
+from mobdat.common.PersonInfo import PersonInfo
+from mobdat.common.Person import *
+from mobdat.common.Location import *
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class Person :
-    def __init__(self, name, profile, job, location = None) :
-        self.Name = name
-        self.Profile = profile
-        self.Job = job
-        self.Location = location
+class PersonBuilder(PersonInfo) :
+
+    # -----------------------------------------------------------------
+    def __init__(self, netinfo) :
+        PersonInfo.__init__(self, netinfo)
