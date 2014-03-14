@@ -39,7 +39,7 @@ clock ticks.
 
 """
 
-import os, sys
+import os, sys, traceback
 import logging
 
 sys.path.append(os.path.join(os.environ.get("OPENSIM","/share/opensim"),"lib","python"))
@@ -50,12 +50,13 @@ import json
 
 from mobdat.common import NetworkInfo, NetworkSettings
 from mobdat.socbuilder import BusinessBuilder, PersonBuilder
+from mobdat.netbuilder import NetBuilder, OpenSimBuilder, SumoBuilder
 
 logger = logging.getLogger(__name__)
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
-def Controller(settings) :
+def Controller(settings, pushlist) :
     """
     Controller is the main entry point for driving the network building process.
 
@@ -63,20 +64,34 @@ def Controller(settings) :
     settings -- nested dictionary with variables for configuring the connectors
     """
 
-    netinfofile = settings["General"].get("NetworkInfoFile","netinfo.js")
-    netinfo = NetworkInfo.Network.LoadFromFile(netinfofile)
     netsettings = NetworkSettings.NetworkSettings(settings)
+
+    netinfo = NetBuilder.Network()
     bizinfo = BusinessBuilder.BusinessBuilder(netinfo)
     perinfo = PersonBuilder.PersonBuilder(netinfo)
 
-    for cf in settings["SocialBuilder"].get("ExtensionFiles",[]) :
+    for cf in settings["Builder"].get("ExtensionFiles",[]) :
         try :
             execfile(cf,{"netinfo" : netinfo, "bizinfo" : bizinfo, "perinfo" : perinfo})
             logger.info('loaded extension file %s', cf)
         except :
-            exctype, value =  sys.exc_info()[:2]
-            logger.warn('unhandled error processing extension file %s: %s/%s', cf, exctype, str(value))
+            logger.warn('unhandled error processing extension file %s\n%s', cf, traceback.format_exc(1))
             sys.exit(-1)
+
+    for push in pushlist :
+        if push == 'opensim' :
+            os = OpenSimBuilder.OpenSimBuilder(settings, netinfo, netsettings)
+            os.PushNetworkToOpenSim()
+        elif push == 'sumo' :
+            sc = SumoBuilder.SumoBuilder(settings, netinfo, netsettings)
+            sc.PushNetworkToSumo()
+
+    # write the network information back out to the netinfo file
+    netinfofile = settings["General"].get("NetworkInfoFile","netinfo.js")
+    logger.info('saving network data to %s',netinfofile)
+
+    with open(netinfofile, "w") as fp :
+        json.dump(netinfo.Dump(), fp, indent=2, ensure_ascii=True)
 
     # write the business information out to the file
     bizinfofile = settings["General"].get("BusinessInfoFile","bizinfo.js")

@@ -130,24 +130,6 @@ class BusinessInfo :
         self.BusinessLocationProfiles = {}
         self.BusinessLocations = []
 
-        self.CapsuleTypeMap = {}
-        self.CapsuleMap = {}
-
-        self._BuildCapsuleMaps(netinfo)
-
-    # -----------------------------------------------------------------
-    def _BuildCapsuleMaps(self, netinfo) :
-        for collection in netinfo.Collections.itervalues() :
-            if CapsuleTypeDecoration.DecorationName not in collection.Decorations :
-                continue
-
-            typename = collection.CapsuleType.Name
-            if typename not in self.CapsuleTypeMap :
-                self.CapsuleTypeMap[typename] = []
-
-            self.CapsuleTypeMap[typename].append(collection)
-            self.CapsuleMap[collection.Name] = collection
-
     # -----------------------------------------------------------------
     def Dump(self) :
         result = dict()

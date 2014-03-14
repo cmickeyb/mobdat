@@ -48,7 +48,7 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
 import time, argparse, json
-from mobdat.netbuilder import Controller
+from mobdat.socbuilder import Controller
 
 logger = logging.getLogger()
 
@@ -103,7 +103,7 @@ def ParseCommandLine(config, args) :
     parser.add_argument('--scene', help='name of the scene in which the operation is performed')
     parser.add_argument('--endpoint', help='URL of the simulator dispatcher')
     parser.add_argument('--asendpoint', help='UDP endpoint of the dispatcher')
-    parser.add_argument('pushlist', help='Connectors to apply to the network', nargs="+")
+    parser.add_argument('pushlist', help='Connectors to apply to the network', nargs="*")
 
     options = parser.parse_args(args)
 

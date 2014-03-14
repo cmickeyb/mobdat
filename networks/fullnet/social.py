@@ -44,9 +44,22 @@ from mobdat.common.BusinessInfo import WeeklySchedule
 from mobdat.common.Business import BusinessType, Business
 from mobdat.common.Location import BusinessLocation, BusinessLocationProfile
 from mobdat.common.Person import Person
+from mobdat.common.Decoration import *
 
-from mobdat.common import NetworkInfo, Decoration
 import random
+
+# -----------------------------------------------------------------
+# -----------------------------------------------------------------
+CapsuleTypeMap = {}
+for collection in netinfo.Collections.itervalues() :
+    if CapsuleTypeDecoration.DecorationName not in collection.Decorations :
+        continue
+
+    typename = collection.CapsuleType.Name
+    if typename not in CapsuleTypeMap :
+        CapsuleTypeMap[typename] = []
+
+    CapsuleTypeMap[typename].append(collection)
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
@@ -111,7 +124,7 @@ bizinfo.AddBusinessLocationProfile('civic', 20, 150, { BusinessType.School : 1.0
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 for capsuletype in ['plaza', 'mall', 'civic'] :
-    for bcapsule in bizinfo.CapsuleTypeMap[capsuletype] :
+    for bcapsule in CapsuleTypeMap.get(capsuletype, []) :
         bizinfo.AddBusinessLocation(bcapsule, bizinfo.BusinessLocationProfiles[capsuletype])
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -154,7 +167,7 @@ PlaceBusinesses()
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 perinfo.AddResidentialLocationProfile('worker', 25)
 
-for rcapsule in bizinfo.CapsuleTypeMap['residence'] :
+for rcapsule in CapsuleTypeMap['residence'] :
     perinfo.AddResidentialLocation(rcapsule, perinfo.ResidentialLocationProfiles['worker'])
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

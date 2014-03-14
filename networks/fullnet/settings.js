@@ -11,15 +11,9 @@
         "Connectors" : ["opensim", "sumo", "social", "stats"]
     },
 
-    "NetworkBuilder" :
+    "Builder" :
     {
-	"InjectionPrefix" : "IN",
-	"ExtensionFiles" : ["networks/fullnet/builder.py", "networks/fullnet/placeinfo.py"]
-    },
-
-    "SocialBuilder" :
-    {
-	"ExtensionFiles" : ["networks/fullnet/social.py"]
+	"ExtensionFiles" : ["networks/fullnet/builder.py", "networks/fullnet/social.py"]
     },
 
     "SocialConnector" :
