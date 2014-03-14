@@ -58,8 +58,8 @@ class PersonInfo :
         self.PersonProfiles = {}
         self.PersonList = {}
 
-        self.PersonLocationProfiles = {}
-        self.PersonLocations = []
+        self.ResidentialLocationProfiles = {}
+        self.ResidentialLocations = []
 
     # -----------------------------------------------------------------
     def Dump(self) :
@@ -73,12 +73,12 @@ class PersonInfo :
         for profile in self.PersonProfiles.itervalues() :
             result['PersonProfiles'].append(profile.Dump())
 
-        result['PersonLocations'] = []
-        for pl in self.PersonLocations :
-            result['PersonLocations'].append(pl.Dump())
+        result['ResidentialLocations'] = []
+        for pl in self.ResidentialLocations :
+            result['ResidentialLocations'].append(pl.Dump())
 
-        result['PersonLocationProfiles'] = []
-        for plp in self.PersonLocationProfiles.itervalues() :
-            result['PersonLocationProfiles'].append(plp.Dump())
+        result['ResidentialLocationProfiles'] = []
+        for plp in self.ResidentialLocationProfiles.itervalues() :
+            result['ResidentialLocationProfiles'].append(plp.Dump())
 
         return result

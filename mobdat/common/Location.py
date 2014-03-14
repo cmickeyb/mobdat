@@ -56,23 +56,28 @@ def restrict (val, minval, maxval):
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class Location :
+class LocationProfile :
 
     # -----------------------------------------------------------------
-    def __init__(self) :
-        pass
+    def __init__(self, name) :
+        self.ProfileName = name
 
     # -----------------------------------------------------------------
     def Dump(self) :
         result = dict()
+        result['Profile'] = self.ProfileName
+
         return result
+        
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class BusinessLocationProfile :
+class BusinessLocationProfile(LocationProfile) :
+
     # -----------------------------------------------------------------
     def __init__(self, name, employees = 20, customers = 50, types = {}) :
-        self.ProfileName = name
+        LocationProfile.__init__(self, name)
+
         self.EmployeesPerNode = employees
         self.CustomersPerNode = customers
         self.PreferredBusinessTypes = types
@@ -84,8 +89,8 @@ class BusinessLocationProfile :
 
     # -----------------------------------------------------------------
     def Dump(self) :
-        result = dict()
-        result['Profile'] = self.ProfileName
+        result = LocationProfile.Dump(self)
+
         result['EmployeesPerNode'] = self.EmployeesPerNode
         result['CustomersPerNode'] = self.CustomersPerNode
         result['PreferredBusinessTypes'] = self.PreferredBusinessTypes        
@@ -94,15 +99,42 @@ class BusinessLocationProfile :
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class ResidentialLocationProfile :
+class ResidentialLocationProfile(LocationProfile) :
+
     # -----------------------------------------------------------------
-    def __init__(self, residents = 5) :
+    def __init__(self, name, residents = 5) :
+        LocationProfile.__init__(self, name)
+
         self.ResidentsPerNode = residents
-        self.TargetSalary = 0
 
     # -----------------------------------------------------------------
     def Fitness(self, resident) :
         return 1
+
+    # -----------------------------------------------------------------
+    def Dump(self) :
+        result = LocationProfile.Dump(self)
+
+        result['ResidentsPerNode'] = self.ResidentsPerNode
+
+        return result
+
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+class Location :
+
+    # -----------------------------------------------------------------
+    def __init__(self, capsule, profile) :
+        self.Capsule = capsule
+        self.LocationProfile = profile
+
+    # -----------------------------------------------------------------
+    def Dump(self) :
+        result = dict()
+        result['Capsule'] = self.Capsule.Name
+        result['LocationProfile'] = self.LocationProfile.ProfileName
+
+        return result
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -110,15 +142,13 @@ class BusinessLocation(Location) :
 
     # -----------------------------------------------------------------
     def __init__(self, capsule, profile) :
-        Location.__init__(self)
+        Location.__init__(self, capsule, profile)
 
-        self.Capsule = capsule
-        self.LocationProfile = profile
         self.Residents = []
         self.PeakEmployeeCount = 0
         self.PeakCustomerCount = 0
-        self.EmployeeCapacity = len(capsule.Members) * self.LocationProfile.EmployeesPerNode
-        self.CustomerCapacity = len(capsule.Members) * self.LocationProfile.CustomersPerNode
+        self.EmployeeCapacity = len(self.Capsule.Members) * self.LocationProfile.EmployeesPerNode
+        self.CustomerCapacity = len(self.Capsule.Members) * self.LocationProfile.CustomersPerNode
 
     # -----------------------------------------------------------------
     @property
@@ -153,8 +183,6 @@ class BusinessLocation(Location) :
     # -----------------------------------------------------------------
     def Dump(self) :
         result = Location.Dump(self)
-        result['Capsule'] = self.Capsule.Name
-        result['LocationProfile'] = self.LocationProfile.ProfileName
         
         result['Residents'] = []
         for b in self.Residents :
@@ -164,29 +192,78 @@ class BusinessLocation(Location) :
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+class Residence :
+    # -----------------------------------------------------------------
+    def __init__(self, capsule, node) :
+        self.Capsule = capsule
+        self.Node = node
+        self.Residents = []
+
+    # -----------------------------------------------------------------
+    @property
+    def SourceName(self) :
+        return node.EndPoint.SourceName
+
+    # -----------------------------------------------------------------
+    @property
+    def DestinationName(self) :
+        return node.EndPoint.DestinationName
+
+    # -----------------------------------------------------------------
+    def Dump(self) :
+        result = dict()
+        result['Node'] = self.Node.Name
+
+        result['Residents'] = []
+        for r in self.Residents :
+            result['Residents'].append(r.Name)
+
+        return result
+    
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class ResidentialLocation(Location) :
 
     # -----------------------------------------------------------------
     def __init__(self, capsule, profile) :
-        Location.__init__(self)
+        Location.__init__(self, capsule, profile)
 
-        self.Capsule = capsule
-        self.ResidentialProfile = profile
-        self.Residents = {}
-        self.Capacity = len(capsule.Members) * self.ResidentialProfile.ResidentsPerNode
+        self.ResidentCount = 0
+        self.ResidentCapacity = len(self.Capsule.Members) * self.LocationProfile.ResidentsPerNode
 
-    # -----------------------------------------------------------------
-    def Fitness(self, business) :
-        ecount = self.PeakEmployeeCount + business.PeakEmployeeCount
-        ccount = self.PeakCustomerCount + business.PeakCustomerCount
-
-        invweight = (ecount / self.EmployeeCapacity + ccount / self.CustomerCapacity) / 2.0
-        return restrict(random.gauss(1.0 - invweight, 0.1), 0, 1.0)
+        self.ResidenceList = {}
+        for node in self.Capsule.Members :
+            self.ResidenceList[node.Name] = Residence(self.Capsule, node)
 
     # -----------------------------------------------------------------
-    def AddBusiness(self, business) :
-        self.PeakEmployeeCount += business.PeakEmployeeCount
-        self.PeakCustomerCount += business.PeakCustomerCount
-        self.Residents.append(business)
+    def Fitness(self, person) :
+        if self.ResidentCount >= self.ResidentCapacity : return 0
 
-    
+        invweight = self.ResidentCount / self.ResidentCapacity
+        return restrict(random.gauss(1.0 - invweight, 0.1), 0, 1.0) * self.LocationProfile.Fitness(person)
+
+    # -----------------------------------------------------------------
+    def AddPerson(self, person) :
+        bestcnt = self.LocationProfile.ResidentsPerNode + 1
+        bestfit = None
+
+        for residence in self.ResidenceList.itervalues() :
+            if len(residence.Residents) < bestcnt :
+                bestcnt = len(residence.Residents)
+                bestfit = residence
+
+        if bestfit :
+            self.ResidentCount += 1
+            bestfit.Residents.append(person)
+
+        return bestfit
+
+    # -----------------------------------------------------------------
+    def Dump(self) :
+        result = Location.Dump(self)
+
+        result['ResidenceList'] = []
+        for residence in self.ResidenceList.itervalues() :
+            result['ResidenceList'].append(residence.Dump())
+
+        return result

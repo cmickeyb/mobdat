@@ -55,3 +55,31 @@ class PersonBuilder(PersonInfo) :
     # -----------------------------------------------------------------
     def __init__(self, netinfo) :
         PersonInfo.__init__(self, netinfo)
+
+    # -----------------------------------------------------------------
+    def AddPersonProfile(self, name) :
+        self.PersonProfiles[name] = PersonProfile(name)
+
+    # -----------------------------------------------------------------
+    def AddResidentialLocationProfile(self, name, residents) :
+        self.ResidentialLocationProfiles[name] = ResidentialLocationProfile(name, residents)
+
+    # -----------------------------------------------------------------
+    def AddResidentialLocation(self, capsule, profile) :
+        self.ResidentialLocations.append(ResidentialLocation(capsule, profile))
+
+    # -----------------------------------------------------------------
+    def PlacePerson(self, person) :
+        bestloc = None
+        bestfit = 0
+        for location in self.ResidentialLocations :
+            fitness = location.Fitness(person)
+            if fitness > bestfit :
+                bestfit = fitness
+                bestloc = location
+
+        if bestloc :
+            person.Location = bestloc.AddPerson(person)
+            self.PersonList[person.Name] = person
+
+        return bestloc

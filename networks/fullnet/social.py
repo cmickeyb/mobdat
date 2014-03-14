@@ -43,6 +43,7 @@ import os, sys
 from mobdat.common.BusinessInfo import WeeklySchedule
 from mobdat.common.Business import BusinessType, Business
 from mobdat.common.Location import BusinessLocation, BusinessLocationProfile
+from mobdat.common.Person import Person
 
 from mobdat.common import NetworkInfo, Decoration
 import random
@@ -115,6 +116,15 @@ for capsuletype in ['plaza', 'mall', 'civic'] :
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+NameCounts = {}
+def GenName(prefix) :
+    if prefix not in NameCounts :
+        NameCounts[prefix] = 0
+    NameCounts[prefix] += 1
+    return prefix + str(NameCounts[prefix])
+
+# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 def PlaceBusinesses() :
     global bizinfo
 
@@ -122,12 +132,12 @@ def PlaceBusinesses() :
     for profname, profile in bizinfo.BusinessProfiles.iteritems() :
         profiles[profname] = profile
 
-    for i in range(0,1000) :
+    while len(profiles) > 0 :
         # this is a uniform distribution of businesses from the options
         pname = random.choice(profiles.keys())
         profile = profiles[pname]
 
-        name = profile.ProfileName + str(i)
+        name = GenName(profile.ProfileName)
         business = Business(name, profile)
 
         location = bizinfo.PlaceBusiness(business)
@@ -136,28 +146,66 @@ def PlaceBusinesses() :
         # have fitness of 0... so don't try again
         if not location :
             del profiles[pname]
-            if len(profiles) == 0 :
-                break
 
 PlaceBusinesses()
 
+
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-JobCount = {}
+perinfo.AddResidentialLocationProfile('worker', 25)
 
-for biz in bizinfo.BusinessList.itervalues() :
-    bprof = biz.Profile
-    for job in bprof.JobList :
-        if job.ProfileName not in JobCount :
-            JobCount[job.ProfileName] = 0
-        JobCount[job.ProfileName] += job.Demand
+for rcapsule in bizinfo.CapsuleTypeMap['residence'] :
+    perinfo.AddResidentialLocation(rcapsule, perinfo.ResidentialLocationProfiles['worker'])
 
-people = 0
-names = sorted(JobCount.keys())
-for name in names :
-    count = JobCount[name]
-    print "%s \t %s" % (name, count)
-    people += count
+# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
-print "Total Jobs: " + str(people)
+perinfo.AddPersonProfile('worker')
+perinfo.AddPersonProfile('student')
+perinfo.AddPersonProfile('homemaker')
+
+def PlacePeople() :
+    global bizinfo, perinfo
+
+    profile = perinfo.PersonProfiles['worker']
+
+    for biz in bizinfo.BusinessList.itervalues() :
+        bprof = biz.Profile
+        for job in bprof.JobList :
+            for p in range(0, job.Demand) :
+                name = GenName(profile.ProfileName)
+                person = Person(name, profile, biz, job)
+                location = perinfo.PlacePerson(person)
+                if not location :
+                    print 'ran out of residences after worker %s' % name
+                    return
+
+PlacePeople()
+
+# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+def CountJobs() :
+    global bizinfo
+    JobCount = {}
+
+    for biz in bizinfo.BusinessList.itervalues() :
+        bprof = biz.Profile
+        for job in bprof.JobList :
+            if job.ProfileName not in JobCount :
+                JobCount[job.ProfileName] = 0
+            JobCount[job.ProfileName] += job.Demand
+
+    people = 0
+    names = sorted(JobCount.keys())
+    for name in names :
+        count = JobCount[name]
+        print "%s \t %s" % (name, count)
+        people += count
+
+    print "Total Jobs: " + str(people)
+
+CountJobs()
+
+# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 print "Loaded fullnet builder extension file"

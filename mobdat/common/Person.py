@@ -48,14 +48,34 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class PersonProfile :
+
+    # -----------------------------------------------------------------
     def __init__(self, name) :
         self.ProfileName = name
 
+    # -----------------------------------------------------------------
+    def Dump(self) :
+        result = dict()
+        result['ProfileName'] = self.ProfileName
+
+        return result
+        
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class Person :
-    def __init__(self, name, profile, job, location = None) :
+    def __init__(self, name, profile, employer, job, location = None) :
         self.Name = name
         self.Profile = profile
+        self.Employer = employer
         self.Job = job
         self.Location = location
+
+    # -----------------------------------------------------------------
+    def Dump(self) :
+        result = dict()
+        result['Name'] = self.Name
+        result['ProfileName'] = self.Profile.ProfileName
+        result['Employer'] = self.Employer.Name
+        result['Job'] = self.Job.ProfileName
+
+        return result
