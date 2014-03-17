@@ -33,9 +33,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 @author  Mic Bowman
 @date    2013-12-03
 
-This file defines entry points for the socbuilder package in the
+This file defines entry points for the builder package in the
 mobdat simulator. The modules in this package generate profiles 
 for people and places.
 """
 
-__all__ = [ 'Controller', 'BusinessBuilder', 'PersonBuilder' ]
+__all__ = [ 'BusinessBuilder', 'NetBuilder', 'PersonBuilder', 'OpenSimBuilder', 'SumoBuilder' ]

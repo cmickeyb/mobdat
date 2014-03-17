@@ -41,7 +41,7 @@ mobdat.
 
 import os, sys
 
-from mobdat.netbuilder import *
+from mobdat.builder import *
 from mobdat.common import NetworkInfo, Decoration
 
 # -----------------------------------------------------------------

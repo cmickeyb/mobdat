@@ -49,8 +49,7 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "
 import json
 
 from mobdat.common import NetworkInfo, NetworkSettings
-from mobdat.socbuilder import BusinessBuilder, PersonBuilder
-from mobdat.netbuilder import NetBuilder, OpenSimBuilder, SumoBuilder
+from mobdat.builder import *
 
 logger = logging.getLogger(__name__)
 
