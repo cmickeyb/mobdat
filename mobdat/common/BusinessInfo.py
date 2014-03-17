@@ -122,31 +122,62 @@ class WeeklySchedule :
 class BusinessInfo :
 
     # -----------------------------------------------------------------
+    @staticmethod
+    def LoadFromFile(netinfo, filename) :
+        with open(filename, 'r') as fp :
+            bizdata = json.load(fp)
+
+        bizinfo = BusinessInfo(netinfo)
+        bizinfo.Load(bizdata)
+
+        return bizinfo
+
+    # -----------------------------------------------------------------
     def __init__(self, netinfo) :
         self.JobProfiles = {}
+
         self.BusinessProfiles = {}
         self.BusinessList = {}
 
         self.BusinessLocationProfiles = {}
-        self.BusinessLocations = []
+        self.BusinessLocations = {}
+
+    # -----------------------------------------------------------------
+    def Load(self, bizdata) :
+        for lpinfo in bizdata['BusinessLocationProfiles'] :
+            locprofile = BusinessLocationProfile.Load(lpinfo)
+            self.BusinessLocationProfiles[locprofile.ProfileName] = locprofile
+
+        for linfo in bizdata['BusinessLocations'] :
+            location = BusinessLocation.Load(linfo)
+            self.BusinessLocations[location.Capsule.Name] = location
+
+        for pinfo in bizdata['BusinessProfiles'] :
+            profile = BusinessProfile.Load(pinfo)
+            self.BusinessProfiles[profile.ProfileName] = profile
+
+        for binfo in bizdata['BusinessList'] :
+            business = Business.Load(binfo)
+            self.BusinessList[business.Name] = business
 
     # -----------------------------------------------------------------
     def Dump(self) :
         result = dict()
-        result['BusinessList'] = []
-        for c in self.BusinessList.itervalues() :
-            result['BusinessList'].append(c.Dump())
 
-        result['BusinessProfiles'] = []
-        for p in self.BusinessProfiles.itervalues() :
-            result['BusinessProfiles'].append(p.Dump())
+        result['BusinessLocationProfiles'] = []
+        for blp in self.BusinessLocationProfiles.itervalues() :
+            result['BusinessLocationProfiles'].append(blp.Dump())
 
         result['BusinessLocations'] = []
         for bl in self.BusinessLocations :
             result['BusinessLocations'].append(bl.Dump())
 
-        result['BusinessLocationProfiles'] = []
-        for blp in self.BusinessLocationProfiles.itervalues() :
-            result['BusinessLocationProfiles'].append(blp.Dump())
+        result['BusinessProfiles'] = []
+        for p in self.BusinessProfiles.itervalues() :
+            result['BusinessProfiles'].append(p.Dump())
+
+        result['BusinessList'] = []
+        for c in self.BusinessList.itervalues() :
+            result['BusinessList'].append(c.Dump())
 
         return result

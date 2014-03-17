@@ -75,6 +75,16 @@ class LocationProfile :
 class BusinessLocationProfile(LocationProfile) :
 
     # -----------------------------------------------------------------
+    @staticmethod
+    def Load(info) :
+        profile = BusinessLocationProfile(info['ProfileName'])
+        profile.EmployeesPerNode = info['EmployeesPerNode']
+        profile.CustomersPerNode = info['CustomersPerNode']
+        profile.PreferredBusinessTypes = info['PreferredBusinessTypes']  # should this be a copy?
+
+        return profile
+
+    # -----------------------------------------------------------------
     def __init__(self, name, employees = 20, customers = 50, types = {}) :
         LocationProfile.__init__(self, name)
 
@@ -100,6 +110,14 @@ class BusinessLocationProfile(LocationProfile) :
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class ResidentialLocationProfile(LocationProfile) :
+
+    # -----------------------------------------------------------------
+    @staticmethod
+    def Load(info) :
+        profile = BusinessLocationProfile(info['ProfileName'])
+        profile.ResidentsPerNode = info['ResidentsPerNode']
+
+        return profile
 
     # -----------------------------------------------------------------
     def __init__(self, name, residents = 5) :
@@ -139,6 +157,15 @@ class Location :
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class BusinessLocation(Location) :
+
+    # -----------------------------------------------------------------
+    @staticmethod
+    def Load(netinfo, bizinfo, info) :
+        capsule = netinfo.CapsuleMap[info['Capsule']]
+        profile = bizinfo.BusinessLocationProfiles[info['LocationProfile']]
+        location = BusinessLocation(capsule, profile)
+
+        return location
 
     # -----------------------------------------------------------------
     def __init__(self, capsule, profile) :
@@ -183,11 +210,6 @@ class BusinessLocation(Location) :
     # -----------------------------------------------------------------
     def Dump(self) :
         result = Location.Dump(self)
-        
-        result['Residents'] = []
-        for b in self.Residents :
-            result['Residents'].append(b.Name)
-
         return result
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -209,20 +231,18 @@ class Residence :
     def DestinationName(self) :
         return node.EndPoint.DestinationName
 
-    # -----------------------------------------------------------------
-    def Dump(self) :
-        result = dict()
-        result['Node'] = self.Node.Name
-
-        result['Residents'] = []
-        for r in self.Residents :
-            result['Residents'].append(r.Name)
-
-        return result
-    
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class ResidentialLocation(Location) :
+
+    # -----------------------------------------------------------------
+    @staticmethod
+    def Load(netinfo, perinfo, info) :
+        capsule = netinfo.CapsuleMap[info['Capsule']]
+        profile = perinfo.ResidentialLocationProfiles[info['LocationProfile']]
+        location = ResidentialLocation(capsule, profile)
+
+        return location
 
     # -----------------------------------------------------------------
     def __init__(self, capsule, profile) :
@@ -259,11 +279,18 @@ class ResidentialLocation(Location) :
         return bestfit
 
     # -----------------------------------------------------------------
+    def AddPersonToNode(self, person, nodename) :
+        """
+        AddPersonToNode -- add a person to a specific node
+
+        person -- an object of type Person
+        nodename -- the string name of a node in the capsule
+        """
+
+        self.ResidenceList[nodename].Residents.append(person)
+        self.ResidentCount += 1
+
+    # -----------------------------------------------------------------
     def Dump(self) :
         result = Location.Dump(self)
-
-        result['ResidenceList'] = []
-        for residence in self.ResidenceList.itervalues() :
-            result['ResidenceList'].append(residence.Dump())
-
         return result

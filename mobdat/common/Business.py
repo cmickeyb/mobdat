@@ -92,7 +92,11 @@ class ServiceProfile :
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class BusinessProfile :
-
+    
+    # -------------------------------------------------------
+    @staticmethod
+    def Load(pinfo) :
+        
     # -------------------------------------------------------
     def __init__(self, name, biztype) :
         """
@@ -192,6 +196,18 @@ class BusinessProfile :
 class Business :
 
     # -------------------------------------------------------
+    @staticmethod
+    def Load(bizinfo, info) :
+        name = info['Name']
+        profile = bizinfo.BusinessProfiles[info['Profile']]
+        location = bizinfo.BusinessLocations[info['Location']]
+
+        business = Business(name, profile, location)
+        location.AddBusiness(business)
+
+        return business
+
+    # -------------------------------------------------------
     def __init__(self, name, profile, location = None) :
         """
         The Business class captures data about a specific business
@@ -213,6 +229,6 @@ class Business :
         result = dict()
         result["Name"] = self.Name
         result["Profile"] = self.Profile.ProfileName
-
+        result["Location"] = self.Location.Capsule.Name
         return result
 
