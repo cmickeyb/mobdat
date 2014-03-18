@@ -48,8 +48,10 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "
 
 import platform, time, threading, cmd, readline
 import EventRouter, EventTypes
-from mobdat.common import NetworkInfo, NetworkSettings
+from mobdat.common import NetworkSettings, NetworkInfo, BusinessInfo, PersonInfo, LocationInfo
 from multiprocessing import Process
+
+import json
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
@@ -177,6 +179,30 @@ class MobdatController(cmd.Cmd) :
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
+def InitializeDataBindings(settings) :
+    netinfofile = settings["General"].get("NetworkInfoFile","netinfo.js")
+    logger.info('loading network data from %s',netinfofile)
+    netinfo = NetworkInfo.Network.LoadFromFile(netinfofile)
+
+    # load location information
+    locinfofile = settings["General"].get("LocationInfoFile","locinfo.js")
+    logger.info('loading location data from %s',locinfofile)
+    locinfo = LocationInfo.LocationInfo.LoadFromFile(locinfofile, netinfo)
+
+    # write the business information out to the file
+    bizinfofile = settings["General"].get("BusinessInfoFile","bizinfo.js")
+    logger.info('loading business data from %s',bizinfofile)
+    bizinfo = BusinessInfo.BusinessInfo.LoadFromFile(bizinfofile, locinfo)
+
+    # write the person information out to the file
+    perinfofile = settings["General"].get("PersonInfoFile","perinfo.js")
+    logger.info('loading person data from %s',perinfofile)
+    perinfo = PersonInfo.PersonInfo.LoadFromFile(perinfofile, locinfo, bizinfo)
+
+    return {"netinfo" : netinfo, "locinfo" : locinfo, "bizinfo" : bizinfo, "perinfo" : perinfo}
+
+# -----------------------------------------------------------------
+# -----------------------------------------------------------------
 def Controller(settings) :
     """
     Controller is the main entry point for driving the simulation.
@@ -185,9 +211,8 @@ def Controller(settings) :
     settings -- nested dictionary with variables for configuring the connectors
     """
 
-    netinfofile = settings["General"].get("NetworkInfoFile","netinfo.js")
-    netinfo = NetworkInfo.Network.LoadFromFile(netinfofile)
     netsettings = NetworkSettings.NetworkSettings(settings)
+    dbbindings = InitializeDataBindings(settings)
 
     cnames = settings["General"].get("Connectors",['sumo', 'opensim', 'social', 'stats'])
 
@@ -200,7 +225,7 @@ def Controller(settings) :
             logger.warn('skipping unknown simulation connector; %s' % (cname))
             continue
 
-        connector = _SimulationControllers[cname](evrouter, settings, netinfo, netsettings)
+        connector = _SimulationControllers[cname](evrouter, settings, dbbindings, netsettings)
         connproc = Process(target=connector.SimulationStart, args=())
         connproc.start()
         connectors.append(connproc)

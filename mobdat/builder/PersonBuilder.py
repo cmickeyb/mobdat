@@ -53,8 +53,8 @@ from mobdat.common.Location import *
 class PersonBuilder(PersonInfo) :
 
     # -----------------------------------------------------------------
-    def __init__(self, netinfo) :
-        PersonInfo.__init__(self, netinfo)
+    def __init__(self) :
+        PersonInfo.__init__(self)
 
     # -----------------------------------------------------------------
     def AddPersonProfile(self, name) :
@@ -66,13 +66,13 @@ class PersonBuilder(PersonInfo) :
 
     # -----------------------------------------------------------------
     def AddResidentialLocation(self, capsule, profile) :
-        self.ResidentialLocations.append(ResidentialLocation(capsule, profile))
+        self.ResidentialLocations[capsule.Name] = ResidentialLocation(capsule, profile)
 
     # -----------------------------------------------------------------
     def PlacePerson(self, person) :
         bestloc = None
         bestfit = 0
-        for location in self.ResidentialLocations :
+        for location in self.ResidentialLocations.itervalues() :
             fitness = location.Fitness(person)
             if fitness > bestfit :
                 bestfit = fitness

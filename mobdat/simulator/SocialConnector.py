@@ -93,15 +93,11 @@ class Trip :
 class SocialConnector(EventHandler.EventHandler, BaseConnector.BaseConnector) :
            
     # -----------------------------------------------------------------
-    def __init__(self, evrouter, settings, netinfo, netsettings) :
+    def __init__(self, evrouter, settings, dbbindings, netsettings) :
         EventHandler.EventHandler.__init__(self, evrouter)
-        BaseConnector.BaseConnector.__init__(self, settings)
+        BaseConnector.BaseConnector.__init__(self, settings, dbbindings, netsettings)
 
         self.__Logger = logging.getLogger(__name__)
-
-        # Save network information
-        self.NetInfo = netinfo
-        self.NetSettings = netsettings
 
         self.VehicleNumber = 1
         self.VehicleMap = {}

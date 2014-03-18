@@ -48,74 +48,12 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
 from mobdat.common.ValueTypes import DaysOfTheWeek
-from Decoration import *
+from mobdat.common.Location import *
+from mobdat.common.Business import *
+
 import json
 
 logger = logging.getLogger(__name__)
-
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class WeeklySchedule :
-    # -----------------------------------------------------------------
-    @staticmethod
-    def WorkWeekSchedule(stime, etime) :
-        sched = [[] for x in range(DaysOfTheWeek.Mon, DaysOfTheWeek.Sun + 1)]
-
-        # work week
-        for d in range(DaysOfTheWeek.Mon, DaysOfTheWeek.Sat) :
-            sched[d].append((stime,etime))
-
-        return WeeklySchedule(sched)
-
-    # -----------------------------------------------------------------
-    @staticmethod
-    def FullWeekSchedule(stime, etime) :
-        sched = [[] for x in range(DaysOfTheWeek.Mon, DaysOfTheWeek.Sun + 1)]
-
-        # work week
-        for d in range(DaysOfTheWeek.Mon, DaysOfTheWeek.Sun + 1) :
-            sched[d].append((stime,etime))
-
-        return WeeklySchedule(sched)
-
-    # -----------------------------------------------------------------
-    @staticmethod
-    def SpecialSchedule(**keywords) :
-        sched = [[] for x in range(DaysOfTheWeek.Mon, DaysOfTheWeek.Sun + 1)]
-
-        for key in keywords :
-            if isinstance(keywords[key], tuple) :
-                sched[DaysOfTheWeek.__dict__[key]].append(keywords[key])
-            elif isinstance(keywords[key], list) :
-                sched[DaysOfTheWeek.__dict__[key]].extend(keywords[key])
-
-        return WeeklySchedule(sched)
-
-    # -----------------------------------------------------------------
-    def __init__(self, schedule) :
-        for d in range(DaysOfTheWeek.Mon, DaysOfTheWeek.Sun + 1) :
-            self.__dict__[DaysOfTheWeek.KeyName[d]] = schedule[d]
-
-    # -----------------------------------------------------------------
-    def ScheduleForDay(self, day) :
-        day = day % (DaysOfTheWeek.Sun + 1)
-        return sorted(self.__dict__[DaysOfTheWeek.KeyName[day]], key= lambda sched: sched[0])
-
-    # -----------------------------------------------------------------
-    def ScheduledAtTime(self, day, time) :
-        time = time % 24
-        for sched in self.ScheduleForDay(day) :
-            if sched[0] <= time and time <= sched[1] :
-                return True
-
-        return False
-
-    # -----------------------------------------------------------------
-    def Dump(self) :
-        result = []
-        for d in range(DaysOfTheWeek.Mon, DaysOfTheWeek.Sun + 1) :
-            result.append(self.ScheduleForDay(d))
-        return result
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -123,19 +61,17 @@ class BusinessInfo :
 
     # -----------------------------------------------------------------
     @staticmethod
-    def LoadFromFile(netinfo, filename) :
+    def LoadFromFile(filename, locinfo) :
         with open(filename, 'r') as fp :
             bizdata = json.load(fp)
 
-        bizinfo = BusinessInfo(netinfo)
-        bizinfo.Load(bizdata)
+        bizinfo = BusinessInfo()
+        bizinfo.Load(bizdata, locinfo)
 
         return bizinfo
 
     # -----------------------------------------------------------------
-    def __init__(self, netinfo) :
-        self.JobProfiles = {}
-
+    def __init__(self) :
         self.BusinessProfiles = {}
         self.BusinessList = {}
 
@@ -143,13 +79,13 @@ class BusinessInfo :
         self.BusinessLocations = {}
 
     # -----------------------------------------------------------------
-    def Load(self, bizdata) :
+    def Load(self, bizdata, locinfo) :
         for lpinfo in bizdata['BusinessLocationProfiles'] :
             locprofile = BusinessLocationProfile.Load(lpinfo)
             self.BusinessLocationProfiles[locprofile.ProfileName] = locprofile
 
         for linfo in bizdata['BusinessLocations'] :
-            location = BusinessLocation.Load(linfo)
+            location = BusinessLocation.Load(linfo, locinfo, self)
             self.BusinessLocations[location.Capsule.Name] = location
 
         for pinfo in bizdata['BusinessProfiles'] :
@@ -157,7 +93,7 @@ class BusinessInfo :
             self.BusinessProfiles[profile.ProfileName] = profile
 
         for binfo in bizdata['BusinessList'] :
-            business = Business.Load(binfo)
+            business = Business.Load(binfo, self)
             self.BusinessList[business.Name] = business
 
     # -----------------------------------------------------------------

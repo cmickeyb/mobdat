@@ -46,6 +46,7 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
 from mobdat.common.ValueTypes import MakeEnum, DaysOfTheWeek
+from mobdat.common.Schedule import WeeklySchedule
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -54,6 +55,17 @@ BusinessType = MakeEnum('Unknown', 'Factory', 'Service', 'Civic', 'Entertainment
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class JobProfile :
+
+    # -------------------------------------------------------
+    @staticmethod
+    def Load(pinfo) :
+        profilename = pinfo['ProfileName']
+        salary = pinfo['Salary']
+        flexible = pinfo['FlexibleHours']
+        schedule = WeeklySchedule(pinfo['Schedule'])
+        demand = pinfo['Demand']
+
+        return JobProfile(profilename, salary, flexible, schedule, demand)
 
     # -------------------------------------------------------
     def __init__(self, name, salary, flexible, schedule, demand = 0) :
@@ -78,6 +90,15 @@ class JobProfile :
 class ServiceProfile :
 
     # -------------------------------------------------------
+    @staticmethod
+    def Load(pinfo) :
+        bizhours = WeeklySchedule(pinfo['Schedule'])
+        capacity = pinfo['CustomerCapacity']
+        servicetime = pinfo['ServiceTime']
+
+        return ServiceProfile(bizhours, capacity, servicetime)
+
+    # -------------------------------------------------------
     def __init__(self, bizhours, capacity, servicetime) :
         self.Schedule = bizhours
         self.CustomerCapacity = capacity
@@ -96,7 +117,18 @@ class BusinessProfile :
     # -------------------------------------------------------
     @staticmethod
     def Load(pinfo) :
-        pass
+        name = pinfo['ProfileName']
+        biztype = pinfo['BusinessType']
+
+        profile = BusinessProfile(name, biztype)
+        
+        if 'ServiceProfile' in pinfo and pinfo['ServiceProfile'] :
+            profile.ServiceProfile = ServiceProfile.Load(pinfo['ServiceProfile'])
+
+        for jinfo in pinfo['JobList'] :
+            profile.JobList.append(JobProfile.Load(jinfo))
+
+        return profile
 
     # -------------------------------------------------------
     def __init__(self, name, biztype) :
@@ -181,7 +213,9 @@ class BusinessProfile :
         
     # -------------------------------------------------------
     def Dump(self) :
-        result = self.__dict__.copy()
+        result = dict()
+        result['ProfileName'] = self.ProfileName
+        result['BusinessType'] = self.BusinessType
 
         if self.ServiceProfile :
             result['ServiceProfile'] = self.ServiceProfile.Dump()
@@ -198,7 +232,7 @@ class Business :
 
     # -------------------------------------------------------
     @staticmethod
-    def Load(bizinfo, info) :
+    def Load(info, bizinfo) :
         name = info['Name']
         profile = bizinfo.BusinessProfiles[info['Profile']]
         location = bizinfo.BusinessLocations[info['Location']]

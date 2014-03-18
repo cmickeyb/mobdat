@@ -48,18 +48,7 @@ from mobdat.common.Decoration import *
 
 import random
 
-# -----------------------------------------------------------------
-# -----------------------------------------------------------------
-CapsuleTypeMap = {}
-for collection in netinfo.Collections.itervalues() :
-    if CapsuleTypeDecoration.DecorationName not in collection.Decorations :
-        continue
-
-    typename = collection.CapsuleType.Name
-    if typename not in CapsuleTypeMap :
-        CapsuleTypeMap[typename] = []
-
-    CapsuleTypeMap[typename].append(collection)
+locinfo.BuildCapsuleMaps(netinfo)
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
@@ -124,7 +113,7 @@ bizinfo.AddBusinessLocationProfile('civic', 20, 150, { BusinessType.School : 1.0
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 for capsuletype in ['plaza', 'mall', 'civic'] :
-    for bcapsule in CapsuleTypeMap.get(capsuletype, []) :
+    for bcapsule in locinfo.CapsuleTypeMap.get(capsuletype, []) :
         bizinfo.AddBusinessLocation(bcapsule, bizinfo.BusinessLocationProfiles[capsuletype])
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -167,7 +156,7 @@ PlaceBusinesses()
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 perinfo.AddResidentialLocationProfile('worker', 25)
 
-for rcapsule in CapsuleTypeMap['residence'] :
+for rcapsule in locinfo.CapsuleTypeMap['residence'] :
     perinfo.AddResidentialLocation(rcapsule, perinfo.ResidentialLocationProfiles['worker'])
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

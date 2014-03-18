@@ -53,8 +53,10 @@ from mobdat.common.Location import *
 class BusinessBuilder(BusinessInfo) :
 
     # -----------------------------------------------------------------
-    def __init__(self, netinfo) :
-        BusinessInfo.__init__(self, netinfo)
+    def __init__(self) :
+        BusinessInfo.__init__(self)
+
+        self.JobProfiles = {}
 
     # -----------------------------------------------------------------
     def AddJobProfile(self, name, salary, flexible, hours) :

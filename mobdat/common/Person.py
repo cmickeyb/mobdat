@@ -45,9 +45,17 @@ sys.path.append(os.path.join(os.environ.get("OPENSIM","/share/opensim"),"lib","p
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
+from mobdat.common.Business import JobProfile
+
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class PersonProfile :
+
+    # -----------------------------------------------------------------
+    @staticmethod
+    def Load(info) :
+        name = info['ProfileName']
+        return PersonProfile(name)
 
     # -----------------------------------------------------------------
     def __init__(self, name) :
@@ -63,6 +71,22 @@ class PersonProfile :
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class Person :
+
+    # -----------------------------------------------------------------
+    @staticmethod
+    def Load(info, locinfo, bizinfo, perinfo) :
+        name = info['Name']
+        profile = perinfo.PersonProfiles[info['ProfileName']]
+        employer = bizinfo.BusinessList[info['Employer']]
+        job = JobProfile.Load(info['Job'])
+
+        person = Person(name, profile, employer, job)
+        rezlocation = perinfo.ResidentialLocations[info['CapsuleName']]
+        person.Location = rezlocation.AddPersonToNode(person, info['NodeName'])
+
+        return person
+
+    # -----------------------------------------------------------------
     def __init__(self, name, profile, employer, job, location = None) :
         self.Name = name
         self.Profile = profile
@@ -76,6 +100,8 @@ class Person :
         result['Name'] = self.Name
         result['ProfileName'] = self.Profile.ProfileName
         result['Employer'] = self.Employer.Name
-        result['Job'] = self.Job.ProfileName
+        result['Job'] = self.Job.Dump()
+        result['CapsuleName'] = self.Location.Capsule.Name
+        result['NodeName'] = self.Location.Node.Name
 
         return result

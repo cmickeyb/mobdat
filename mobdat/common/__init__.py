@@ -37,4 +37,4 @@ This package defines modules for the mobdat simulation environment
 
 """
 
-__all__ = ['Business', 'BusinessInfo', 'Decoration', 'Location', 'NetworkInfo', 'NetworkSettings', 'Person', 'PersonInfo', 'ValueTypes']
+__all__ = ['Business', 'BusinessInfo', 'Decoration', 'Location', 'LocationInfo', 'NetworkInfo', 'NetworkSettings', 'Person', 'PersonInfo', 'ValueTypes']

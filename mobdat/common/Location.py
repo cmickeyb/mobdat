@@ -65,7 +65,7 @@ class LocationProfile :
     # -----------------------------------------------------------------
     def Dump(self) :
         result = dict()
-        result['Profile'] = self.ProfileName
+        result['ProfileName'] = self.ProfileName
 
         return result
         
@@ -114,7 +114,7 @@ class ResidentialLocationProfile(LocationProfile) :
     # -----------------------------------------------------------------
     @staticmethod
     def Load(info) :
-        profile = BusinessLocationProfile(info['ProfileName'])
+        profile = ResidentialLocationProfile(info['ProfileName'])
         profile.ResidentsPerNode = info['ResidentsPerNode']
 
         return profile
@@ -160,8 +160,8 @@ class BusinessLocation(Location) :
 
     # -----------------------------------------------------------------
     @staticmethod
-    def Load(netinfo, bizinfo, info) :
-        capsule = netinfo.CapsuleMap[info['Capsule']]
+    def Load(info, locinfo, bizinfo) :
+        capsule = locinfo.CapsuleMap[info['Capsule']]
         profile = bizinfo.BusinessLocationProfiles[info['LocationProfile']]
         location = BusinessLocation(capsule, profile)
 
@@ -237,8 +237,8 @@ class ResidentialLocation(Location) :
 
     # -----------------------------------------------------------------
     @staticmethod
-    def Load(netinfo, perinfo, info) :
-        capsule = netinfo.CapsuleMap[info['Capsule']]
+    def Load(info, locinfo, perinfo) :
+        capsule = locinfo.CapsuleMap[info['Capsule']]
         profile = perinfo.ResidentialLocationProfiles[info['LocationProfile']]
         location = ResidentialLocation(capsule, profile)
 
@@ -289,6 +289,8 @@ class ResidentialLocation(Location) :
 
         self.ResidenceList[nodename].Residents.append(person)
         self.ResidentCount += 1
+
+        return self.ResidenceList[nodename]
 
     # -----------------------------------------------------------------
     def Dump(self) :

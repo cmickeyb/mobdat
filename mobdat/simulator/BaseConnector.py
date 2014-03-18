@@ -53,7 +53,7 @@ import platform, time
 class BaseConnector :
            
     # -----------------------------------------------------------------
-    def __init__(self, settings) :
+    def __init__(self, settings, dbbindings, netsettings) :
 
         self.__Logger = logging.getLogger(__name__)
 
@@ -70,6 +70,14 @@ class BaseConnector :
         ## versions of time.clock seem seriously broken
         if platform.system() == 'Windows' :
             self.Clock = time.clock
+
+        # Save network information
+        self.NetInfo = dbbindings['netinfo']
+        self.BizInfo = dbbindings['bizinfo']
+        self.PerInfo = dbbindings['perinfo']
+
+        self.NetSettings = netsettings
+
 
     # -----------------------------------------------------------------
     def GetWorldTime(self, currentstep) :

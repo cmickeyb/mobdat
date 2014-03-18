@@ -48,7 +48,7 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "
 
 import json
 
-from mobdat.common import NetworkInfo, NetworkSettings
+from mobdat.common import NetworkSettings, NetworkInfo, LocationInfo
 from mobdat.builder import *
 
 logger = logging.getLogger(__name__)
@@ -66,12 +66,15 @@ def Controller(settings, pushlist) :
     netsettings = NetworkSettings.NetworkSettings(settings)
 
     netinfo = NetBuilder.Network()
-    bizinfo = BusinessBuilder.BusinessBuilder(netinfo)
-    perinfo = PersonBuilder.PersonBuilder(netinfo)
+    locinfo = LocationInfo.LocationInfo()
+    bizinfo = BusinessBuilder.BusinessBuilder()
+    perinfo = PersonBuilder.PersonBuilder()
+
+    bindings = {"netinfo" : netinfo, "locinfo" : locinfo, "bizinfo" : bizinfo, "perinfo" : perinfo}
 
     for cf in settings["Builder"].get("ExtensionFiles",[]) :
         try :
-            execfile(cf,{"netinfo" : netinfo, "bizinfo" : bizinfo, "perinfo" : perinfo})
+            execfile(cf, bindings)
             logger.info('loaded extension file %s', cf)
         except :
             logger.warn('unhandled error processing extension file %s\n%s', cf, traceback.format_exc(1))
@@ -91,6 +94,13 @@ def Controller(settings, pushlist) :
 
     with open(netinfofile, "w") as fp :
         json.dump(netinfo.Dump(), fp, indent=2, ensure_ascii=True)
+
+    # write the network information back out to the netinfo file
+    locinfofile = settings["General"].get("LocationInfoFile","locinfo.js")
+    logger.info('saving location data to %s',locinfofile)
+
+    with open(locinfofile, "w") as fp :
+        json.dump(locinfo.Dump(), fp, indent=2, ensure_ascii=True)
 
     # write the business information out to the file
     bizinfofile = settings["General"].get("BusinessInfoFile","bizinfo.js")
