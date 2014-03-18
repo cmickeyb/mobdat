@@ -169,7 +169,7 @@ class BusinessInfo :
             result['BusinessLocationProfiles'].append(blp.Dump())
 
         result['BusinessLocations'] = []
-        for bl in self.BusinessLocations :
+        for bl in self.BusinessLocations.itervalues() :
             result['BusinessLocations'].append(bl.Dump())
 
         result['BusinessProfiles'] = []

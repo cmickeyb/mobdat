@@ -96,7 +96,8 @@ class BusinessProfile :
     # -------------------------------------------------------
     @staticmethod
     def Load(pinfo) :
-        
+        pass
+
     # -------------------------------------------------------
     def __init__(self, name, biztype) :
         """

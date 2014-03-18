@@ -102,13 +102,13 @@ class BusinessBuilder(BusinessInfo) :
 
     # -----------------------------------------------------------------
     def AddBusinessLocation(self, capsule, profile) :
-        self.BusinessLocations.append(BusinessLocation(capsule, profile))
+        self.BusinessLocations[capsule.Name] = BusinessLocation(capsule, profile)
 
     # -----------------------------------------------------------------
     def PlaceBusiness(self, business) :
         bestloc = None
         bestfit = 0
-        for location in self.BusinessLocations :
+        for location in self.BusinessLocations.itervalues() :
             fitness = location.Fitness(business)
             if fitness > bestfit :
                 bestfit = fitness
