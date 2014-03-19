@@ -70,11 +70,11 @@ def Controller(settings, pushlist) :
     bizinfo = BusinessBuilder.BusinessBuilder()
     perinfo = PersonBuilder.PersonBuilder()
 
-    bindings = {"netinfo" : netinfo, "locinfo" : locinfo, "bizinfo" : bizinfo, "perinfo" : perinfo}
+    dbbindings = {"netsettings" : netsettings, "netinfo" : netinfo, "locinfo" : locinfo, "bizinfo" : bizinfo, "perinfo" : perinfo}
 
     for cf in settings["Builder"].get("ExtensionFiles",[]) :
         try :
-            execfile(cf, bindings)
+            execfile(cf, dbbindings)
             logger.info('loaded extension file %s', cf)
         except :
             logger.warn('unhandled error processing extension file %s\n%s', cf, traceback.format_exc(1))

@@ -46,6 +46,7 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
 from mobdat.common.Business import JobProfile
+import random
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -55,16 +56,38 @@ class PersonProfile :
     @staticmethod
     def Load(info) :
         name = info['ProfileName']
-        return PersonProfile(name)
+        profile = PersonProfile(name)
+
+        for name, rate in info['VehicleTypes'].iteritems() :
+            profile.AddVehicleType(name, rate)
+
+        return profile
 
     # -----------------------------------------------------------------
     def __init__(self, name) :
         self.ProfileName = name
+        self.VehicleTypes = {}
+        self.VehicleTypeList = None
+
+    # -----------------------------------------------------------------
+    def AddVehicleType(self, name, rate) :
+        self.VehicleTypes[name] = rate
+        self.VehicleTypeList = None  # so we'll rebuild the map when needed
+
+    # -----------------------------------------------------------------
+    def PickVehicleType(self) :
+        if not self.VehicleTypeList :
+            self.VehicleTypeList = []
+            for name, rate in self.VehicleTypes.iteritems() :
+                self.VehicleTypeList.extend([name for x in range(rate)])
+
+        return random.choice(self.VehicleTypeList)
 
     # -----------------------------------------------------------------
     def Dump(self) :
         result = dict()
         result['ProfileName'] = self.ProfileName
+        result['VehicleTypes'] = self.VehicleTypes
 
         return result
         
@@ -79,20 +102,22 @@ class Person :
         profile = perinfo.PersonProfiles[info['ProfileName']]
         employer = bizinfo.BusinessList[info['Employer']]
         job = JobProfile.Load(info['Job'])
+        vtype = info['VehicleType']
 
-        person = Person(name, profile, employer, job)
+        person = Person(name, profile, employer, job, vtype = vtype)
         rezlocation = perinfo.ResidentialLocations[info['CapsuleName']]
         person.Location = rezlocation.AddPersonToNode(person, info['NodeName'])
 
         return person
 
     # -----------------------------------------------------------------
-    def __init__(self, name, profile, employer, job, location = None) :
+    def __init__(self, name, profile, employer, job, vtype = None, location = None) :
         self.Name = name
         self.Profile = profile
         self.Employer = employer
         self.Job = job
         self.Location = location
+        self.VehicleType = vtype or profile.PickVehicleType()
 
     # -----------------------------------------------------------------
     def Dump(self) :
@@ -103,5 +128,6 @@ class Person :
         result['Job'] = self.Job.Dump()
         result['CapsuleName'] = self.Location.Capsule.Name
         result['NodeName'] = self.Location.Node.Name
+        result['VehicleType'] = self.VehicleType
 
         return result

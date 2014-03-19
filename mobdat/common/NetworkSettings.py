@@ -81,8 +81,7 @@ class VehicleTypeInfo :
 
         # Social connector attributes
         self.Rate = settings["Rate"]
-        self.SourceIntersectionTypes = settings["SourceIntersectionTypes"]
-        self.DestinationIntersectionTypes = settings["DestinationIntersectionTypes"]
+        self.ProfileTypes = settings["ProfileTypes"]
 
         # Sumo connector attributes
         self.Acceleration = settings["Acceleration"]

@@ -39,9 +39,14 @@ social framework including people and businesses.
 """
 
 import os, sys
+import logging
+
+sys.path.append(os.path.join(os.environ.get("SUMO_HOME"), "tools"))
+sys.path.append(os.path.join(os.environ.get("OPENSIM","/share/opensim"),"lib","python"))
+#sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
+#sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
 from mobdat.common.Person import Person
-
 import random
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -62,11 +67,18 @@ for rcapsule in locinfo.CapsuleTypeMap['residence'] :
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-
 perinfo.AddPersonProfile('worker')
 perinfo.AddPersonProfile('student')
 perinfo.AddPersonProfile('homemaker')
 
+print 'starting'
+for vtype in netsettings.VehicleTypes.itervalues() :
+    print vtype.Name
+    for ptype in vtype.ProfileTypes :
+        perinfo.PersonProfiles[ptype].AddVehicleType(vtype.Name, vtype.Rate)
+
+# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 def PlacePeople() :
     global bizinfo, perinfo
 

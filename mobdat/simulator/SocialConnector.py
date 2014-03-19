@@ -47,9 +47,8 @@ sys.path.append(os.path.join(os.environ.get("OPENSIM","/share/opensim"),"lib","p
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
-import math, random, json, heapq
+import math, random, heapq
 import BaseConnector, EventRouter, EventHandler, EventTypes
-from mobdat.common import NetworkInfo, Decoration
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -102,64 +101,20 @@ class SocialConnector(EventHandler.EventHandler, BaseConnector.BaseConnector) :
         self.VehicleNumber = 1
         self.VehicleMap = {}
         self.VehicleTypeMap = {}
-        self.NodeTypeMap = {}
 
         self.InjectionRate = settings["SocialConnector"].get("InjectionRate",1.0)
         self.PeopleCount = settings["SocialConnector"].get("PeopleCount",300)
         self.WaitMean = settings["SocialConnector"].get("WaitMean",300.0)
         self.WaitSigma = settings["SocialConnector"].get("WaitSigma",50.0)
 
-        self._CreateVehicleTypeMap()
-        self._CreateNodeTypeMap()
         self._CreatePeople()
 
         self.CurrentStep = 0
 
     # -----------------------------------------------------------------
-    def _CreateVehicleTypeMap(self) :
-        for vtype in self.NetSettings.VehicleTypes.itervalues() :
-
-            for ntype in vtype.SourceIntersectionTypes :
-                if ntype not in self.VehicleTypeMap :
-                    self.VehicleTypeMap[ntype] = []
-
-                # put vtype.Rate copies in the map so we can just use random.choice
-                # to pick a vehicle when we need it
-                count = vtype.Rate
-                while count > 0 :
-                    self.VehicleTypeMap[ntype].append(vtype)
-                    count = count - 1
-
-    # -----------------------------------------------------------------
-    def _CreateNodeTypeMap(self) :
-        for node in self.NetInfo.Nodes.itervalues() :
-            if Decoration.EndPointDecoration.DecorationName not in node.Decorations :
-                continue
-
-            ntname = node.NodeType.Name
-            if ntname not in self.NodeTypeMap :
-                self.NodeTypeMap[ntname] = []
-
-            self.NodeTypeMap[ntname].append(node)
-
-        # make sure the people are more or less distributed evenly through the residences
-        rescapacity = 1 + int(self.PeopleCount / len(self.NodeTypeMap['residence']))
-        for node in self.NodeTypeMap['residence'] :
-            node.Capacity = rescapacity
-
-        # even distribution in the businesses is a little less important, will make this
-        # more interesting in a bit
-        buscapacity = 1 + int(self.PeopleCount / len(self.NodeTypeMap['business']))
-        for node in self.NodeTypeMap['business'] :
-            node.Capacity = 2 * buscapacity
-
-    # -----------------------------------------------------------------
     def _CreatePeople(self) :
         
         self.EventQ = []
-
-        rlist = self.NodeTypeMap['residence']
-        blist = self.NodeTypeMap['business']
         vlist = self.VehicleTypeMap['residence']
 
         for i in range(0,self.PeopleCount - 1) :
