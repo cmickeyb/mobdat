@@ -48,7 +48,7 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "
 
 import json
 
-from mobdat.common import NetworkSettings, NetworkInfo, LocationInfo
+from mobdat.common import NetworkSettings
 from mobdat.builder import *
 
 logger = logging.getLogger(__name__)
@@ -66,7 +66,7 @@ def Controller(settings, pushlist) :
     netsettings = NetworkSettings.NetworkSettings(settings)
 
     netinfo = NetBuilder.Network()
-    locinfo = LocationInfo.LocationInfo()
+    locinfo = LocationBuilder.LocationBuilder(netinfo)
     bizinfo = BusinessBuilder.BusinessBuilder()
     perinfo = PersonBuilder.PersonBuilder()
 

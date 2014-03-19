@@ -4,5 +4,6 @@
 *.xml
 build
 netinfo.js
+locinfo.js
 bizinfo.js
 perinfo.js

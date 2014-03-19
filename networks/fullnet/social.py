@@ -48,8 +48,6 @@ from mobdat.common.Decoration import *
 
 import random
 
-locinfo.BuildCapsuleMaps(netinfo)
-
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
 bizinfo.AddJobProfile('shift1',    30000,  False, WeeklySchedule.WorkWeekSchedule(4.0, 12.0))
@@ -154,7 +152,7 @@ PlaceBusinesses()
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-perinfo.AddResidentialLocationProfile('worker', 25)
+perinfo.AddResidentialLocationProfile('worker', 20)
 
 for rcapsule in locinfo.CapsuleTypeMap['residence'] :
     perinfo.AddResidentialLocation(rcapsule, perinfo.ResidentialLocationProfiles['worker'])
@@ -171,16 +169,20 @@ def PlacePeople() :
 
     profile = perinfo.PersonProfiles['worker']
 
+    people = 0
     for biz in bizinfo.BusinessList.itervalues() :
         bprof = biz.Profile
         for job in bprof.JobList :
             for p in range(0, job.Demand) :
+                people += 1
                 name = GenName(profile.ProfileName)
                 person = Person(name, profile, biz, job)
                 location = perinfo.PlacePerson(person)
                 if not location :
-                    print 'ran out of residences after worker %s' % name
+                    print 'ran out of residences after %s people' % people
                     return
+
+    print 'created %s people' % people
 
 PlacePeople()
 
@@ -201,7 +203,7 @@ def CountJobs() :
     names = sorted(JobCount.keys())
     for name in names :
         count = JobCount[name]
-        print "%s \t %s" % (name, count)
+        print "{:10} {:5}".format(name, count)
         people += count
 
     print "Total Jobs: " + str(people)

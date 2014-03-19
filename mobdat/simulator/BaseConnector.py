@@ -73,6 +73,7 @@ class BaseConnector :
 
         # Save network information
         self.NetInfo = dbbindings['netinfo']
+        self.LocInfo = dbbindings['locinfo']
         self.BizInfo = dbbindings['bizinfo']
         self.PerInfo = dbbindings['perinfo']
 

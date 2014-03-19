@@ -74,21 +74,27 @@ class LocationInfo :
         self.CapsuleTypeMap = {}
 
     # -----------------------------------------------------------------
-    def BuildCapsuleMaps(self, netinfo) :
-        for collection in netinfo.Collections.itervalues() :
-            if CapsuleTypeDecoration.DecorationName not in collection.Decorations :
-                continue
+    def AddCapsule(self, capsule) :
+        """
+        AddCapsule -- add a capsule to the maps
 
-            typename = collection.CapsuleType.Name
-            if typename not in self.CapsuleTypeMap :
-                self.CapsuleTypeMap[typename] = []
+        capsule -- a NetworkInfo.Collection object that has capsule type decoration
+        """
+        typename = capsule.CapsuleType.Name
+        if typename not in self.CapsuleTypeMap :
+            self.CapsuleTypeMap[typename] = []
 
-            self.CapsuleMap[collection.Name] = collection
-            self.CapsuleTypeMap[typename].append(collection)
-
+        self.CapsuleMap[capsule.Name] = capsule
+        self.CapsuleTypeMap[typename].append(capsule)
+        
     # -----------------------------------------------------------------
     def Load(self, locdata, netinfo) :
-        self.BuildCapsuleMaps(netinfo)
+        self.CapsuleMap = {}
+        self.CapsuleTypeMap = {}
+
+        for collection in netinfo.Collections.itervalues() :
+            if CapsuleTypeDecoration.DecorationName in collection.Decorations :
+                self.AddCapsule(collection)
 
     # -----------------------------------------------------------------
     def Dump(self) :
