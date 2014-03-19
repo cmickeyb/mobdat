@@ -149,43 +149,6 @@ def PlaceBusinesses() :
 
 PlaceBusinesses()
 
-
-# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-perinfo.AddResidentialLocationProfile('worker', 20)
-
-for rcapsule in locinfo.CapsuleTypeMap['residence'] :
-    perinfo.AddResidentialLocation(rcapsule, perinfo.ResidentialLocationProfiles['worker'])
-
-# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-
-perinfo.AddPersonProfile('worker')
-perinfo.AddPersonProfile('student')
-perinfo.AddPersonProfile('homemaker')
-
-def PlacePeople() :
-    global bizinfo, perinfo
-
-    profile = perinfo.PersonProfiles['worker']
-
-    people = 0
-    for biz in bizinfo.BusinessList.itervalues() :
-        bprof = biz.Profile
-        for job in bprof.JobList :
-            for p in range(0, job.Demand) :
-                people += 1
-                name = GenName(profile.ProfileName)
-                person = Person(name, profile, biz, job)
-                location = perinfo.PlacePerson(person)
-                if not location :
-                    print 'ran out of residences after %s people' % people
-                    return
-
-    print 'created %s people' % people
-
-PlacePeople()
-
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 def CountJobs() :
@@ -212,4 +175,4 @@ CountJobs()
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-print "Loaded fullnet social extension file"
+print "Loaded fullnet business builder extension file"

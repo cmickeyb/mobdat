@@ -14,7 +14,7 @@
 
     "Builder" :
     {
-	"ExtensionFiles" : ["networks/fullnet/builder.py", "networks/fullnet/social.py"]
+	"ExtensionFiles" : ["networks/fullnet/network.py", "networks/fullnet/business.py", "networks/fullnet/people.py"]
     },
 
     "SocialConnector" :

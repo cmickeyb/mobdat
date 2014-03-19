@@ -234,4 +234,4 @@ def BuildNetwork() :
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 BuildNetwork()
 
-print "Loaded fullnet builder extension file"
+print "Loaded fullnet network builder extension file"
