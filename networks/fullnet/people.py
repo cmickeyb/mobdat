@@ -47,16 +47,10 @@ sys.path.append(os.path.join(os.environ.get("OPENSIM","/share/opensim"),"lib","p
 #sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
 from mobdat.common.Person import Person
+from mobdat.common.Utilities import GenName
+
 import random
 
-# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-NameCounts = {}
-def GenName(prefix) :
-    if prefix not in NameCounts :
-        NameCounts[prefix] = 0
-    NameCounts[prefix] += 1
-    return prefix + str(NameCounts[prefix])
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -71,7 +65,6 @@ perinfo.AddPersonProfile('worker')
 perinfo.AddPersonProfile('student')
 perinfo.AddPersonProfile('homemaker')
 
-print 'starting'
 for vtype in netsettings.VehicleTypes.itervalues() :
     print vtype.Name
     for ptype in vtype.ProfileTypes :
