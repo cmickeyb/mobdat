@@ -52,40 +52,31 @@ import BaseConnector, EventRouter, EventHandler, EventTypes
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class Person :
-    Count = 0
-    NameFormat = "person{0}"
+class Traveler :
+    def __init__(self, person) :
+        self.Person = person
+        self.CurrentLocation = self.Person.Residence
 
-    def __init__(self, resnodes, biznodes, vehicles) :
-        Person.Count = Person.Count + 1
-        self.Name = Person.NameFormat.format(Person.Count)
+        self.CommonTrips = {}
 
-        # pick a residence
-        index = random.randint(0,len(resnodes) - 1)
-        self.Home = resnodes[index]
-        resnodes[index].Capacity = resnodes[index].Capacity - 1
-        if resnodes[index].Capacity <= 0 :
-            del resnodes[index]
-
-        # pick a business
-        index = random.randint(0,len(biznodes) - 1)
-        self.Work = biznodes[index]
-        biznodes[index].Capacity = biznodes[index].Capacity - 1
-        if biznodes[index].Capacity <= 0 :
-            del biznodes[index]
-
-        self.VehicleType = random.choice(vehicles)
-        self.CurrentLocation = self.Home
+    # def NextTrip(self) :
+    #     if self.CurrentLocation == self.Person.Residence :
+            
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class Trip :
-    def __init__(self, stime, vname, person, source, destination) :
+    VehicleNumber = 0
+
+    def __init__(self, stime, vtype, traveler, source, destination) :
         self.StartTime = stime
-        self.VehicleName = vname
-        self.Person = person
+        self.VehicleType = vtype
+        self.Traveler = traveler
         self.Source = source
         self.Destination = destination
+
+        Trip.VehicleNumber += 1
+        self.VehicleName = "car%i" % Trip.VehicleNumber
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -102,70 +93,52 @@ class SocialConnector(EventHandler.EventHandler, BaseConnector.BaseConnector) :
         self.VehicleMap = {}
         self.VehicleTypeMap = {}
 
-        self.InjectionRate = settings["SocialConnector"].get("InjectionRate",1.0)
-        self.PeopleCount = settings["SocialConnector"].get("PeopleCount",300)
-        self.WaitMean = settings["SocialConnector"].get("WaitMean",300.0)
-        self.WaitSigma = settings["SocialConnector"].get("WaitSigma",50.0)
+        self.EventQ = []
 
-        self._CreatePeople()
+        self.Travelers = {}
+        self._CreateTravelers()
 
         self.CurrentStep = 0
 
     # -----------------------------------------------------------------
-    def _CreatePeople(self) :
-        
-        self.EventQ = []
-        vlist = self.VehicleTypeMap['residence']
+    def AddTripToEventQueue(self, trip) :
+        heapq.heappush(self.EventQ, [trip.StartTime, trip])
 
-        for i in range(0,self.PeopleCount - 1) :
-            person = Person(rlist, blist, vlist)
-            waittime = int(random.uniform(0, self.WaitMean * 2.0))
-
-            heapq.heappush(self.EventQ,[waittime, person])
+    # -----------------------------------------------------------------
+    def _CreateTravelers(self) :
+        for person in self.PerInfo.PersonList :
+            self.Travelers[person.Name] = Traveler(person)
 
     # -----------------------------------------------------------------
     def _GenerateTripStatsEvent(self, trip) :
         pname = trip.Person.Name
         sname = trip.Source.Name
         dname = trip.Destination.Name
-        duration = self.CurrentStep - trip.StartTime
+        duration = self.GetWorldTime(self.CurrentStep) - trip.StartTime
+
         event = EventTypes.TripLengthStatsEvent(self.CurrentStep, duration, pname, sname, dname)
         self.PublishEvent(event)
 
     # -----------------------------------------------------------------
-    def _GenerateVehicle(self, person, dnode) :
-        self.VehicleNumber += 1
-        vname = "car%i" % (self.VehicleNumber)
-        vtype = str(person.VehicleType.Name)
-        rname = str(person.CurrentLocation.EndPoint.DestinationName)
-        tname = str(dnode.EndPoint.SourceName)
+    def _GenerateAddVehicleEvent(self, trip) :
+        """
+        _GenerateAddVehicleEvent -- generate an AddVehicle event to initiate trip simulation
 
-        self.VehicleMap[vname] = Trip(self.CurrentStep, vname, person, person.CurrentLocation, dnode)
+        trip -- Trip object initialized with traveler, vehicle and destination information
+        """
+
+        vname = str(trip.VehicleName)
+        vtype = str(trip.VehicleType)
+        rname = str(trip.Source.DestinationName)
+        tname = str(trip.Destination.SourceName)
+
+        # save the trip so that when the vehicle arrives we can get the trip
+        # that caused the car to be created
+        self.VehicleMap[vname] = trip
 
         event = EventTypes.EventAddVehicle(vname, vtype, rname, tname)
         self.PublishEvent(event)
 
-    # -----------------------------------------------------------------
-    def GenerateVehicles(self, currentstep) :
-        while self.EventQ :
-            head = self.EventQ[0]
-            if head[0] > currentstep :
-                break
-
-            waittime, person = heapq.heappop(self.EventQ)
-
-            # pick a location, generally the person moves between home and work
-            # though sometimes the person moves to a random residence or business
-            p = random.uniform(0,1)
-            if p < 0.5 :
-                dest = person.Work if person.CurrentLocation == person.Home else person.Home
-            elif p < 0.75 :
-                dest = random.choice(self.NodeTypeMap['residence'])
-            else :
-                dest = random.choice(self.NodeTypeMap['business'])
-
-            self._GenerateVehicle(person, dest)
-            
     # -----------------------------------------------------------------
     def HandleDeleteObjectEvent(self, event) :
         vname = event.ObjectIdentity
@@ -175,17 +148,20 @@ class SocialConnector(EventHandler.EventHandler, BaseConnector.BaseConnector) :
 
         self._GenerateTripStatsEvent(trip)
 
-        person = trip.Person
-        person.CurrentLocation = trip.Destination
+        traveler = trip.Traveler
+        traveler.CurrentLocation = trip.Destination
 
-        waittime = self.CurrentStep + int(random.gauss(self.WaitMean,self.WaitSigma))
-        heapq.heappush(self.EventQ, [waittime, person])
+        self.AddTripToEventQueue(traveler.GetNextTrip())
 
     # -----------------------------------------------------------------
-    # Returns True if the simulation can continue
     def HandleTimerEvent(self, event) :
         self.CurrentStep = event.CurrentStep
-        self.GenerateVehicles(self.CurrentStep)
+
+        currenttime = self.GetWorldTime(event.CurrentStep)
+
+        while self.EventQ :
+            if self.EventQ[0][0] > currenttime : break
+            self._GenerateAddVehicleEvent(heapq.heappop(self.EventQ))
 
     # -----------------------------------------------------------------
     def HandleShutdownEvent(self, event) :
