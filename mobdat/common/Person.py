@@ -105,19 +105,20 @@ class Person :
         vtype = info['VehicleType']
 
         person = Person(name, profile, employer, job, vtype = vtype)
-        rezlocation = perinfo.ResidentialLocations[info['CapsuleName']]
-        person.Location = rezlocation.AddPersonToNode(person, info['NodeName'])
+
+        rezlocation = perinfo.ResidentialLocations[info['Residence']['CapsuleName']]
+        person.Location = rezlocation.AddPersonToNode(person, info['Residence']['NodeName'])
 
         return person
 
     # -----------------------------------------------------------------
-    def __init__(self, name, profile, employer, job, vtype = None, location = None) :
+    def __init__(self, name, profile, employer, job, vtype = None, residence = None) :
         self.Name = name
         self.Profile = profile
         self.Employer = employer
         self.Job = job
-        self.Location = location
         self.VehicleType = vtype or profile.PickVehicleType()
+        self.Residence = residence
 
     # -----------------------------------------------------------------
     def Dump(self) :
@@ -126,8 +127,7 @@ class Person :
         result['ProfileName'] = self.Profile.ProfileName
         result['Employer'] = self.Employer.Name
         result['Job'] = self.Job.Dump()
-        result['CapsuleName'] = self.Location.Capsule.Name
-        result['NodeName'] = self.Location.Node.Name
+        result['Residence'] = { 'CapsuleName' : self.Residence.Capsule.Name, 'NodeName' : self.Residence.Node.Name }
         result['VehicleType'] = self.VehicleType
 
         return result

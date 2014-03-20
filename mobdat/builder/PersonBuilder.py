@@ -72,14 +72,14 @@ class PersonBuilder(PersonInfo) :
     def PlacePerson(self, person) :
         bestloc = None
         bestfit = 0
-        for location in self.ResidentialLocations.itervalues() :
-            fitness = location.Fitness(person)
+        for residence in self.ResidentialLocations.itervalues() :
+            fitness = residence.Fitness(person)
             if fitness > bestfit :
                 bestfit = fitness
-                bestloc = location
+                bestloc = residence
 
         if bestloc :
-            person.Location = bestloc.AddPerson(person)
+            person.Residence = bestloc.AddPerson(person)
             self.PersonList[person.Name] = person
 
         return bestloc
