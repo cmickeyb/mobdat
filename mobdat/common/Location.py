@@ -224,12 +224,12 @@ class Residence :
     # -----------------------------------------------------------------
     @property
     def SourceName(self) :
-        return node.EndPoint.SourceName
+        return self.Node.EndPoint.SourceName
 
     # -----------------------------------------------------------------
     @property
     def DestinationName(self) :
-        return node.EndPoint.DestinationName
+        return self.Node.EndPoint.DestinationName
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
