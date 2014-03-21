@@ -48,35 +48,63 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
 import math, random, heapq
+from mobdat.common.Utilities import GenName
 import BaseConnector, EventRouter, EventHandler, EventTypes
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class Traveler :
-    def __init__(self, person) :
+
+    # -----------------------------------------------------------------
+    def __init__(self, person, connector) :
         self.Person = person
         self.CurrentLocation = self.Person.Residence
 
         self.CommonTrips = {}
 
-    # def NextTrip(self) :
-    #     if self.CurrentLocation == self.Person.Residence :
-            
+        nexttrip = self.NextTrip(connector.WorldTime)
+        connector.AddTripToEventQueue(nextrip)
+
+    # -----------------------------------------------------------------
+    def NextTrip(self, worldtime) :
+        if self.CurrentLocation == self.Person.Residence :
+            pass
+        else:
+            pass
+
+    # -----------------------------------------------------------------
+    def TripCompleted(self, trip, connector) :
+        self.CurrentLocation = trip.Destination
+
+        nexttrip = self.NextTrip(connector.GetWorldTime())
+        connector.AddTripToTimerEventQueue(nexttrip)
+
+    # -----------------------------------------------------------------
+    def TripStarted(self, connector) :
+        pass
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class Trip :
-    VehicleNumber = 0
-
-    def __init__(self, stime, vtype, traveler, source, destination) :
+    # -----------------------------------------------------------------
+    def __init__(self, stime, traveler, source, destination) :
         self.StartTime = stime
-        self.VehicleType = vtype
         self.Traveler = traveler
         self.Source = source
         self.Destination = destination
 
-        Trip.VehicleNumber += 1
-        self.VehicleName = "car%i" % Trip.VehicleNumber
+        self.VehicleType = self.Traveler.Person.VehicleType
+        self.VehicleName = GenName(self.VehicleType)
+
+    # -----------------------------------------------------------------
+    def TripCompleted(self, connector) :
+        connector.GenerateTripStatsEvent(self)
+        self.Traveler.TripCompleted(self, connector)
+
+    # -----------------------------------------------------------------
+    def TripStarted(self, connector) :
+        self.Traveler.TripStarted(self, connector)
+        connector.GenerateAddVehicleEvent(self)
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -89,28 +117,37 @@ class SocialConnector(EventHandler.EventHandler, BaseConnector.BaseConnector) :
 
         self.__Logger = logging.getLogger(__name__)
 
-        self.VehicleNumber = 1
-        self.VehicleMap = {}
-        self.VehicleTypeMap = {}
-
-        self.EventQ = []
-
-        self.Travelers = {}
-        self._CreateTravelers()
+        self.TripCallbackMap = {}
+        self.TripTimerEventQ = []
 
         self.CurrentStep = 0
+        self.WorldTime = self.GetWorldTime(self.CurrentStep)
+
+        self.Travelers = {}
+        self.CreateTravelers()
 
     # -----------------------------------------------------------------
     def AddTripToEventQueue(self, trip) :
-        heapq.heappush(self.EventQ, [trip.StartTime, trip])
+        heapq.heappush(self.TripTimerEventQ, [trip.StartTime, trip])
 
     # -----------------------------------------------------------------
-    def _CreateTravelers(self) :
+    def CreateTravelers(self) :
         for person in self.PerInfo.PersonList :
-            self.Travelers[person.Name] = Traveler(person)
+            traveler = Traveler(person)
+            self.Travelers[person.Name] = traveler
+            
+    # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    # EVENT GENERATORS
+    # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
     # -----------------------------------------------------------------
-    def _GenerateTripStatsEvent(self, trip) :
+    def GenerateTripStatsEvent(self, trip) :
+        """
+        GenerateTripStatsEvent -- create and publish an event to capture
+        statistics about a completed trip
+        
+        trip -- a Trip object for a recently completed trip
+        """
         pname = trip.Person.Name
         sname = trip.Source.Name
         dname = trip.Destination.Name
@@ -120,9 +157,10 @@ class SocialConnector(EventHandler.EventHandler, BaseConnector.BaseConnector) :
         self.PublishEvent(event)
 
     # -----------------------------------------------------------------
-    def _GenerateAddVehicleEvent(self, trip) :
+    def GenerateAddVehicleEvent(self, trip) :
         """
-        _GenerateAddVehicleEvent -- generate an AddVehicle event to initiate trip simulation
+        GenerateAddVehicleEvent -- generate an AddVehicle event to start
+        a new trip
 
         trip -- Trip object initialized with traveler, vehicle and destination information
         """
@@ -134,34 +172,47 @@ class SocialConnector(EventHandler.EventHandler, BaseConnector.BaseConnector) :
 
         # save the trip so that when the vehicle arrives we can get the trip
         # that caused the car to be created
-        self.VehicleMap[vname] = trip
+        self.TripCallbackMap[vname] = trip
+        trip.TripStarted(self)
 
         event = EventTypes.EventAddVehicle(vname, vtype, rname, tname)
         self.PublishEvent(event)
 
+    # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    # EVENT HANDLERS
+    # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
     # -----------------------------------------------------------------
     def HandleDeleteObjectEvent(self, event) :
+        """
+        HandleDeleteObjectEvent -- delete object means that a car has completed its
+        trip so record the stats and add the next trip for the person
+
+        event -- a DeleteObject event object
+        """
+
         vname = event.ObjectIdentity
         
-        trip = self.VehicleMap[vname]
-        del self.VehicleMap[vname]
-
-        self._GenerateTripStatsEvent(trip)
-
-        traveler = trip.Traveler
-        traveler.CurrentLocation = trip.Destination
-
-        self.AddTripToEventQueue(traveler.GetNextTrip())
+        trip = self.VehicleMap.pop(vname)
+        trip.TripCompleted(self)
 
     # -----------------------------------------------------------------
     def HandleTimerEvent(self, event) :
+        """
+        HandleTimerEvent -- timer event happened, process pending events from
+        the eventq
+
+        event -- Timer event object
+        """
         self.CurrentStep = event.CurrentStep
+        self.WorldTime = self.GetWorldTime(self.CurrentStep)
 
-        currenttime = self.GetWorldTime(event.CurrentStep)
+        while self.TripTimerEventQ :
+            if self.TripTimerEventQ[0][0] > self.WorldTime :
+                break
 
-        while self.EventQ :
-            if self.EventQ[0][0] > currenttime : break
-            self._GenerateAddVehicleEvent(heapq.heappop(self.EventQ))
+            trip = heapq.heappop(self.TripTimerEventQ)
+            trip.TripStarted(self)
 
     # -----------------------------------------------------------------
     def HandleShutdownEvent(self, event) :
