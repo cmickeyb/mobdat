@@ -40,7 +40,6 @@ the social (people) aspects of the mobdat simulation.
 
 import os, sys
 import logging
-import subprocess
 
 sys.path.append(os.path.join(os.environ.get("SUMO_HOME"), "tools"))
 sys.path.append(os.path.join(os.environ.get("OPENSIM","/share/opensim"),"lib","python"))
@@ -58,38 +57,55 @@ class Traveler :
     # -----------------------------------------------------------------
     def __init__(self, person, connector) :
         self.Person = person
-        self.CurrentLocation = self.Person.Residence
 
-        self.CommonTrips = {}
+        self.EstimatedTimeToWork = random.uniform(0.25, 0.75)
+        self.CurrentLocation = self.Person.Residence
+        self.CurrentEvent = None
 
         nexttrip = self.NextTrip(connector.WorldTime)
-        connector.AddTripToEventQueue(nextrip)
+        connector.AddTripToEventQueue(nexttrip)
 
     # -----------------------------------------------------------------
     def NextTrip(self, worldtime) :
         if self.CurrentLocation == self.Person.Residence :
-            pass
+            self.CurrentEvent = self.Person.Job.Schedule.NextScheduledEvent(worldtime + self.EstimatedTimeToWork)
+            stime = self.CurrentEvent.WorldStartTime - self.EstimatedTimeToWork
+            if self.Person.Job.FlexibleHours :
+                stime = random.gauss(stime, 0.5)
+            stime = max(worldtime, stime)
+
+            return Trip(self, stime, self.Person.Residence, self.Person.Employer.Location)
         else:
-            pass
+            etime = self.CurrentEvent.WorldEndTime
+            if self.Person.Job.FlexibleHours :
+                etime = random.gauss(etime, 0.5)
+            etime = max(worldtime, etime)
+
+            return Trip(self, etime, self.Person.Employer.Location, self.Person.Residence)
 
     # -----------------------------------------------------------------
     def TripCompleted(self, trip, connector) :
+        # if this is a trip to work, update the estimated start time, dont want to be late to work
+        if trip.Destination == self.Person.Employer.Location :
+            offset = connector.WorldTime - self.CurrentEvent.WorldStartTime # positive means traveler is late for work
+            self.EstimatedTimeToWork = (4.0 * self.EstimatedTimeToWork - offset) / 5.0
+
         self.CurrentLocation = trip.Destination
 
-        nexttrip = self.NextTrip(connector.GetWorldTime())
-        connector.AddTripToTimerEventQueue(nexttrip)
+        nexttrip = self.NextTrip(connector.WorldTime)
+        connector.AddTripToEventQueue(nexttrip)
 
     # -----------------------------------------------------------------
-    def TripStarted(self, connector) :
+    def TripStarted(self, trip, connector) :
         pass
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class Trip :
     # -----------------------------------------------------------------
-    def __init__(self, stime, traveler, source, destination) :
-        self.StartTime = stime
+    def __init__(self, traveler, stime, source, destination) :
         self.Traveler = traveler
+        self.StartTime = stime
         self.Source = source
         self.Destination = destination
 
@@ -105,6 +121,10 @@ class Trip :
     def TripStarted(self, connector) :
         self.Traveler.TripStarted(self, connector)
         connector.GenerateAddVehicleEvent(self)
+
+    # -----------------------------------------------------------------
+    def __cmp__(self, other) :
+        return cmp(self.StartTime, other.StartTime)
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -128,12 +148,12 @@ class SocialConnector(EventHandler.EventHandler, BaseConnector.BaseConnector) :
 
     # -----------------------------------------------------------------
     def AddTripToEventQueue(self, trip) :
-        heapq.heappush(self.TripTimerEventQ, [trip.StartTime, trip])
+        heapq.heappush(self.TripTimerEventQ, trip)
 
     # -----------------------------------------------------------------
     def CreateTravelers(self) :
-        for person in self.PerInfo.PersonList :
-            traveler = Traveler(person)
+        for person in self.PerInfo.PersonList.itervalues() :
+            traveler = Traveler(person, self)
             self.Travelers[person.Name] = traveler
             
     # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -148,9 +168,9 @@ class SocialConnector(EventHandler.EventHandler, BaseConnector.BaseConnector) :
         
         trip -- a Trip object for a recently completed trip
         """
-        pname = trip.Person.Name
-        sname = trip.Source.Name
-        dname = trip.Destination.Name
+        pname = trip.Traveler.Person.Name
+        sname = trip.Source.SourceName
+        dname = trip.Destination.DestinationName
         duration = self.GetWorldTime(self.CurrentStep) - trip.StartTime
 
         event = EventTypes.TripLengthStatsEvent(self.CurrentStep, duration, pname, sname, dname)
@@ -170,10 +190,11 @@ class SocialConnector(EventHandler.EventHandler, BaseConnector.BaseConnector) :
         rname = str(trip.Source.DestinationName)
         tname = str(trip.Destination.SourceName)
 
+        self.__Logger.debug('add vehicle %s from %s to %s',vname, rname, tname)
+
         # save the trip so that when the vehicle arrives we can get the trip
         # that caused the car to be created
         self.TripCallbackMap[vname] = trip
-        trip.TripStarted(self)
 
         event = EventTypes.EventAddVehicle(vname, vtype, rname, tname)
         self.PublishEvent(event)
@@ -193,7 +214,7 @@ class SocialConnector(EventHandler.EventHandler, BaseConnector.BaseConnector) :
 
         vname = event.ObjectIdentity
         
-        trip = self.VehicleMap.pop(vname)
+        trip = self.TripCallbackMap.pop(vname)
         trip.TripCompleted(self)
 
     # -----------------------------------------------------------------
@@ -207,8 +228,14 @@ class SocialConnector(EventHandler.EventHandler, BaseConnector.BaseConnector) :
         self.CurrentStep = event.CurrentStep
         self.WorldTime = self.GetWorldTime(self.CurrentStep)
 
+        if self.CurrentStep % 100 == 0 :
+            wtime = self.WorldTime
+            qlen = len(self.TripTimerEventQ)
+            stime = self.TripTimerEventQ[0].StartTime if self.TripTimerEventQ else 0.0
+            self.__Logger.info('at time %0.3f, timer queue contains %s elements, next event scheduled for %0.3f', wtime, qlen, stime)
+
         while self.TripTimerEventQ :
-            if self.TripTimerEventQ[0][0] > self.WorldTime :
+            if self.TripTimerEventQ[0].StartTime > self.WorldTime :
                 break
 
             trip = heapq.heappop(self.TripTimerEventQ)
@@ -226,4 +253,3 @@ class SocialConnector(EventHandler.EventHandler, BaseConnector.BaseConnector) :
 
         # all set... time to get to work!
         self.HandleEvents()
-

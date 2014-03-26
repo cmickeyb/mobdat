@@ -177,6 +177,10 @@ class MobdatController(cmd.Cmd) :
 
         return True
 
+    # -----------------------------------------------------------------
+    def do_shutdown(self, args) :
+        self.do_exit(args)
+
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
 def InitializeDataBindings(settings) :

@@ -54,10 +54,12 @@ import random
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-perinfo.AddResidentialLocationProfile('worker', 20)
+perinfo.AddResidentialLocationProfile('townhouse', 7)
+perinfo.AddResidentialLocationProfile('apartment', 11)
 
-for rcapsule in locinfo.CapsuleTypeMap['residence'] :
-    perinfo.AddResidentialLocation(rcapsule, perinfo.ResidentialLocationProfiles['worker'])
+for lprof in ['townhouse', 'apartment'] :
+    for rcapsule in locinfo.CapsuleTypeMap[lprof] :
+        perinfo.AddResidentialLocation(rcapsule, perinfo.ResidentialLocationProfiles[lprof])
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

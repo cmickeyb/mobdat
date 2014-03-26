@@ -38,7 +38,7 @@ the simulation modules in the mobdat simulation environment.
 
 """
 
-import os, sys
+import os, sys, traceback
 import logging
 
 sys.path.append(os.path.join(os.environ.get("SUMO_HOME"), "tools"))
@@ -103,12 +103,20 @@ class EventHandler :
             except TypeError as detail :
                 self._Logger.warn('handler for event %s failed with type error; %s', evtype.__name__, str(detail))
             except :
-                exctype, value =  sys.exc_info()[:2]
-                self._Logger.warn('handler failed with exception type %s; %s', exctype, str(value))
-    
+                exctype, value, tracebk =  sys.exc_info()
+                frames = traceback.extract_tb(tracebk)[-1]
+                self._Logger.warn('handler failed with exception type %s; %s in %s at line %s', exctype, str(value), frames[0], frames[1])
+                self.Shutdown()
+                return
+
     # -----------------------------------------------------------------
     def HandleEvent(self, evtype, event) :
         if evtype in self.HandlerRegistry :
             for handler in self.HandlerRegistry[evtype] :
                 handler(event)
                     
+    # -----------------------------------------------------------------
+    def Shutdown(self) :
+        self._Logger.warn('shutting down handler %s', self.__class__.__name__)
+        self.PublishEvent(EventTypes.ShutdownEvent(False))
+

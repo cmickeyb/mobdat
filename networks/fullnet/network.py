@@ -60,7 +60,8 @@ def BuildNetwork() :
     global netinfo, locinfo
 
     # residence and business nodes
-    rntype = netinfo.AddNodeType('residence', 'priority')
+    rntype = netinfo.AddNodeType('townhouse', 'priority')
+    antype = netinfo.AddNodeType('apartment', 'priority', False)
     bntype = netinfo.AddNodeType('business', 'priority', False)
 
     # basic roadway nodes and edges
@@ -168,6 +169,11 @@ def BuildNetwork() :
     netinfo.ConnectNodes(netinfo.Nodes['main100W0N'],netinfo.Nodes['plaza50W0N'],e2A)
     netinfo.ConnectNodes(netinfo.Nodes['main100E0N'],netinfo.Nodes['plaza50E0N'],e2A)
 
+    netinfo.ConnectNodes(netinfo.Nodes['main100W200S'], netinfo.Nodes['plaza50W200S'], e1A)
+    netinfo.ConnectNodes(netinfo.Nodes['main100E200S'], netinfo.Nodes['plaza50E200S'], e1A)
+    netinfo.ConnectNodes(netinfo.Nodes['main100W200N'], netinfo.Nodes['plaza50W200N'], e1A)
+    netinfo.ConnectNodes(netinfo.Nodes['main100E200N'], netinfo.Nodes['plaza50E200N'], e1A)
+
     # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     # BUILD THE RESIDENTIAL NEIGHBORHOODS
     # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -179,39 +185,49 @@ def BuildNetwork() :
         for nw in range (-200, 200, 100) :
             node1 = netinfo.Nodes[ConvertNodeCoordinate('main', (ew, nw))]
             node2 = netinfo.Nodes[ConvertNodeCoordinate('main', (ew, nw + 100))]
-            locinfo.CreateCapsule('residence', netinfo.GenerateResidential(node1, node2, rgenv))
+            locinfo.CreateCapsule('townhouse', netinfo.GenerateResidential(node1, node2, rgenv))
 
     for nw in [-400, 400] :
         for ew in [-300, -200, 100, 200] :
             node1 = netinfo.Nodes[ConvertNodeCoordinate('main', (ew, nw))]
             node2 = netinfo.Nodes[ConvertNodeCoordinate('main', (ew + 100, nw))]
-            locinfo.CreateCapsule('residence', netinfo.GenerateResidential(node1, node2, rgenv))
+            locinfo.CreateCapsule('townhouse', netinfo.GenerateResidential(node1, node2, rgenv))
 
     rgenv.BothSides = False
-    locinfo.CreateCapsule('residence', netinfo.GenerateResidential(netinfo.Nodes['main300W200N'],netinfo.Nodes['main400W200N'], rgenv))
-    locinfo.CreateCapsule('residence', netinfo.GenerateResidential(netinfo.Nodes['main300E200N'],netinfo.Nodes['main400E200N'], rgenv))
+    locinfo.CreateCapsule('townhouse', netinfo.GenerateResidential(netinfo.Nodes['main300W200N'],netinfo.Nodes['main400W200N'], rgenv))
+    locinfo.CreateCapsule('townhouse', netinfo.GenerateResidential(netinfo.Nodes['main300E200N'],netinfo.Nodes['main400E200N'], rgenv))
 
     rgenv.DrivewayLength = - rgenv.DrivewayLength
-    locinfo.CreateCapsule('residence', netinfo.GenerateResidential(netinfo.Nodes['main400W200S'],netinfo.Nodes['main300W200S'], rgenv))
-    locinfo.CreateCapsule('residence', netinfo.GenerateResidential(netinfo.Nodes['main400E200S'],netinfo.Nodes['main300E200S'], rgenv))
+    locinfo.CreateCapsule('townhouse', netinfo.GenerateResidential(netinfo.Nodes['main400W200S'],netinfo.Nodes['main300W200S'], rgenv))
+    locinfo.CreateCapsule('townhouse', netinfo.GenerateResidential(netinfo.Nodes['main400E200S'],netinfo.Nodes['main300E200S'], rgenv))
+
+    # some of the malls to be marked as residential apartments
+    rgenplR = NetBuilder.ResidentialGenerator(plotentry, plotnode, plotdrive, antype, driveway = -8, bspace = 5, spacing = 5, both = False)
+    rgenplL = NetBuilder.ResidentialGenerator(plotentry, plotnode, plotdrive, antype, driveway = 8, bspace = 5, spacing = 5, both = False)
+
+    for n in ['main200W200S', 'main100E200S', 'main200E200S', 'main300W200N', 'main200W200N', 'main100E200N'] :
+        locinfo.CreateCapsule('apartment', netinfo.BuildSimpleParkingLotEW(netinfo.Nodes[n], pntype, rgenplR, 'apartment', offset=-15, slength=40, elength=60))
+        locinfo.CreateCapsule('apartment', netinfo.BuildSimpleParkingLotEW(netinfo.Nodes[n], pntype, rgenplL, 'apartment', offset=15, slength=40, elength=60))
+
+    for n in ['main200W200S', 'main200W100S', 'main200W200N', 'main200W100N'] : 
+        locinfo.CreateCapsule('apartment', netinfo.BuildSimpleParkingLotNS(netinfo.Nodes[n], pntype, rgenplR, 'apartment', offset=-30))
+        locinfo.CreateCapsule('apartment', netinfo.BuildSimpleParkingLotNS(netinfo.Nodes[n], pntype, rgenplL, 'apartment', offset=30))
+
+    for n in ['main200E100S', 'main200E0N', 'main200E100N'] : 
+        locinfo.CreateCapsule('apartment', netinfo.BuildSimpleParkingLotNS(netinfo.Nodes[n], pntype, rgenplR, 'apartment', offset=-30))
+        locinfo.CreateCapsule('apartment', netinfo.BuildSimpleParkingLotNS(netinfo.Nodes[n], pntype, rgenplL, 'apartment', offset=30))
 
     # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     # BUILD THE BUSINESS NEIGHBORHOODS
     # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
-    # Time to build out some tiles... starting with simple parking lots, do not render with OpenSim
     rgenplR = NetBuilder.ResidentialGenerator(plotentry, plotnode, plotdrive, bntype, driveway = 8, bspace = 5, spacing = 5, both = False)
     rgenplL = NetBuilder.ResidentialGenerator(plotentry, plotnode, plotdrive, bntype, driveway = -8, bspace = 5, spacing = 5, both = False)
 
-    # first batch is marked as schools
+    # mark some school
     for n in ['main300W200S', 'main200E200N'] :
         locinfo.CreateCapsule('civic', netinfo.BuildSimpleParkingLotEW(netinfo.Nodes[n], pntype, rgenplR, 'civic', offset=-15, slength=40, elength=60))
         locinfo.CreateCapsule('civic', netinfo.BuildSimpleParkingLotEW(netinfo.Nodes[n], pntype, rgenplL, 'civic', offset=15, slength=40, elength=60))
-
-    # and the rest are more residential properties
-    for n in ['main200W200S', 'main100E200S', 'main200E200S', 'main300W200N', 'main200W200N', 'main100E200N'] :
-        locinfo.CreateCapsule('residence', netinfo.BuildSimpleParkingLotEW(netinfo.Nodes[n], pntype, rgenplR, 'residence', offset=-15, slength=40, elength=60))
-        locinfo.CreateCapsule('residence', netinfo.BuildSimpleParkingLotEW(netinfo.Nodes[n], pntype, rgenplL, 'residence', offset=15, slength=40, elength=60))
 
     # these are the downtown work and shopping plazas
     for ns in range(-200, 300, 50) :
@@ -222,11 +238,11 @@ def BuildNetwork() :
         locinfo.CreateCapsule('plaza', netinfo.BuildSimpleParkingLotNS(netinfo.Nodes[ename], pntype, rgenplR, 'plaza', offset=-25, slength = 17.5, elength=32.5))
         
     # these are the main business areas
-    for n in ['main200W300S', 'main200W200S', 'main200W100S', 'main200W0N', 'main200W100N', 'main200W200N'] : 
+    for n in ['main200W300S', 'main200W0N'] : 
         locinfo.CreateCapsule('mall', netinfo.BuildSimpleParkingLotNS(netinfo.Nodes[n], pntype, rgenplR, 'mall', offset=-30))
         locinfo.CreateCapsule('mall', netinfo.BuildSimpleParkingLotNS(netinfo.Nodes[n], pntype, rgenplL, 'mall', offset=30))
 
-    for n in ['main200E300S', 'main200E200S', 'main200E100S', 'main200E0N', 'main200E100N', 'main200E200N'] : 
+    for n in ['main200E300S', 'main200E200S', 'main200E200N'] : 
         locinfo.CreateCapsule('mall', netinfo.BuildSimpleParkingLotNS(netinfo.Nodes[n], pntype, rgenplR, 'mall', offset=-30))
         locinfo.CreateCapsule('mall', netinfo.BuildSimpleParkingLotNS(netinfo.Nodes[n], pntype, rgenplL, 'mall', offset=30))
 

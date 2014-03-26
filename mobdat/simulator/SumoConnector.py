@@ -189,6 +189,7 @@ class SumoConnector(EventHandler.EventHandler, BaseConnector.BaseConnector) :
  
     # -----------------------------------------------------------------
     def HandleAddVehicleEvent(self, event) :
+        self.__Logger.debug('received add vehicle event for %s going from %s to %s', event.ObjectIdentity, event.Route, event.Target)
         traci.vehicle.add(event.ObjectIdentity, event.Route, typeID=event.ObjectType)
         traci.vehicle.changeTarget(event.ObjectIdentity, event.Target)
 

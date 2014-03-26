@@ -82,7 +82,10 @@ class BaseConnector :
 
     # -----------------------------------------------------------------
     def GetWorldTime(self, currentstep) :
-        return self.StartTimeOfDay + (currentstep * self.SecondsPerStep) / (24.0 * 60.0 * 60.0)
+        """
+        GetWorldTime -- return the time associated with the step count in hours
+        """
+        return self.StartTimeOfDay + (currentstep * self.SecondsPerStep) / (60.0 * 60.0)
 
     # -----------------------------------------------------------------
     def GetWorldTimeOfDay(self, currentstep) :
@@ -91,3 +94,4 @@ class BaseConnector :
     # -----------------------------------------------------------------
     def GetWorldDay(self, currentstep) :
         return int(self.GetWorldTime(currentstep) / 24.0)
+

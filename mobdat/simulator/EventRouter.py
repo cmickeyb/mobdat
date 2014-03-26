@@ -90,7 +90,6 @@ class EventRouter :
                 exctype, value =  sys.exc_info()[:2]
                 self._Logger.warn('failed with exception type %s; %s', exctype, str(value))
 
-
     # -----------------------------------------------------------------
     def RouteEvent(self, evtype, event) :
         # print "PublishEvent: " + evtype.__name__ + " for " + str(event)

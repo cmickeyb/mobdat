@@ -171,6 +171,7 @@ class SumoBuilder :
 
             for node in self.NetworkInfo.Nodes.itervalues() :
                 if Decoration.EndPointDecoration.DecorationName in node.Decorations :
+                    name = None
                     for edge in node.OutputEdges :
                         for redge in edge.EndNode.OutputEdges :
                             if redge.EndNode == node :
@@ -179,6 +180,9 @@ class SumoBuilder :
                                 fp.write("  <route id=\"%s\" edges=\"%s\" />\n" % (name, edges))
                                 break
 
+                    if not name :
+                        self.Logger.warn('cannot find route for %s', node.Name)
+                    
             fp.write("</routes>\n")
 
     # -----------------------------------------------------------------

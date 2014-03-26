@@ -53,7 +53,26 @@ logger = logging.getLogger(__name__)
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+class ScheduledEvent :
+
+    # -----------------------------------------------------------------
+    def __init__(self, day, stime, etime) :
+        self.Day = day
+        self.StartTime = stime
+        self.EndTime = etime
+
+    # -----------------------------------------------------------------
+    @property
+    def WorldStartTime(self) : return self.Day * 24.0 + self.StartTime
+    
+    # -----------------------------------------------------------------
+    @property
+    def WorldEndTime(self) : return self.Day * 24.0 + self.EndTime
+
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class WeeklySchedule :
+
     # -----------------------------------------------------------------
     @staticmethod
     def WorkWeekSchedule(stime, etime) :
@@ -109,9 +128,42 @@ class WeeklySchedule :
         return False
 
     # -----------------------------------------------------------------
+    def NextScheduledEvent(self, worldtime) :
+        day = int(worldtime / 24.0)
+        time = worldtime % 24
+
+        for iday in range(DaysOfTheWeek.Mon, DaysOfTheWeek.Sun + 1) :
+            for sched in self.ScheduleForDay(iday + int(day)) :
+                if sched[0] >= time : return ScheduledEvent(iday + int(day), sched[0], sched[1])
+            time = 0.0          # start at the beginning of the next day
+
+        return None
+
+    # -----------------------------------------------------------------
     def Dump(self) :
         result = []
         for d in range(DaysOfTheWeek.Mon, DaysOfTheWeek.Sun + 1) :
             result.append(self.ScheduleForDay(d))
         return result
 
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+if __name__ == '__main__' :
+    sched = WeeklySchedule.WorkWeekSchedule(8.0, 17.0)
+    ev = sched.NextScheduledEvent(0.0, 0.0)
+    print "{0}, {1}, {2}".format(ev.Day, ev.StartTime, ev.EndTime)
+
+    ev = sched.NextScheduledEvent(0.0, 12.0)
+    print "{0}, {1}, {2}".format(ev.Day, ev.StartTime, ev.EndTime)
+
+    ev = sched.NextScheduledEvent(6.0, 0.0)
+    print "{0}, {1}, {2}".format(ev.Day, ev.StartTime, ev.EndTime)
+
+    ev = sched.NextScheduledEvent(6.0, 12.0)
+    print "{0}, {1}, {2}".format(ev.Day, ev.StartTime, ev.EndTime)
+
+    ev = sched.NextScheduledEvent(600.0, 2.0)
+    print "{0}, {1}, {2}".format(ev.Day, ev.StartTime, ev.EndTime)
+
+    ev = sched.NextScheduledEvent(322.75690, 2.2334)
+    print "{0}, {1}, {2}".format(ev.Day, ev.StartTime, ev.EndTime)

@@ -240,5 +240,5 @@ class OpenSimBuilder :
                     break
 
             if not success :
-                self.NodeMap[n] = self.NetworkSettings.IntersectionTypeMap[tname][0]
-                self.Logger.warn("No match for node %s with type %s and signature %s" % (n, tname, sig1))
+                self.NodeMap[node.Name] = self.NetworkSettings.IntersectionTypeMap[tname][0]
+                self.Logger.warn("No match for node %s with type %s and signature %s" % (node.Name, tname, sig1))

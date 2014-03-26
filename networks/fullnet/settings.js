@@ -4,7 +4,7 @@
         "TimeSteps" : 0,
         "Interval" : 0.150,
         "SecondsPerStep" : 2.0,
-        "StartTimeOfDay" : 8.0,
+        "StartTimeOfDay" : 6.0,
         "BusinessInfoFile" : "networks/fullnet/data/bizinfo.js",
 	"LocationInfoFile" : "networks/fullnet/data/locinfo.js",
 	"NetworkInfoFile" : "networks/fullnet/data/netinfo.js",
@@ -303,6 +303,15 @@
 	    "Signature" : ["1L/1L", "1L/1L", "1L/1L", "1L/1L"],
             "IntersectionTypes" : [ "stoplight", "priority" ]
 	},
+
+	{
+	    "Name" : "Intersection [1L 2L 1L 2L]",
+	    "AssetID" : { "ObjectName" : "SumoAssets Nodes", "ItemName" : "Intersection [1L 1L 1L 1L]" },
+	    "ZOffset" : 20.5,
+	    "Padding" : 7.5,
+	    "Signature" : ["1L/1L", "2L/0L", "1L/1L", "0L/2L"],
+            "IntersectionTypes" : [ "stoplight", "priority" ]
+	},
 	    
 	{
 	    "Name" : "Intersection [1L 0L 1L 2L]",
@@ -346,7 +355,7 @@
 	    "ZOffset" : 25.0,
 	    "Padding" : 0,
 	    "Signature" : ["0L/0L", "0L/0L", "D/D", "0L/0L"],
-            "IntersectionTypes" : [ "residence" ]
+            "IntersectionTypes" : [ "townhouse", "apartment" ]
 	},
 
 	{
@@ -356,7 +365,7 @@
 	    "Padding" : 0,
 	    "Signature" : ["0L/0L", "0L/0L", "D/D", "0L/0L"],
             "IntersectionTypes" : [ ],
-            "xIntersectionTypes" : [ "residence" ]
+            "xIntersectionTypes" : [ "townhouse" ]
 	},
 
         {
