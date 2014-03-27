@@ -76,7 +76,10 @@ class StatsConnector(EventHandler.EventHandler, BaseConnector.BaseConnector) :
     # -----------------------------------------------------------------
     def HandleStatsEvent(self, event) :
         if event.__class__ == EventTypes.SumoConnectorStatsEvent :
-            print "{0} vehicles in the simulation at time step {1}".format(event.VehicleCount, event.CurrentStep)
+            vcount = event.VehicleCount
+            scount = event.CurrentStep
+            timeofday = self.GetWorldTimeOfDay(scount)
+            print "{0} vehicles in the simulation, steps={1}, time={2:.2f}".format(vcount, scount, timeofday)
             
         self.Logger.info(str(event))
 

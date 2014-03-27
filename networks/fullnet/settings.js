@@ -2,7 +2,7 @@
     "General" :
     {
         "TimeSteps" : 0,
-        "Interval" : 0.150,
+        "Interval" : 0.200,
         "SecondsPerStep" : 2.0,
         "StartTimeOfDay" : 6.0,
         "BusinessInfoFile" : "networks/fullnet/data/bizinfo.js",

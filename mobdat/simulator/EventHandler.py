@@ -105,7 +105,8 @@ class EventHandler :
             except :
                 exctype, value, tracebk =  sys.exc_info()
                 frames = traceback.extract_tb(tracebk)[-1]
-                self._Logger.warn('handler failed with exception type %s; %s in %s at line %s', exctype, str(value), frames[0], frames[1])
+                self._Logger.warn('handler failed with exception type %s; %s in %s at line %s',
+                                  exctype, str(value), frames[0], frames[1])
                 self.Shutdown()
                 return
 

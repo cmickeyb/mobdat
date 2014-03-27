@@ -101,16 +101,18 @@ def ParseCommandLine(config, args) :
     parser.add_argument("--interval", help="sumo interval time", type=float)
     parser.add_argument("--connectors", help="list of connectors to use in the simulation", nargs='+')
 
+    parser.add_argument("--starttime", help="hour of the day when simulation starts", type=float)
+    parser.add_argument("--secondsperstep", help="number of seconds per simulation step", type=float)
+
     parser.add_argument("--steps", help="number of steps to execute", type=int)
-    parser.add_argument("--people", help="number of people to simulate", type=int)
-    parser.add_argument("--waittime", help="number of intervals on average for a person to wait", type=int)
+
     options = parser.parse_args(args)
 
-    if options.people :
-        config["SocialConnector"]["PeopleCount"] = options.people
+    if options.starttime :
+        config["General"]["StartTimeOfDay"] = options.starttime
         
-    if options.waittime :
-        config["SocialConnector"]["WaitMean"] = options.waittime
+    if options.secondsperstep :
+        config["General"]["SecondsPerStep"] = options.secondsperstep
 
     if options.capability :
         config["OpenSimConnector"]["Capability"] = options.capability

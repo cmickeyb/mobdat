@@ -125,6 +125,7 @@ class SumoConnector(EventHandler.EventHandler, BaseConnector.BaseConnector) :
             edge = self.CurrentEdgeList.pop()
             traci.edge.adaptTraveltime(edge, traci.edge.getTraveltime(edge)) 
             count += 1
+
     # # -----------------------------------------------------------------
     # def AddVehicle(self, vehid, routeid, typeid) :
     #     traci.vehicle.add(vehid, routeid, typeID=typeid)
@@ -189,7 +190,7 @@ class SumoConnector(EventHandler.EventHandler, BaseConnector.BaseConnector) :
  
     # -----------------------------------------------------------------
     def HandleAddVehicleEvent(self, event) :
-        self.__Logger.debug('received add vehicle event for %s going from %s to %s', event.ObjectIdentity, event.Route, event.Target)
+        self.__Logger.debug('add vehicle %s going from %s to %s', event.ObjectIdentity, event.Route, event.Target)
         traci.vehicle.add(event.ObjectIdentity, event.Route, typeID=event.ObjectType)
         traci.vehicle.changeTarget(event.ObjectIdentity, event.Target)
 
@@ -262,7 +263,7 @@ class SumoConnector(EventHandler.EventHandler, BaseConnector.BaseConnector) :
     # -----------------------------------------------------------------
     def SimulationStart(self) :
         sumoBinary = checkBinary('sumo')
-        sumoCommandLine = [sumoBinary, "-c", self.ConfigFile]
+        sumoCommandLine = [sumoBinary, "-c", self.ConfigFile, "-l", "sumo.log"]
         
         self.SumoProcess = subprocess.Popen(sumoCommandLine, stdout=sys.stdout, stderr=sys.stderr)
         traci.init(self.Port)

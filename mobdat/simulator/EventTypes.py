@@ -90,7 +90,7 @@ class TripLengthStatsEvent(StatsEvent) :
 
     # -----------------------------------------------------------------
     def __str__(self) :
-        fstring = "{0},{1},{2},{3},{4},{5}"
+        fstring = "{0},{1},{2:.3f},{3},{4},{5}"
         return fstring.format(self.StatKey, self.CurrentStep, self.Duration, self.Person, self.SourceNode, self.DestinationNode)
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
