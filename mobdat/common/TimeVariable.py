@@ -69,13 +69,9 @@ class TimeVariable :
 
     # -----------------------------------------------------------------
     def __str__(self) :
-        # fmt = "{0}:{1:.3f}" if self.IsFixed() else "{0}:<{1:.3f}-{2:.3f}>" 
         if self.IsFixed() :
-            day = int(self.STime / 24.0)
-            hour = self.STime % 24.0
-            return "{0:02d}:{1:5.2f}".format(day, hour)
-        
-        return "{0}:<{1:.3f}-{2:.3f}>".format(self.ID, self.STime, self.ETime)
+            return "{0:02d}:{1:5.2f}".format(int(self.STime / 24.0), self.STime % 24.0)
+        return "<{0:.3f}-{1:.3f}>".format(self.STime, self.ETime)
 
     # -----------------------------------------------------------------
     def Copy(self, id = None) :

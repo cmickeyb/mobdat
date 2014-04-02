@@ -66,6 +66,14 @@ class PlaceEvent :
         self.Departure = None
 
     # -----------------------------------------------------------------
+    def NextPlace(self) :
+        return self.Departure.DstPlace if self.Departure else None
+
+    # -----------------------------------------------------------------
+    def PrevPlace(self) :
+        return self.Arrival.SrcPlace if self.Arrival else None
+
+    # -----------------------------------------------------------------
     def AddConstraints(self, cstore) :
         constraint = OrderConstraint(self.STime.ID, self.ETime.ID, self.Duration)
         cstore.AddConstraint(constraint)
@@ -84,15 +92,11 @@ class PlaceEvent :
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class TravelEvent :
     # -----------------------------------------------------------------
-    def __init__(self, srcplace, dstplace, id = None) :
+    def __init__(self, srcplace, dstplace, duration = 0.5, id = None) :
         self.SrcPlace = srcplace
         self.DstPlace = dstplace
+        self.Duration = duration
         self.EventID = id or GenName('TRAVEL')
-
-    # -----------------------------------------------------------------
-    @property
-    def Duration(self) :
-        return 0.5
 
     # -----------------------------------------------------------------
     def AddConstraints(self, cstore) :
@@ -162,6 +166,10 @@ class TimeVariableStore(dict) :
             
         return sorted(variables, key= lambda var : var.Priority, reverse=True)
         
+    # -----------------------------------------------------------------
+    def Dump(self) :
+        for tvar in sorted(self.values(), key= lambda tvar : tvar.STime) :
+            print "{0:5s} {1}".format(tvar.ID, str(tvar))
     
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -239,6 +247,16 @@ class TimedEventList :
         return event
 
     # -----------------------------------------------------------------
+    def PrevPlaceID(self, eventid) :
+        ev = self.Events[eventid].PrevPlace()
+        return ev.EventID if ev else None
+
+    # -----------------------------------------------------------------
+    def NextPlaceID(self, eventid) :
+        ev = self.Events[eventid].NextPlace()
+        return ev.EventID if ev else None
+
+    # -----------------------------------------------------------------
     def AddPlaceEvent(self, details, svar, evar, duration = 0.01, id = None) :
         self.TimeVariableStore[svar.ID] = svar
         self.TimeVariableStore[evar.ID] = evar
@@ -265,10 +283,11 @@ class TimedEventList :
             ev2.Departure = TravelEvent(ev2, ev1.Departure.DstPlace)
 
         ev1.Departure = TravelEvent(ev1, ev2)
+        ev2.Arrival = ev1.Departure
 
         t1 = max(ev1.STime.STime, ev2.STime.STime)
         t2 = max(ev1.STime.ETime, ev2.STime.ETime)
-        print "T1=%s, T2=%s" % (t1, t2)
+
         ev1.ETime = MaximumTimeVariable(t1, t2, ev1.ETime.ID)
         self.TimeVariableStore[ev1.ETime.ID] = ev1.ETime
 
@@ -295,14 +314,17 @@ class TimedEventList :
         idc = self.AddPlaceEvent(ev1.Details, ev1.STime.Copy(GenName('TV')), ev1.ETime.Copy(GenName('TV')), ev1.Duration)
         clone = self.Events[idc]
 
-        ev2.Departure = TravelEvent(ev2, clone)
         if ev1.Departure :
             clone.Departure = TravelEvent(clone, ev1.Departure.DstPlace)
+
+        ev2.Departure = TravelEvent(ev2, clone)
+        clone.Arrival = ev2.Departure
 
         clone.STime = MinimumTimeVariable(ev2.ETime.STime, ev1.ETime.ETime, clone.STime.ID)
         self.TimeVariableStore[clone.STime.ID] = clone.STime
 
         ev1.Departure = TravelEvent(ev1, ev2)
+        ev2.Arrival = ev1.Departure
 
         ev1.ETime = MaximumTimeVariable(ev1.STime.STime, ev2.STime.ETime, ev1.ETime.ID)
         self.TimeVariableStore[ev1.ETime.ID] = ev1.ETime
@@ -315,8 +337,7 @@ class TimedEventList :
 
     # -----------------------------------------------------------------
     def DumpTimeVariables(self) :
-        for tvar in sorted(self.TimeVariableStore.values(), key= lambda tvar : tvar.STime) :
-            print str(tvar)
+        self.TimeVariableStore.Dump()
 
     # -----------------------------------------------------------------
     def Dump(self) :
@@ -335,23 +356,27 @@ def AddWorkEvent(evlist, event, days) :
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-def AddLunchEvent(evlist, event, days) :
+def AddLunchToWorkEvent(evlist, workevent, days) :
     slunch = GaussianTimeVariable(days * 24.0 + 11.5, days * 24.0 + 13.0)
     elunch = GaussianTimeVariable(days * 24.0 + 12.5, days * 24.0 + 14.0)
     idl = evlist.AddPlaceEvent('lunch', slunch, elunch, 0.75)
 
-    evlist.InsertWithinPlaceEvent(event, idl)
+    evlist.InsertWithinPlaceEvent(workevent, idl)
 
     return idl
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-def AddCoffeeEvent(evlist, event, days) :
-    scoffee = MaximumTimeVariable(days * 24.0 + 0.0, days * 24.0 + 24.0)
-    ecoffee = MinimumTimeVariable(days * 24.0 + 0.0, days * 24.0 + 24.0)
-    idc = evlist.AddPlaceEvent('coffee', scoffee, ecoffee, 0.2)
+def AddCoffeeBeforeWorkEvent(evlist, workevent, days) :
+    """Add a PlaceEvent for coffee before a work event. This moves the
+    coffee event as close as possible to the work event.
+    """
 
-    evlist.InsertAfterPlaceEvent(event, idc)
+    scoffee = MaximumTimeVariable(days * 24.0 + 0.0, days * 24.0 + 24.0)
+    ecoffee = MaximumTimeVariable(days * 24.0 + 0.0, days * 24.0 + 24.0)
+    idc = evlist.AddPlaceEvent('coffee', scoffee, ecoffee, max(0.2, random.gauss(0.25, 0.1)))
+
+    evlist.InsertAfterPlaceEvent(evlist.PrevPlaceID(workevent), idc)
     
     return idc
 
@@ -360,16 +385,16 @@ def AddCoffeeEvent(evlist, event, days) :
 if __name__ == '__main__' :
     evlist = TimedEventList('home', 7 * 24.0)
 
-    for day in range(0, 1) :
+    for day in range(0, 6) :
         lastev = evlist.LastEvent.EventID
 
         workev = AddWorkEvent(evlist, lastev, day)
 
-        if random.uniform(0.0, 1.0) > 0.0 :
-            AddCoffeeEvent(evlist, lastev, day)
+        if random.uniform(0.0, 1.0) > 0.8 :
+            AddCoffeeBeforeWorkEvent(evlist, workev, day)
 
         if random.uniform(0.0, 1.0) > 0.5 :
-            AddLunchEvent(evlist, workev, day)
+            AddLunchToWorkEvent(evlist, workev, day)
 
     # evlist.DumpTimeVariables()
     if not evlist.SolveConstraints() :
