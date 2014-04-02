@@ -66,42 +66,6 @@ class PlaceEvent :
         self.Departure = None
 
     # -----------------------------------------------------------------
-    def InsertAfterEvent(self, place) :
-        """Insert a PlaceEvent after the current event. Create a travel event to move
-        from the current location to the new one.
-
-        Args:
-            place -- a PlaceEvent, assumes that departure is not already set
-        """
-
-        if self.Departure :
-            place.Departure = TravelEvent(place, self.Departure.DstPlace)
-
-        self.Departure = TravelEvent(self, place)
-        self.ETime = MaximumTimeVariable(place.STime.STime, place.STime.ETime)
-
-    # -----------------------------------------------------------------
-    def InsertWithinEvent(self, place) :
-        """Insert a PlaceEvent in the middle of the current event. Create travel events to
-        move from the current location to the new location and then back to the current location.
-        The assumption is that self.STime.STime < place.STime.STime and
-        place.ETime.ETime < self.ETime.ETime
-
-        Args:
-            place -- an initialized PlaceEvent
-        """
-
-        clone = self.Copy(GenName('PLACE'))
-
-        place.Departure = TravelEvent(place, clone)
-        if self.Departure :
-            clone.Departure = TravelEvent(clone, self.Departure.DstPlace)
-        clone.STime = MinimumTimeVariable(place.ETime.STime, self.ETime.ETime)
-
-        self.Departure = TravelEvent(self, place)
-        self.ETime = MaximumTimeVariable(self.STime.STime, place.STime.ETime)
-
-    # -----------------------------------------------------------------
     def AddConstraints(self, cstore) :
         constraint = OrderConstraint(self.STime.ID, self.ETime.ID, self.Duration)
         cstore.AddConstraint(constraint)
@@ -111,7 +75,7 @@ class PlaceEvent :
 
     # -----------------------------------------------------------------
     def Dump(self) :
-        print ">>> [{0}]: {1}, {2}, {3}, {4}".format(self.EventID, self.Details, str(self.STime), str(self.ETime), self.Duration)
+        print "[{0:8s}]: {1:8s} from {2} to {3}".format(self.EventID, self.Details, str(self.STime), str(self.ETime))
         if self.Departure :
             self.Departure.Dump()
 
@@ -140,7 +104,7 @@ class TravelEvent :
 
     # -----------------------------------------------------------------
     def Dump(self) :
-        print "=== [{0}]: {1}".format(self.EventID, self.Duration)
+        # print "[{0:8s}]: travel from {1} to {2}".format(self.EventID, self.SrcPlace.Details, self.DstPlace.Details)
         if self.DstPlace :
             self.DstPlace.Dump()
 
@@ -254,20 +218,6 @@ class ConstraintStore :
 
         return True
         
-
-# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class xxTimedEventList :
-    # -----------------------------------------------------------------
-    def __init__(self, baseevent) :
-        self.BaseEvent = baseevent
-        self.TimeVariableStore = TimeVariableStore()
-
-    # -----------------------------------------------------------------
-    def Dump(self) :
-        for tvar in sorted(self.TimeVariableStore.values(), key= lambda tvar : tvar.STime) :
-            print str(tvar)
-
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class TimedEventList :
@@ -276,8 +226,17 @@ class TimedEventList :
         self.Events = {}
         self.TimeVariableStore = TimeVariableStore()
 
-        baseid = self.AddPlaceEvent(details, TimeVariable(0.0), TimeVariable(lifespan))
+        baseid = self.AddPlaceEvent(details, MinimumTimeVariable(0.0), MaximumTimeVariable(lifespan))
         self.BaseEvent = self.Events[baseid]
+
+    # -----------------------------------------------------------------
+    @property
+    def LastEvent(self) :
+        event = self.BaseEvent
+        while event.Departure :
+            event = event.Departure.DstPlace
+
+        return event
 
     # -----------------------------------------------------------------
     def AddPlaceEvent(self, details, svar, evar, duration = 0.01, id = None) :
@@ -291,6 +250,14 @@ class TimedEventList :
 
     # -----------------------------------------------------------------
     def InsertAfterPlaceEvent(self, id1, id2) :
+        """Insert PlaceEvent id2 after the event id1. Create a travel event to move
+        from the current location to the new one.
+
+        Args:
+            id1 -- string event identifier
+            id2 -- string event identifier
+        """
+
         ev1 = self.Events[id1]
         ev2 = self.Events[id2]
 
@@ -298,13 +265,32 @@ class TimedEventList :
             ev2.Departure = TravelEvent(ev2, ev1.Departure.DstPlace)
 
         ev1.Departure = TravelEvent(ev1, ev2)
-        ev1.ETime = MaximumTimeVariable(ev2.STime.STime, ev2.STime.ETime)
+
+        t1 = max(ev1.STime.STime, ev2.STime.STime)
+        t2 = max(ev1.STime.ETime, ev2.STime.ETime)
+        print "T1=%s, T2=%s" % (t1, t2)
+        ev1.ETime = MaximumTimeVariable(t1, t2, ev1.ETime.ID)
         self.TimeVariableStore[ev1.ETime.ID] = ev1.ETime
 
     # -----------------------------------------------------------------
     def InsertWithinPlaceEvent(self, id1, id2) :
+        """Insert split event id1 and insert id2 into the middle. Create travel events to
+        move from the current location to the new location and then back to the current location.
+        The assumption is that self.STime.STime < place.STime.STime and
+        place.ETime.ETime < self.ETime.ETime
+
+        Args:
+            id1 -- string event identifier
+            id2 -- string event identifier
+        """
         ev1 = self.Events[id1]
         ev2 = self.Events[id2]
+
+        # this is really wrong, there should be a constraint across the two intervals
+        # that ensures that the duration is consistent...
+        oldduration = ev1.Duration
+        if oldduration > 0.01 :
+            ev1.Duration = oldduration / 2.0
 
         idc = self.AddPlaceEvent(ev1.Details, ev1.STime.Copy(GenName('TV')), ev1.ETime.Copy(GenName('TV')), ev1.Duration)
         clone = self.Events[idc]
@@ -312,46 +298,83 @@ class TimedEventList :
         ev2.Departure = TravelEvent(ev2, clone)
         if ev1.Departure :
             clone.Departure = TravelEvent(clone, ev1.Departure.DstPlace)
-        clone.STime = MinimumTimeVariable(ev2.ETime.STime, ev1.ETime.ETime)
+
+        clone.STime = MinimumTimeVariable(ev2.ETime.STime, ev1.ETime.ETime, clone.STime.ID)
         self.TimeVariableStore[clone.STime.ID] = clone.STime
 
         ev1.Departure = TravelEvent(ev1, ev2)
-        ev1.ETime = MaximumTimeVariable(ev1.STime.STime, ev2.STime.ETime)
+
+        ev1.ETime = MaximumTimeVariable(ev1.STime.STime, ev2.STime.ETime, ev1.ETime.ID)
         self.TimeVariableStore[ev1.ETime.ID] = ev1.ETime
 
     # -----------------------------------------------------------------
     def SolveConstraints(self) :
         cstore = ConstraintStore()
         self.BaseEvent.AddConstraints(cstore)
-        cstore.SolveConstraints(self.TimeVariableStore)
+        return cstore.SolveConstraints(self.TimeVariableStore)
 
     # -----------------------------------------------------------------
-    def Dump(self) :
+    def DumpTimeVariables(self) :
         for tvar in sorted(self.TimeVariableStore.values(), key= lambda tvar : tvar.STime) :
             print str(tvar)
 
+    # -----------------------------------------------------------------
+    def Dump(self) :
+        self.BaseEvent.Dump()
+
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+def AddWorkEvent(evlist, event, days) :
+    swork = GaussianTimeVariable(days * 24.0 + 7.0,  days * 24.0 + 9.0)
+    ework = GaussianTimeVariable(days * 24.0 + 16.0, days * 24.0 + 18.0)
+    idw = evlist.AddPlaceEvent('work', swork, ework, 9.0)
+
+    evlist.InsertWithinPlaceEvent(event, idw)
+
+    return idw
+
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+def AddLunchEvent(evlist, event, days) :
+    slunch = GaussianTimeVariable(days * 24.0 + 11.5, days * 24.0 + 13.0)
+    elunch = GaussianTimeVariable(days * 24.0 + 12.5, days * 24.0 + 14.0)
+    idl = evlist.AddPlaceEvent('lunch', slunch, elunch, 0.75)
+
+    evlist.InsertWithinPlaceEvent(event, idl)
+
+    return idl
+
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+def AddCoffeeEvent(evlist, event, days) :
+    scoffee = MaximumTimeVariable(days * 24.0 + 0.0, days * 24.0 + 24.0)
+    ecoffee = MinimumTimeVariable(days * 24.0 + 0.0, days * 24.0 + 24.0)
+    idc = evlist.AddPlaceEvent('coffee', scoffee, ecoffee, 0.2)
+
+    evlist.InsertAfterPlaceEvent(event, idc)
+    
+    return idc
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 if __name__ == '__main__' :
-    evlist = TimedEventList('home', 7*24.0)
+    evlist = TimedEventList('home', 7 * 24.0)
 
-    idw = evlist.AddPlaceEvent('work', GaussianTimeVariable(7.0, 9.0), GaussianTimeVariable(16.0, 18.0), 9.0)
-    idc = evlist.AddPlaceEvent('coffee', MaximumTimeVariable(0.0, 24.0), MinimumTimeVariable(0.0, 24.0), 0.2)
+    for day in range(0, 1) :
+        lastev = evlist.LastEvent.EventID
 
-    evlist.InsertWithinPlaceEvent(evlist.BaseEvent.EventID, idw)
-    evlist.InsertAfterPlaceEvent(evlist.BaseEvent.EventID, idc)
+        workev = AddWorkEvent(evlist, lastev, day)
 
-    evlist.SolveConstraints()
+        if random.uniform(0.0, 1.0) > 0.0 :
+            AddCoffeeEvent(evlist, lastev, day)
+
+        if random.uniform(0.0, 1.0) > 0.5 :
+            AddLunchEvent(evlist, workev, day)
+
+    # evlist.DumpTimeVariables()
+    if not evlist.SolveConstraints() :
+        print 'resolution failed'
+        sys.exit(1)
+
     evlist.Dump()
-
-    # h1 = PlaceEvent('home', TimeVariable(0.0, 0.0), TimeVariable(7*24.0, 7*24.0))
-    # h1.InsertWithinEvent(PlaceEvent('work', GaussianTimeVariable(7.0, 9.0), GaussianTimeVariable(16.0, 18.0), 9.0))
-    # h1.InsertAfterEvent(PlaceEvent('coffee', MaximumTimeVariable(0.0, 24.0), MinimumTimeVariable(0.0, 24.0), 0.2))
-
-    # evlist = TimedEventList()
-    # h1.AddToTimedEventList(evlist)
-
-    # evlist.SolveConstraints()
-    # h1.Dump()
 
