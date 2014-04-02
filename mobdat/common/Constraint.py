@@ -45,16 +45,28 @@ sys.path.append(os.path.join(os.environ.get("OPENSIM","/share/opensim"),"lib","p
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
+import math
 from mobdat.common.Utilities import GenName
+from mobdat.common.TimeVariable import TimeVariable
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class Constraint :
     Priority = 0
+    MinimalVariance = 0.00001
 
     # -----------------------------------------------------------------
     def __init__(self) :
         self.ConstraintID = GenName('CONSTRAINT')
+
+    # -----------------------------------------------------------------
+    @staticmethod
+    def fpcompare(v1, v2) :
+        if math.fabs(v1 - v2) < Constraint.MinimalVariance :
+            return 0
+        if v1 < v2 :
+            return -1
+        return 1
         
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -82,12 +94,32 @@ class OrderConstraint(Constraint) :
         ev2 = varstore[self.ID2]
 
         changed = False
-        if (ev1.STime + self.Delta > ev2.STime) :
+        
+        if self.fpcompare(ev2.STime, ev1.STime + self.Delta) < 0 :
             ev2.STime = ev1.STime + self.Delta
             changed = True
 
-        if (ev1.ETime + self.Delta > ev2.ETime) :
+        if self.fpcompare(ev2.ETime, ev1.ETime + self.Delta) < 0 :
             ev1.ETime = ev2.ETime - self.Delta
             changed = True
 
         return changed
+
+    # -----------------------------------------------------------------
+    def Dump(self, varstore) :
+        print "{0}: ID1={1}, ID2={2}, Delta={3}".format(self.ConstraintID, self.ID1, self.ID2, self.Delta)
+        print "{0:5s} == {1}".format(self.ID1, str(varstore[self.ID1]))
+        print "{0:5s} == {1}".format(self.ID2, str(varstore[self.ID2]))
+
+        ev1 = varstore[self.ID1]
+        ev2 = varstore[self.ID2]
+
+        if ev2.STime < ev1.STime + self.Delta :
+            print "ev2.STime < ev1.STime + self.Delta"
+            print "{2} < {0} + {1}".format(ev1.ETime, self.Delta, ev2.STime)
+
+        if ev1.ETime + self.Delta > ev2.ETime :
+            print "ev1.ETime + self.Delta > ev2.ETime"
+            print "{0} + {1} > {2}".format(ev1.ETime, self.Delta, ev2.STime)
+
+        print

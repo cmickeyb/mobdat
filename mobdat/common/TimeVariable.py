@@ -45,13 +45,14 @@ sys.path.append(os.path.join(os.environ.get("OPENSIM","/share/opensim"),"lib","p
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
-import random
+import random, math
 from mobdat.common.Utilities import GenName
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class TimeVariable :
     Priority = 5
+    MinimalVariance = 0.00001
 
     # -----------------------------------------------------------------
     def __init__(self, stime, etime = None, id = None) :
@@ -70,23 +71,28 @@ class TimeVariable :
     # -----------------------------------------------------------------
     def __str__(self) :
         if self.IsFixed() :
-            return "{0:02d}:{1:5.2f}".format(int(self.STime / 24.0), self.STime % 24.0)
-        return "<{0:.3f}-{1:.3f}>".format(self.STime, self.ETime)
+            return "{0:02d}:{1:5.3f}".format(int(self.STime / 24.0), self.STime % 24.0)
+        return "<{0}:{1}>".format(self.STime, self.ETime)
 
     # -----------------------------------------------------------------
     def Copy(self, id = None) :
         """ Create a copy of the time variable """
-        ## return TimeVariable(self.STime, self.ETime, self.ID)
         return self.__class__(self.STime, self.ETime, id or self.ID)
 
     # -----------------------------------------------------------------
     def IsFixed(self) :
         """ Predicate to determine if the interval has set a single value """
-        return self.STime == self.ETime
+        return math.fabs(self.ETime - self.STime) < TimeVariable.MinimalVariance
 
     # -----------------------------------------------------------------
     def IsValid(self) :
         """ Predicate to determine if the interval has any valid values """
+        if self.IsFixed() :
+            return True
+
+        if not self.STime <= self.ETime :
+            print "INVALID: {0}".format(self.STime - self.ETime)
+
         return self.STime <= self.ETime
     
     # -----------------------------------------------------------------
@@ -102,6 +108,7 @@ class TimeVariable :
         Returns:
             the fixed value of the variable
         """
+
         self.STime = value
         self.ETime = value
         return value
