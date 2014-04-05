@@ -61,18 +61,10 @@ class PersonBuilder(PersonInfo) :
         self.PersonProfiles[name] = PersonProfile(name)
 
     # -----------------------------------------------------------------
-    def AddResidentialLocationProfile(self, name, residents) :
-        self.ResidentialLocationProfiles[name] = ResidentialLocationProfile(name, residents)
-
-    # -----------------------------------------------------------------
-    def AddResidentialLocation(self, capsule, profile) :
-        self.ResidentialLocations[capsule.Name] = ResidentialLocation(capsule, profile)
-
-    # -----------------------------------------------------------------
-    def PlacePerson(self, person) :
+    def PlacePerson(self, person, locinfo) :
         bestloc = None
         bestfit = 0
-        for residence in self.ResidentialLocations.itervalues() :
+        for residence in locinfo.ResidentialLocations.itervalues() :
             fitness = residence.Fitness(person)
             if fitness > bestfit :
                 bestfit = fitness
@@ -83,3 +75,4 @@ class PersonBuilder(PersonInfo) :
             self.PersonList[person.Name] = person
 
         return bestloc
+

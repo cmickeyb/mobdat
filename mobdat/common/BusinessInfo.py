@@ -48,7 +48,6 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
 from mobdat.common.ValueTypes import DaysOfTheWeek
-from mobdat.common.Location import *
 from mobdat.common.Business import *
 
 import json
@@ -75,19 +74,8 @@ class BusinessInfo :
         self.BusinessProfiles = {}
         self.BusinessList = {}
 
-        self.BusinessLocationProfiles = {}
-        self.BusinessLocations = {}
-
     # -----------------------------------------------------------------
     def Load(self, bizdata, locinfo) :
-        for lpinfo in bizdata['BusinessLocationProfiles'] :
-            locprofile = BusinessLocationProfile.Load(lpinfo)
-            self.BusinessLocationProfiles[locprofile.ProfileName] = locprofile
-
-        for linfo in bizdata['BusinessLocations'] :
-            location = BusinessLocation.Load(linfo, locinfo, self)
-            self.BusinessLocations[location.Capsule.Name] = location
-
         for pinfo in bizdata['BusinessProfiles'] :
             profile = BusinessProfile.Load(pinfo)
             self.BusinessProfiles[profile.ProfileName] = profile
@@ -99,14 +87,6 @@ class BusinessInfo :
     # -----------------------------------------------------------------
     def Dump(self) :
         result = dict()
-
-        result['BusinessLocationProfiles'] = []
-        for blp in self.BusinessLocationProfiles.itervalues() :
-            result['BusinessLocationProfiles'].append(blp.Dump())
-
-        result['BusinessLocations'] = []
-        for bl in self.BusinessLocations.itervalues() :
-            result['BusinessLocations'].append(bl.Dump())
 
         result['BusinessProfiles'] = []
         for p in self.BusinessProfiles.itervalues() :

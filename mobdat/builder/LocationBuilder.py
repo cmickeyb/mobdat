@@ -47,6 +47,7 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "
 from mobdat.common.LocationInfo import LocationInfo
 from mobdat.common.NetworkInfo import Collection
 from mobdat.common.Decoration import CapsuleTypeDecoration, EndPointDecoration
+from mobdat.common.Location import *
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -87,4 +88,20 @@ class LocationBuilder(LocationInfo) :
 
         self.AddCapsule(capsule)
         self.NetworkInfo.AddCollection(capsule)
+
+    # -----------------------------------------------------------------
+    def AddBusinessLocationProfile(self, name, employees, customers, types) :
+        self.BusinessLocationProfiles[name] = BusinessLocationProfile(name, employees, customers, types)
+
+    # -----------------------------------------------------------------
+    def AddBusinessLocation(self, capsule, profile) :
+        self.BusinessLocations[capsule.Name] = BusinessLocation(capsule, profile)
+
+    # -----------------------------------------------------------------
+    def AddResidentialLocationProfile(self, name, residents) :
+        self.ResidentialLocationProfiles[name] = ResidentialLocationProfile(name, residents)
+
+    # -----------------------------------------------------------------
+    def AddResidentialLocation(self, capsule, profile) :
+        self.ResidentialLocations[capsule.Name] = ResidentialLocation(capsule, profile)
 

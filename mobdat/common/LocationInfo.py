@@ -47,8 +47,9 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
-from mobdat.common.ValueTypes import DaysOfTheWeek
+from mobdat.common.Location import *
 from Decoration import *
+
 import json
 
 logger = logging.getLogger(__name__)
@@ -73,6 +74,12 @@ class LocationInfo :
         self.CapsuleMap = {}
         self.CapsuleTypeMap = {}
 
+        self.BusinessLocationProfiles = {}
+        self.BusinessLocations = {}
+
+        self.ResidentialLocationProfiles = {}
+        self.ResidentialLocations = {}
+
     # -----------------------------------------------------------------
     def AddCapsule(self, capsule) :
         """
@@ -96,8 +103,40 @@ class LocationInfo :
             if CapsuleTypeDecoration.DecorationName in collection.Decorations :
                 self.AddCapsule(collection)
 
+        for lpinfo in bizdata['BusinessLocationProfiles'] :
+            locprofile = BusinessLocationProfile.Load(lpinfo)
+            self.BusinessLocationProfiles[locprofile.ProfileName] = locprofile
+
+        for linfo in bizdata['BusinessLocations'] :
+            location = BusinessLocation.Load(linfo, locinfo, self)
+            self.BusinessLocations[location.Capsule.Name] = location
+
+        for lpinfo in perdata['ResidentialLocationProfiles'] :
+            locprofile = ResidentialLocationProfile.Load(lpinfo)
+            self.ResidentialLocationProfiles[locprofile.ProfileName] = locprofile
+
+        for linfo in perdata['ResidentialLocations'] :
+            location = ResidentialLocation.Load(linfo, locinfo, self)
+            self.ResidentialLocations[location.Capsule.Name] = location
+
     # -----------------------------------------------------------------
     def Dump(self) :
         result = dict()
+
+        result['BusinessLocationProfiles'] = []
+        for blp in self.BusinessLocationProfiles.itervalues() :
+            result['BusinessLocationProfiles'].append(blp.Dump())
+
+        result['BusinessLocations'] = []
+        for bl in self.BusinessLocations.itervalues() :
+            result['BusinessLocations'].append(bl.Dump())
+
+        result['ResidentialLocationProfiles'] = []
+        for plp in self.ResidentialLocationProfiles.itervalues() :
+            result['ResidentialLocationProfiles'].append(plp.Dump())
+
+        result['ResidentialLocations'] = []
+        for pl in self.ResidentialLocations.itervalues() :
+            result['ResidentialLocations'].append(pl.Dump())
 
         return result

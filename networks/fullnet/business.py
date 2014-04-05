@@ -105,20 +105,20 @@ bizinfo.AddSchool("high-school", { 'teacher' : 30, 'admin' : 8, 'principal' : 4}
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-bizinfo.AddBusinessLocationProfile('plaza', 50, 25,  { BusinessType.Factory : 1.0, BusinessType.Service : 0.5, BusinessType.Food : 0.25 })
-bizinfo.AddBusinessLocationProfile('mall',  20, 75,  { BusinessType.Factory : 0.1, BusinessType.Service : 1.0, BusinessType.Food : 1.0 })
-bizinfo.AddBusinessLocationProfile('civic', 20, 150, { BusinessType.School : 1.0, BusinessType.Civic : 1.0 })
+locinfo.AddBusinessLocationProfile('plaza', 50, 25,  { BusinessType.Factory : 1.0, BusinessType.Service : 0.5, BusinessType.Food : 0.25 })
+locinfo.AddBusinessLocationProfile('mall',  20, 75,  { BusinessType.Factory : 0.1, BusinessType.Service : 1.0, BusinessType.Food : 1.0 })
+locinfo.AddBusinessLocationProfile('civic', 20, 150, { BusinessType.School : 1.0, BusinessType.Civic : 1.0 })
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 for capsuletype in ['plaza', 'mall', 'civic'] :
     for bcapsule in locinfo.CapsuleTypeMap.get(capsuletype, []) :
-        bizinfo.AddBusinessLocation(bcapsule, bizinfo.BusinessLocationProfiles[capsuletype])
+        locinfo.AddBusinessLocation(bcapsule, locinfo.BusinessLocationProfiles[capsuletype])
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 def PlaceBusinesses() :
-    global bizinfo
+    global bizinfo, locinfo
 
     profiles = {}
     for profname, profile in bizinfo.BusinessProfiles.iteritems() :
@@ -132,7 +132,7 @@ def PlaceBusinesses() :
         name = GenName(profile.ProfileName)
         business = Business(name, profile)
 
-        location = bizinfo.PlaceBusiness(business)
+        location = bizinfo.PlaceBusiness(business, locinfo)
 
         # if we could not place the business, then all locations
         # have fitness of 0... so don't try again

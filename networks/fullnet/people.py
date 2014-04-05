@@ -54,12 +54,12 @@ import random
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-perinfo.AddResidentialLocationProfile('townhouse', 7)
-perinfo.AddResidentialLocationProfile('apartment', 11)
+locinfo.AddResidentialLocationProfile('townhouse', 7)
+locinfo.AddResidentialLocationProfile('apartment', 11)
 
 for lprof in ['townhouse', 'apartment'] :
     for rcapsule in locinfo.CapsuleTypeMap[lprof] :
-        perinfo.AddResidentialLocation(rcapsule, perinfo.ResidentialLocationProfiles[lprof])
+        locinfo.AddResidentialLocation(rcapsule, locinfo.ResidentialLocationProfiles[lprof])
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -87,7 +87,7 @@ def PlacePeople() :
                 people += 1
                 name = GenName(profile.ProfileName)
                 person = Person(name, profile, biz, job)
-                location = perinfo.PlacePerson(person)
+                location = perinfo.PlacePerson(person, locinfo)
                 if not location :
                     print 'ran out of residences after %s people' % people
                     return

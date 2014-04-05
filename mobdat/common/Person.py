@@ -106,7 +106,7 @@ class Person :
 
         person = Person(name, profile, employer, job, vtype = vtype)
 
-        rezlocation = perinfo.ResidentialLocations[info['Residence']['CapsuleName']]
+        rezlocation = locinfo.ResidentialLocations[info['Residence']['CapsuleName']]
         person.Residence = rezlocation.AddPersonToNode(person, info['Residence']['NodeName'])
 
         return person

@@ -48,7 +48,6 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
 import json
-from mobdat.common.Location import ResidentialLocationProfile, ResidentialLocation
 from mobdat.common.Person import PersonProfile, Person
 
 logger = logging.getLogger(__name__)
@@ -73,19 +72,8 @@ class PersonInfo :
         self.PersonProfiles = {}
         self.PersonList = {}
 
-        self.ResidentialLocationProfiles = {}
-        self.ResidentialLocations = {}
-
     # -----------------------------------------------------------------
     def Load(self, perdata, locinfo, bizinfo) :
-        for lpinfo in perdata['ResidentialLocationProfiles'] :
-            locprofile = ResidentialLocationProfile.Load(lpinfo)
-            self.ResidentialLocationProfiles[locprofile.ProfileName] = locprofile
-
-        for linfo in perdata['ResidentialLocations'] :
-            location = ResidentialLocation.Load(linfo, locinfo, self)
-            self.ResidentialLocations[location.Capsule.Name] = location
-
         for ppinfo in perdata['PersonProfiles'] :
             profile = PersonProfile.Load(ppinfo)
             self.PersonProfiles[profile.ProfileName] = profile
@@ -97,14 +85,6 @@ class PersonInfo :
     # -----------------------------------------------------------------
     def Dump(self) :
         result = dict()
-
-        result['ResidentialLocationProfiles'] = []
-        for plp in self.ResidentialLocationProfiles.itervalues() :
-            result['ResidentialLocationProfiles'].append(plp.Dump())
-
-        result['ResidentialLocations'] = []
-        for pl in self.ResidentialLocations.itervalues() :
-            result['ResidentialLocations'].append(pl.Dump())
 
         result['PersonProfiles'] = []
         for profile in self.PersonProfiles.itervalues() :
