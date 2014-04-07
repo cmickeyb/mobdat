@@ -160,9 +160,9 @@ class BusinessLocation(Location) :
 
     # -----------------------------------------------------------------
     @staticmethod
-    def Load(info, locinfo, bizinfo) :
+    def Load(info, locinfo) :
         capsule = locinfo.CapsuleMap[info['Capsule']]
-        profile = bizinfo.BusinessLocationProfiles[info['LocationProfile']]
+        profile = locinfo.BusinessLocationProfiles[info['LocationProfile']]
         location = BusinessLocation(capsule, profile)
 
         return location
@@ -237,9 +237,9 @@ class ResidentialLocation(Location) :
 
     # -----------------------------------------------------------------
     @staticmethod
-    def Load(info, locinfo, perinfo) :
+    def Load(info, locinfo) :
         capsule = locinfo.CapsuleMap[info['Capsule']]
-        profile = perinfo.ResidentialLocationProfiles[info['LocationProfile']]
+        profile = locinfo.ResidentialLocationProfiles[info['LocationProfile']]
         location = ResidentialLocation(capsule, profile)
 
         return location

@@ -103,20 +103,20 @@ class LocationInfo :
             if CapsuleTypeDecoration.DecorationName in collection.Decorations :
                 self.AddCapsule(collection)
 
-        for lpinfo in bizdata['BusinessLocationProfiles'] :
+        for lpinfo in locdata['BusinessLocationProfiles'] :
             locprofile = BusinessLocationProfile.Load(lpinfo)
             self.BusinessLocationProfiles[locprofile.ProfileName] = locprofile
 
-        for linfo in bizdata['BusinessLocations'] :
-            location = BusinessLocation.Load(linfo, locinfo, self)
+        for linfo in locdata['BusinessLocations'] :
+            location = BusinessLocation.Load(linfo, self)
             self.BusinessLocations[location.Capsule.Name] = location
 
-        for lpinfo in perdata['ResidentialLocationProfiles'] :
+        for lpinfo in locdata['ResidentialLocationProfiles'] :
             locprofile = ResidentialLocationProfile.Load(lpinfo)
             self.ResidentialLocationProfiles[locprofile.ProfileName] = locprofile
 
-        for linfo in perdata['ResidentialLocations'] :
-            location = ResidentialLocation.Load(linfo, locinfo, self)
+        for linfo in locdata['ResidentialLocations'] :
+            location = ResidentialLocation.Load(linfo, self)
             self.ResidentialLocations[location.Capsule.Name] = location
 
     # -----------------------------------------------------------------

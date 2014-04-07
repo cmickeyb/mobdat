@@ -81,7 +81,7 @@ class BusinessInfo :
             self.BusinessProfiles[profile.ProfileName] = profile
 
         for binfo in bizdata['BusinessList'] :
-            business = Business.Load(binfo, self)
+            business = Business.Load(binfo, locinfo, self)
             self.BusinessList[business.Name] = business
 
     # -----------------------------------------------------------------

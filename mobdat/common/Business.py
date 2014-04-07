@@ -232,10 +232,10 @@ class Business :
 
     # -------------------------------------------------------
     @staticmethod
-    def Load(info, bizinfo) :
+    def Load(info, locinfo, bizinfo) :
         name = info['Name']
         profile = bizinfo.BusinessProfiles[info['Profile']]
-        location = bizinfo.BusinessLocations[info['Location']]
+        location = locinfo.BusinessLocations[info['Location']]
 
         business = Business(name, profile, location)
         location.AddBusiness(business)
