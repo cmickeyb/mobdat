@@ -58,3 +58,10 @@ def GenName(prefix) :
 
     return prefix + str(_NameCounts[prefix])
 
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+def GenNameFromCoordinates(x, y, prefix = 'node') :
+    ewdir = 'W' if x < 0 else 'E'
+    nsdir = 'S' if y < 0 else 'N'
+    return "%s%d%s%d%s" % (prefix, abs(x), ewdir, abs(y), nsdir)
+

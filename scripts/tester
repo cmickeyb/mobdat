@@ -48,7 +48,7 @@ import json, argparse
 import cmd, readline, traceback
 import re
 
-from mobdat.common import NetworkSettings, NetworkInfo, BusinessInfo, PersonInfo, LocationInfo
+from mobdat.common import NetworkSettings, NetworkInfo, BusinessInfo, PersonInfo, LocationInfo, Graph
 
 DataBindings = None
 logger = logging.getLogger(__name__)
@@ -154,7 +154,7 @@ class TestController(cmd.Cmd) :
 def InitializeDataBindings(settings) :
     netinfofile = settings["General"].get("NetworkInfoFile","netinfo.js")
     logger.info('loading network data from %s',netinfofile)
-    netinfo = NetworkInfo.Network.LoadFromFile(netinfofile)
+    netinfo = Graph.Graph.LoadFromFile(netinfofile)
 
     # load location information
     locinfofile = settings["General"].get("LocationInfoFile","locinfo.js")

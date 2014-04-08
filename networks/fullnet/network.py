@@ -43,11 +43,12 @@ import os, sys
 
 from mobdat.builder import *
 from mobdat.common import NetworkInfo
+from mobdat.common.Utilities import GenName, GenNameFromCoordinates
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
 def ConvertNodeCoordinate(prefix, p) :
-    return NetworkInfo.Node.GenName(p[0], p[1], prefix)
+    return GenNameFromCoordinates(p[0], p[1], prefix)
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
@@ -96,7 +97,7 @@ def BuildNetwork() :
     # Create the main east and west grids and drop the corner nodes
     netinfo.GenerateGrid(-400, -400, -100, 400, 100, 100, sntype, e2A, 'main')
     netinfo.GenerateGrid(100, -400, 400, 400, 100, 100, sntype, e2A, 'main')
-    netinfo.DropNodeByPattern('main400[EW][34]00[SN]')
+    netinfo.DropNodesByPattern('main400[EW][34]00[SN]')
 
     # All of these nodes should be four way stops, they are the
     # two lane intersections

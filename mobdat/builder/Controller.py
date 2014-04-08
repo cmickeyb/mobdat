@@ -77,7 +77,7 @@ def Controller(settings, pushlist) :
             execfile(cf, dbbindings)
             logger.info('loaded extension file %s', cf)
         except :
-            logger.warn('unhandled error processing extension file %s\n%s', cf, traceback.format_exc(1))
+            logger.warn('unhandled error processing extension file %s\n%s', cf, traceback.format_exc(5))
             sys.exit(-1)
 
     for push in pushlist :

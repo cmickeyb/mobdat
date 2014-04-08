@@ -46,6 +46,7 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
 from mobdat.common import NetworkInfo, Decoration
+from mobdat.common.Utilities import GenName, GenNameFromCoordinates
 import re
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -73,7 +74,7 @@ class Node(NetworkInfo.Node) :
 
     # -----------------------------------------------------------------
     def __init__(self, x, y, ntype, prefix) :
-        NetworkInfo.Node.__init__(self, x, y, prefix = prefix)
+        NetworkInfo.Node.__init__(self, x, y, GenNameFromCoordinates(x, y, prefix))
         ntype.AddMember(self)
 
     # -----------------------------------------------------------------
@@ -154,7 +155,6 @@ class Node(NetworkInfo.Node) :
 
         return signature
 
-
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class Edge(NetworkInfo.Edge) :
@@ -166,6 +166,14 @@ class Edge(NetworkInfo.Edge) :
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+class Collection(NetworkInfo.Collection) :
+    
+    # -----------------------------------------------------------------
+    def __init__(self, members = [], name = None, prefix = 'col') :
+        NetworkInfo.Collection.__init__(self, members, name, prefix)
+
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class Network(NetworkInfo.Network) :
 
     # -----------------------------------------------------------------
@@ -174,7 +182,7 @@ class Network(NetworkInfo.Network) :
 
     # -----------------------------------------------------------------
     def AddEdgeType(self, name, lanes = 1, pri = 70, speed = 2.0, wid = 2.5, sig = '1L', render = True, center = False) :
-        etype = NetworkInfo.Collection(name = name)
+        etype = Collection(name = name)
         etype.AddDecoration(Decoration.EdgeTypeDecoration(name, lanes, pri, speed, wid, sig, render, center))
 
         self.AddCollection(etype)
@@ -182,7 +190,7 @@ class Network(NetworkInfo.Network) :
 
     # -----------------------------------------------------------------
     def AddNodeType(self, name, itype = 'priority', render = True) :
-        ntype = NetworkInfo.Collection(name = name)
+        ntype = Collection(name = name)
         ntype.AddDecoration(Decoration.NodeTypeDecoration(name, itype, render))
 
         self.AddCollection(ntype)

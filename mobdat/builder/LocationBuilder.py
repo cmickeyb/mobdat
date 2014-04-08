@@ -45,7 +45,7 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
 from mobdat.common.LocationInfo import LocationInfo
-from mobdat.common.NetworkInfo import Collection
+from mobdat.common.Graph import Collection
 from mobdat.common.Decoration import CapsuleTypeDecoration, EndPointDecoration
 from mobdat.common.Location import *
 
