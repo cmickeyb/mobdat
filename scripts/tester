@@ -107,6 +107,36 @@ class TestController(cmd.Cmd) :
         return flag
 
     # -----------------------------------------------------------------
+    def do_node(self, args) :
+        """node list x y distance
+        """
+        pargs = args.split()
+        if pargs[0] == 'list' :
+            xcoord = int(pargs[1])
+            ycoord = int(pargs[2])
+            dist = int(pargs[3])
+            for node in DataBindings['netinfo'].FindNodesInRange(xcoord, ycoord, dist) :
+                print node.Name
+
+        elif pargs[0] == 'dump' :
+            for name in pargs[1:] :
+                if name in DataBindings['netinfo'].Nodes :
+                    print json.dumps(DataBindings['netinfo'].Nodes[name].Dump(), indent=4, sort_keys=True)
+
+    # -----------------------------------------------------------------
+    def do_collection(self, args) :
+        """collection list
+        """
+        pargs = args.split()
+        if pargs[0] == 'list' :
+            for collection in DataBindings['netinfo'].Collections.itervalues() :
+                print collection.Name
+        elif pargs[0] == 'dump' :
+            for name in pargs[1:] :
+                if name in DataBindings['netinfo'].Collections :
+                    print json.dumps(DataBindings['netinfo'].Collections[name].Dump(), indent=4, sort_keys=True)
+
+    # -----------------------------------------------------------------
     def do_person(self, args) :
         """stopat iteration
         Stop sending timer events and shutdown the simulator after the specified iteration
@@ -154,7 +184,7 @@ class TestController(cmd.Cmd) :
 def InitializeDataBindings(settings) :
     netinfofile = settings["General"].get("NetworkInfoFile","netinfo.js")
     logger.info('loading network data from %s',netinfofile)
-    netinfo = Graph.Graph.LoadFromFile(netinfofile)
+    netinfo = NetworkInfo.Network.LoadFromFile(netinfofile)
 
     # load location information
     locinfofile = settings["General"].get("LocationInfoFile","locinfo.js")

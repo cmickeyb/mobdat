@@ -92,8 +92,30 @@ class Collection(Graph.Collection) :
 class Network(Graph.Graph) :
 
     # -----------------------------------------------------------------
+    @staticmethod
+    def LoadFromFile(filename) :
+        with open(filename, 'r') as fp :
+            netdata = json.load(fp)
+
+        graph = Network()
+        graph.Load(netdata)
+
+        return graph
+
+    # -----------------------------------------------------------------
     def __init__(self) :
         Graph.Graph.__init__(self)
+    
+    # -----------------------------------------------------------------
+    def FindNodesInRange(self, x, y, dist) :
+        result = []
+        sqdist = int(dist) * int(dist)
+        for n in self.Nodes.itervalues() :
+            cdist = (n.Coord.X - x)**2 + (n.Coord.Y - y)**2
+            if cdist < sqdist :
+                result.append(n)
+
+        return result
 
     # -----------------------------------------------------------------
     def FindClosestNode(self, node) :
