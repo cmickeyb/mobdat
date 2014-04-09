@@ -147,8 +147,6 @@ class Node(_GraphObject) :
     # -----------------------------------------------------------------
     def Dump(self) :
         result = _GraphObject.Dump(self)
-        result['Name'] = self.Name
-
         return result
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
