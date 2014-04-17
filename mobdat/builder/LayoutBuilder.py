@@ -45,7 +45,8 @@ sys.path.append(os.path.join(os.environ.get("OPENSIM","/share/opensim"),"lib","p
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
-from mobdat.common import LayoutInfo, Decoration
+from mobdat.common import LayoutInfo
+from mobdat.common.LayoutDecoration import *
 from mobdat.common.Utilities import GenName, GenNameFromCoordinates
 import re
 
@@ -183,7 +184,7 @@ class LayoutBuilder(LayoutInfo.LayoutInfo) :
     # -----------------------------------------------------------------
     def AddEdgeType(self, name, lanes = 1, pri = 70, speed = 2.0, wid = 2.5, sig = '1L', render = True, center = False) :
         etype = Collection(name = name)
-        etype.AddDecoration(Decoration.EdgeTypeDecoration(name, lanes, pri, speed, wid, sig, render, center))
+        etype.AddDecoration(EdgeTypeDecoration(name, lanes, pri, speed, wid, sig, render, center))
 
         self.AddCollection(etype)
         return etype
@@ -191,7 +192,7 @@ class LayoutBuilder(LayoutInfo.LayoutInfo) :
     # -----------------------------------------------------------------
     def AddNodeType(self, name, itype = 'priority', render = True) :
         ntype = Collection(name = name)
-        ntype.AddDecoration(Decoration.NodeTypeDecoration(name, itype, render))
+        ntype.AddDecoration(NodeTypeDecoration(name, itype, render))
 
         self.AddCollection(ntype)
         return ntype
@@ -241,13 +242,13 @@ class LayoutBuilder(LayoutInfo.LayoutInfo) :
         nnode = self.AddNode(curx, cury, ntype, prefix)
 
         if edge1 :
-            etype1 = edge1.FindDecorationProvider(Decoration.EdgeTypeDecoration.DecorationName)
+            etype1 = edge1.FindDecorationProvider(EdgeTypeDecoration.DecorationName)
             self.DropEdge(edge1)
             self.AddEdge(node1,nnode,etype1)
             self.AddEdge(nnode,node2,etype1)
 
         if edge2 :
-            etype2 = edge2.FindDecorationProvider(Decoration.EdgeTypeDecoration.DecorationName)
+            etype2 = edge2.FindDecorationProvider(EdgeTypeDecoration.DecorationName)
             self.DropEdge(edge2)
             self.AddEdge(node2,nnode,etype2)
             self.AddEdge(nnode,node1,etype2)
@@ -260,7 +261,7 @@ class LayoutBuilder(LayoutInfo.LayoutInfo) :
             if re.match(pattern, name) :
                 # the node type is actually a decorated collection, need to remove it
                 # from the current type collection before adding it to the new one
-                curtype = node.FindDecorationProvider(Decoration.NodeTypeDecoration.DecorationName)
+                curtype = node.FindDecorationProvider(NodeTypeDecoration.DecorationName)
                 if curtype : curtype.DropMember(node)
                 
                 # and add it to the new collection
@@ -274,7 +275,7 @@ class LayoutBuilder(LayoutInfo.LayoutInfo) :
             if re.match(pattern, name) :
                 # the edge type is actually a decorated collection, need to remove it
                 # from the current type collection before adding it to the new one
-                curtype = edge.FindDecorationProvider(Decoration.EdgeTypeDecoration.DecorationName)
+                curtype = edge.FindDecorationProvider(EdgeTypeDecoration.DecorationName)
                 if curtype : curtype.DropMember(edge)
                 
                 # and add it to the new collection

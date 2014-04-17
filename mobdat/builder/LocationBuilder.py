@@ -46,7 +46,7 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "
 
 from mobdat.common.LocationInfo import LocationInfo
 from mobdat.common.Graph import Collection
-from mobdat.common.Decoration import CapsuleTypeDecoration, EndPointDecoration
+from mobdat.common.LayoutDecoration import CapsuleTypeDecoration, EndPointDecoration
 from mobdat.common.Location import *
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

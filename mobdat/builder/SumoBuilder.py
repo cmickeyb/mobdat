@@ -49,7 +49,7 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "
 
 import string
 
-from mobdat.common import Decoration
+from mobdat.common.LayoutDecoration import *
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -146,7 +146,7 @@ class SumoBuilder :
             fp.write("<types>\n")
 
             for collection in self.LayoutInfo.Collections.itervalues() :
-                if Decoration.EdgeTypeDecoration.DecorationName in collection.Decorations :
+                if EdgeTypeDecoration.DecorationName in collection.Decorations :
                     etype = collection.EdgeType
                     fp.write("  <type id=\"%s\" priority=\"%d\" numLanes=\"%d\" speed=\"%f\" width=\"%f\" />\n" %
                              (etype.Name, etype.Priority, etype.Lanes, self.Scale(etype.Speed), self.Scale(etype.Width)))
@@ -170,7 +170,7 @@ class SumoBuilder :
             fp.write("\n")
 
             for node in self.LayoutInfo.Nodes.itervalues() :
-                if Decoration.EndPointDecoration.DecorationName in node.Decorations :
+                if EndPointDecoration.DecorationName in node.Decorations :
                     name = None
                     for edge in node.OutputEdges :
                         for redge in edge.EndNode.OutputEdges :

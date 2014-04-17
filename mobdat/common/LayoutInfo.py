@@ -47,7 +47,8 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
-from Decoration import *
+from mobdat.common.Decoration import CoordDecoration
+from mobdat.common.LayoutDecoration import CommonDecorations
 from mobdat.common.Utilities import GenName, GenNameFromCoordinates
 from mobdat.common import Graph
 
@@ -105,6 +106,9 @@ class LayoutInfo(Graph.Graph) :
     # -----------------------------------------------------------------
     def __init__(self) :
         Graph.Graph.__init__(self)
+
+        for dtype in CommonDecorations :
+            self.AddDecorationHandler(dtype)
     
     # -----------------------------------------------------------------
     def FindNodesInRange(self, x, y, dist) :

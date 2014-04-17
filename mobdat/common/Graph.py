@@ -47,7 +47,7 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
-from Decoration import *
+from Decoration import CommonDecorations
 from Utilities import GenName
 
 import uuid, re
@@ -412,6 +412,8 @@ class Graph :
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 if __name__ == '__main__' :
+    from mobdat.common.Utilities import GenNameFromCoordinates
+    from mobdat.common.Decoration import Decoration, CoordDecoration
 
     # -----------------------------------------------------------------
     class TestDecoration(Decoration) :
@@ -465,7 +467,6 @@ if __name__ == '__main__' :
 
 
     net1 = Graph()
-    net1.AddDecorationHandler(CoordDecoration)
     net1.AddDecorationHandler(TestDecoration)
     net1.AddDecorationHandler(EdgeTypeDecoration)
 
@@ -479,12 +480,12 @@ if __name__ == '__main__' :
 
     for x in range(0, 5) :
         for y in range(0, 5) :
-            node = Node(CoordDecoration.GenName(x, y))
+            node = Node(GenNameFromCoordinates(x, y))
             node.AddDecoration(CoordDecoration(x, y))
             net1.AddNode(node)
             if x > 0 :
                 if y > 0 :
-                    edge = Edge(node, net1.Nodes[CoordDecoration.GenName(x-1,y-1)])
+                    edge = Edge(node, net1.Nodes[GenNameFromCoordinates(x-1,y-1)])
                     edges1.AddMember(edge)
                     net1.AddEdge(edge)
                     
@@ -498,7 +499,6 @@ if __name__ == '__main__' :
             edges2.AddMember(edge)
 
     net2 = Graph()
-    net2.AddDecorationHandler(CoordDecoration)
     net2.AddDecorationHandler(TestDecoration)
     net2.AddDecorationHandler(EdgeTypeDecoration)
 
