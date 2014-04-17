@@ -48,7 +48,7 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "
 
 import json
 
-from mobdat.common import NetworkSettings
+from mobdat.common import LayoutSettings
 from mobdat.builder import *
 
 logger = logging.getLogger(__name__)
@@ -63,14 +63,14 @@ def Controller(settings, pushlist) :
     settings -- nested dictionary with variables for configuring the connectors
     """
 
-    netsettings = NetworkSettings.NetworkSettings(settings)
+    laysettings = LayoutSettings.LayoutSettings(settings)
 
-    netinfo = NetBuilder.Network()
-    locinfo = LocationBuilder.LocationBuilder(netinfo)
+    layinfo = LayoutBuilder.LayoutBuilder()
+    locinfo = LocationBuilder.LocationBuilder(layinfo)
     bizinfo = BusinessBuilder.BusinessBuilder()
     perinfo = PersonBuilder.PersonBuilder()
 
-    dbbindings = {"netsettings" : netsettings, "netinfo" : netinfo, "locinfo" : locinfo, "bizinfo" : bizinfo, "perinfo" : perinfo}
+    dbbindings = {"laysettings" : laysettings, "layinfo" : layinfo, "locinfo" : locinfo, "bizinfo" : bizinfo, "perinfo" : perinfo}
 
     for cf in settings["Builder"].get("ExtensionFiles",[]) :
         try :
@@ -82,20 +82,20 @@ def Controller(settings, pushlist) :
 
     for push in pushlist :
         if push == 'opensim' :
-            os = OpenSimBuilder.OpenSimBuilder(settings, netinfo, netsettings)
+            os = OpenSimBuilder.OpenSimBuilder(settings, layinfo, laysettings)
             os.PushNetworkToOpenSim()
         elif push == 'sumo' :
-            sc = SumoBuilder.SumoBuilder(settings, netinfo, netsettings)
+            sc = SumoBuilder.SumoBuilder(settings, layinfo, laysettings)
             sc.PushNetworkToSumo()
 
-    # write the network information back out to the netinfo file
-    netinfofile = settings["General"].get("NetworkInfoFile","netinfo.js")
-    logger.info('saving network data to %s',netinfofile)
+    # write the network information back out to the layinfo file
+    layinfofile = settings["General"].get("LayoutInfoFile","layinfo.js")
+    logger.info('saving network data to %s',layinfofile)
 
-    with open(netinfofile, "w") as fp :
-        json.dump(netinfo.Dump(), fp, indent=2, ensure_ascii=True)
+    with open(layinfofile, "w") as fp :
+        json.dump(layinfo.Dump(), fp, indent=2, ensure_ascii=True)
 
-    # write the network information back out to the netinfo file
+    # write the network information back out to the layinfo file
     locinfofile = settings["General"].get("LocationInfoFile","locinfo.js")
     logger.info('saving location data to %s',locinfofile)
 

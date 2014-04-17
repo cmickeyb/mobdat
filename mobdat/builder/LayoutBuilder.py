@@ -29,7 +29,7 @@ LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
 
-@file    NetBuilder.py
+@file    LayoutBuilder.py
 @author  Mic Bowman
 @date    2013-12-03
 
@@ -45,7 +45,7 @@ sys.path.append(os.path.join(os.environ.get("OPENSIM","/share/opensim"),"lib","p
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
-from mobdat.common import NetworkInfo, Decoration
+from mobdat.common import LayoutInfo, Decoration
 from mobdat.common.Utilities import GenName, GenNameFromCoordinates
 import re
 
@@ -66,7 +66,7 @@ class ResidentialGenerator :
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class Node(NetworkInfo.Node) :
+class Node(LayoutInfo.Node) :
     WEST  = 0
     NORTH = 1
     EAST  = 2
@@ -74,7 +74,7 @@ class Node(NetworkInfo.Node) :
 
     # -----------------------------------------------------------------
     def __init__(self, x, y, ntype, prefix) :
-        NetworkInfo.Node.__init__(self, x, y, GenNameFromCoordinates(x, y, prefix))
+        LayoutInfo.Node.__init__(self, x, y, GenNameFromCoordinates(x, y, prefix))
         ntype.AddMember(self)
 
     # -----------------------------------------------------------------
@@ -157,28 +157,28 @@ class Node(NetworkInfo.Node) :
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class Edge(NetworkInfo.Edge) :
+class Edge(LayoutInfo.Edge) :
     
     # -----------------------------------------------------------------
     def __init__(self, snode, enode, etype) :
-        NetworkInfo.Edge.__init__(self, snode, enode)
+        LayoutInfo.Edge.__init__(self, snode, enode)
         etype.AddMember(self)
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class Collection(NetworkInfo.Collection) :
+class Collection(LayoutInfo.Collection) :
     
     # -----------------------------------------------------------------
     def __init__(self, members = [], name = None, prefix = 'col') :
-        NetworkInfo.Collection.__init__(self, members, name, prefix)
+        LayoutInfo.Collection.__init__(self, members, name, prefix)
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class Network(NetworkInfo.Network) :
+class LayoutBuilder(LayoutInfo.LayoutInfo) :
 
     # -----------------------------------------------------------------
     def __init__(self) :
-        NetworkInfo.Network.__init__(self)
+        LayoutInfo.LayoutInfo.__init__(self)
 
     # -----------------------------------------------------------------
     def AddEdgeType(self, name, lanes = 1, pri = 70, speed = 2.0, wid = 2.5, sig = '1L', render = True, center = False) :
@@ -199,14 +199,14 @@ class Network(NetworkInfo.Network) :
     # -----------------------------------------------------------------
     def AddNode(self, curx, cury, ntype, prefix) :
         node = Node(curx, cury, ntype, prefix)
-        NetworkInfo.Network.AddNode(self, node)
+        LayoutInfo.LayoutInfo.AddNode(self, node)
 
         return node
 
     # -----------------------------------------------------------------
     def AddEdge(self, snode, enode, etype) :
         edge = Edge(snode, enode, etype)
-        NetworkInfo.Network.AddEdge(self, edge)
+        LayoutInfo.LayoutInfo.AddEdge(self, edge)
         
         return edge
 

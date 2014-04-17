@@ -29,7 +29,7 @@ LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
 
-@file    NetworkInfo.py
+@file    LayoutInfo.py
 @author  Mic Bowman
 @date    2013-12-03
 
@@ -89,7 +89,7 @@ class Collection(Graph.Collection) :
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class Network(Graph.Graph) :
+class LayoutInfo(Graph.Graph) :
 
     # -----------------------------------------------------------------
     @staticmethod
@@ -97,7 +97,7 @@ class Network(Graph.Graph) :
         with open(filename, 'r') as fp :
             netdata = json.load(fp)
 
-        graph = Network()
+        graph = LayoutInfo()
         graph.Load(netdata)
 
         return graph

@@ -56,11 +56,11 @@ from mobdat.common import Decoration
 class SumoBuilder :
 
     # -----------------------------------------------------------------
-    def __init__(self, settings, netinfo, netsettings) :
+    def __init__(self, settings, layinfo, laysettings) :
         self.Logger = logging.getLogger(__name__)
 
-        self.NetworkInfo = netinfo
-        self.NetworkSettings = netsettings
+        self.LayoutInfo = layinfo
+        self.LayoutSettings = laysettings
 
         self.ScaleValue = 3.0
 
@@ -89,7 +89,7 @@ class SumoBuilder :
         with open(fname, 'w') as fp :
             fp.write("<edges>\n")
 
-            for edge in self.NetworkInfo.Edges.itervalues() :
+            for edge in self.LayoutInfo.Edges.itervalues() :
                 e = edge.Name
                 sn = edge.StartNode.Name
                 en = edge.EndNode.Name
@@ -106,7 +106,7 @@ class SumoBuilder :
         with open(fname, 'w') as fp :
             fp.write("<nodes>\n")
 
-            for node in self.NetworkInfo.Nodes.itervalues() :
+            for node in self.LayoutInfo.Nodes.itervalues() :
                 itype = node.NodeType.IntersectionType
                 fp.write("  <node id=\"%s\" x=\"%d\" y=\"%d\" z=\"0\"  type=\"%s\" />\n" % (node.Name, self.Scale(node.X), self.Scale(node.Y), itype))
 
@@ -120,7 +120,7 @@ class SumoBuilder :
         with open(fname, 'w') as fp :
             fp.write("<connections>\n")
             
-            for node in self.NetworkInfo.Nodes.itervalues() :
+            for node in self.LayoutInfo.Nodes.itervalues() :
                 if not node.Signature() == ['2L/2L', '2L/2L', '2L/2L', '2L/2L' ] :
                     continue
 
@@ -145,7 +145,7 @@ class SumoBuilder :
         with open(fname, 'w') as fp :
             fp.write("<types>\n")
 
-            for collection in self.NetworkInfo.Collections.itervalues() :
+            for collection in self.LayoutInfo.Collections.itervalues() :
                 if Decoration.EdgeTypeDecoration.DecorationName in collection.Decorations :
                     etype = collection.EdgeType
                     fp.write("  <type id=\"%s\" priority=\"%d\" numLanes=\"%d\" speed=\"%f\" width=\"%f\" />\n" %
@@ -162,14 +162,14 @@ class SumoBuilder :
         with open(fname, 'w') as fp :
             fp.write("<routes>\n")
             
-            for v in self.NetworkSettings.VehicleTypes :
-                vtype = self.NetworkSettings.VehicleTypes[v]
+            for v in self.LayoutSettings.VehicleTypes :
+                vtype = self.LayoutSettings.VehicleTypes[v]
                 fp.write(vtfmt.format(v, self.Scale(vtype.Acceleration), self.Scale(vtype.Deceleration),
                                       vtype.Sigma, self.Scale(vtype.Length), self.Scale(vtype.MinGap), self.Scale(vtype.MaxSpeed)) + "\n")
 
             fp.write("\n")
 
-            for node in self.NetworkInfo.Nodes.itervalues() :
+            for node in self.LayoutInfo.Nodes.itervalues() :
                 if Decoration.EndPointDecoration.DecorationName in node.Decorations :
                     name = None
                     for edge in node.OutputEdges :

@@ -54,10 +54,10 @@ from mobdat.common.Location import *
 class LocationBuilder(LocationInfo) :
 
     # -----------------------------------------------------------------
-    def __init__(self, netinfo) :
+    def __init__(self, layinfo) :
         LocationInfo.__init__(self)
 
-        self.NetworkInfo = netinfo
+        self.LayoutInfo = layinfo
         self.CapsuleIdentifier = {} 
 
     # -----------------------------------------------------------------
@@ -87,7 +87,7 @@ class LocationBuilder(LocationInfo) :
             capsule.AddMember(node)
 
         self.AddCapsule(capsule)
-        self.NetworkInfo.AddCollection(capsule)
+        self.LayoutInfo.AddCollection(capsule)
 
     # -----------------------------------------------------------------
     def AddBusinessLocationProfile(self, name, employees, customers, types) :

@@ -85,7 +85,7 @@ class LocationInfo :
         """
         AddCapsule -- add a capsule to the maps
 
-        capsule -- a NetworkInfo.Collection object that has capsule type decoration
+        capsule -- a LayoutInfo.Collection object that has capsule type decoration
         """
         typename = capsule.CapsuleType.Name
         if typename not in self.CapsuleTypeMap :

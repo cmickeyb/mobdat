@@ -7,14 +7,14 @@
         "StartTimeOfDay" : 6.0,
         "BusinessInfoFile" : "networks/fullnet/data/bizinfo.js",
 	"LocationInfoFile" : "networks/fullnet/data/locinfo.js",
-	"NetworkInfoFile" : "networks/fullnet/data/netinfo.js",
+	"LayoutInfoFile" : "networks/fullnet/data/layinfo.js",
         "PersonInfoFile" : "networks/fullnet/data/perinfo.js",
         "Connectors" : ["opensim", "sumo", "social", "stats"]
     },
 
     "Builder" :
     {
-	"ExtensionFiles" : ["networks/fullnet/network.py", "networks/fullnet/business.py", "networks/fullnet/people.py"]
+	"ExtensionFiles" : ["networks/fullnet/layout.py", "networks/fullnet/business.py", "networks/fullnet/people.py"]
     },
 
     "SocialConnector" :

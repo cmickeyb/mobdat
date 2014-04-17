@@ -67,7 +67,7 @@ perinfo.AddPersonProfile('worker')
 perinfo.AddPersonProfile('student')
 perinfo.AddPersonProfile('homemaker')
 
-for vtype in netsettings.VehicleTypes.itervalues() :
+for vtype in laysettings.VehicleTypes.itervalues() :
     print vtype.Name
     for ptype in vtype.ProfileTypes :
         perinfo.PersonProfiles[ptype].AddVehicleType(vtype.Name, vtype.Rate)

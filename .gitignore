@@ -3,7 +3,7 @@
 *.out
 *.xml
 build
-netinfo.js
+layinfo.js
 locinfo.js
 bizinfo.js
 perinfo.js
