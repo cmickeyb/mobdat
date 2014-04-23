@@ -219,7 +219,12 @@ class Residence :
     def __init__(self, capsule, node) :
         self.Capsule = capsule
         self.Node = node
+
         self.Residents = []
+    # -----------------------------------------------------------------
+    @property
+    def Name(self) :
+        return self.Capsule.Name + '::' + self.Node.Name
 
     # -----------------------------------------------------------------
     @property

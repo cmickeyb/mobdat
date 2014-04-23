@@ -196,10 +196,6 @@ class Collection(_GraphObject) :
     @staticmethod
     def Load(graph, cinfo) :
         collection = Collection(name = cinfo['Name'])
-
-        for member in cinfo['Members'] :
-            collection.AddMember(graph.Edges[member] if member in graph.Edges else graph.Nodes[member])
-
         collection.LoadDecorations(graph, cinfo)
 
         return collection
@@ -211,6 +207,20 @@ class Collection(_GraphObject) :
 
         self.Members = []
         for member in members :
+            self.AddMember(member)
+
+    # -----------------------------------------------------------------
+    def _LoadMembers(self, graph, cinfo) :
+        for mname in cinfo['Members'] :
+            if mname in graph.Edges :
+                member = graph.Edges[mname]
+            elif mname in graph.Nodes :
+                member = graph.Nodes[mname]
+            elif mname in graph.Collections :
+                member = graph.Collections[mname]
+            else :
+                raise NameError("graph contains no object named %s" % mname)
+            
             self.AddMember(member)
 
     # -----------------------------------------------------------------
@@ -293,6 +303,9 @@ class Graph :
     
     # -----------------------------------------------------------------
     def Load(self, info) :
+        """
+        Load the graph from the dictionary representation
+        """
         for ninfo in info['Nodes'] :
             node = Node.Load(self, ninfo)
             self.Nodes[node.Name] = node
@@ -304,6 +317,12 @@ class Graph :
         for cinfo in info['Collections'] :
             collection = Collection.Load(self, cinfo)
             self.Collections[collection.Name] = collection
+
+        # setting up the membership after creating all the
+        # collections makes it possible to have collections within collections
+        for cinfo in info['Collections'] :
+            collection = self.Collections[cinfo['Name']]
+            collection._LoadMembers(self, cinfo)
 
     # -----------------------------------------------------------------
     def AddNode(self, node) :

@@ -120,7 +120,7 @@ class BusinessProfile :
         name = pinfo['ProfileName']
         biztype = pinfo['BusinessType']
 
-        profile = BusinessProfile(name, biztype)
+        profile = BusinessProfile(name, biztype, [])
         
         if 'ServiceProfile' in pinfo and pinfo['ServiceProfile'] :
             profile.ServiceProfile = ServiceProfile.Load(pinfo['ServiceProfile'])
@@ -131,7 +131,7 @@ class BusinessProfile :
         return profile
 
     # -------------------------------------------------------
-    def __init__(self, name, biztype) :
+    def __init__(self, name, biztype, joblist = None, sprofile = None) :
         """
         The business profile class captures the structure of a 
         generic business pattern. The profile can be used to
@@ -144,8 +144,8 @@ class BusinessProfile :
         self.ProfileName = name
         self.BusinessType = biztype
 
-        self.ServiceProfile = None
-        self.JobList = []
+        self.ServiceProfile = sprofile
+        self.JobList = joblist or []
 
     # -------------------------------------------------------
     def PeakEmployeeCount(self, day = DaysOfTheWeek.Mon) :
@@ -232,9 +232,8 @@ class Business :
 
     # -------------------------------------------------------
     @staticmethod
-    def Load(info, locinfo, bizinfo) :
+    def XLoad(info, locinfo, bizinfo) :
         name = info['Name']
-        profile = bizinfo.BusinessProfiles[info['Profile']]
         location = locinfo.BusinessLocations[info['Location']]
 
         business = Business(name, profile, location)
@@ -242,8 +241,12 @@ class Business :
 
         return business
 
+    @staticmethod
+    def Load(info) :
+        return Business(info['Name'])
+
     # -------------------------------------------------------
-    def __init__(self, name, profile, location = None) :
+    def __init__(self, name, location = None) :
         """
         The Business class captures data about a specific business
         that operates in the simulation.
@@ -254,16 +257,13 @@ class Business :
         """
 
         self.Name = name
-        self.Profile = profile
-        self.Location = location
-        self.PeakEmployeeCount = self.Profile.PeakEmployeeCount()
-        self.PeakCustomerCount = self.Profile.PeakServiceCount()
+#        self.Location = location
 
     # -------------------------------------------------------
     def Dump(self) :
         result = dict()
         result["Name"] = self.Name
-        result["Profile"] = self.Profile.ProfileName
-        result["Location"] = self.Location.Capsule.Name
+#        if self.Location :
+#            result["Location"] = self.Location.Capsule.Name
         return result
 
