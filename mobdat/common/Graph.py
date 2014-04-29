@@ -57,6 +57,16 @@ logger = logging.getLogger(__name__)
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+def GenEdgeName(snode, enode) :
+    return snode.Name + '=O=' + enode.Name
+
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+def GenNodeName(prefix = 'node') :
+    return GenName(prefix)
+
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class _GraphObject :
 
     # -----------------------------------------------------------------
@@ -64,6 +74,8 @@ class _GraphObject :
         self.Name = name
         self.Decorations = {}
         self.Collections = {}
+
+        self.AddDecoration(NodeTypeDecoration(self.__Class__.__Name__))
 
     # -----------------------------------------------------------------
     def __getattr__(self, attr) :
@@ -83,6 +95,7 @@ class _GraphObject :
 
     # -----------------------------------------------------------------
     def AddDecoration(self, decoration) :
+        decoration.HostObject = self
         self.Decorations[decoration.DecorationName] = decoration
 
     # -----------------------------------------------------------------
@@ -130,7 +143,7 @@ class Node(_GraphObject) :
 
     # -----------------------------------------------------------------
     def __init__(self, name = None, prefix = 'node') :
-        if not name : name = GenName(prefix)
+        if not name : name = GenNodeName(prefix)
         _GraphObject.__init__(self, name)
 
         self.OutputEdges = []
@@ -152,10 +165,6 @@ class Node(_GraphObject) :
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class Edge(_GraphObject) :
-    # -----------------------------------------------------------------
-    @staticmethod
-    def GenEdgeName(snode, enode) :
-        return "%s=O=%s" % (snode.Name, enode.Name)
 
     # -----------------------------------------------------------------
     @staticmethod
@@ -170,7 +179,7 @@ class Edge(_GraphObject) :
 
     # -----------------------------------------------------------------
     def __init__(self, snode, enode, name = None) :
-        if not name : name = self.GenEdgeName(snode, enode)
+        if not name : name = GenEdgeName(snode, enode)
         _GraphObject.__init__(self, name)
 
         self.StartNode = snode
@@ -202,7 +211,7 @@ class Collection(_GraphObject) :
 
     # -----------------------------------------------------------------
     def __init__(self, members = [], name = None, prefix = 'col') :
-        if not name : name = GenName(prefix)
+        if not name : name = GenNodeName(prefix)
         _GraphObject.__init__(self, name)
 
         self.Members = []

@@ -59,8 +59,16 @@ class Decoration :
 
     # -----------------------------------------------------------------
     def __init__(self) : 
-        pass
-        
+        self.HostObject = None
+
+    # -----------------------------------------------------------------
+    def SetHostObject(self, obj) :
+        """
+        Args:
+            obj -- object of type Graph._GraphObject
+        """
+        self.HostObject = obj
+
     # -----------------------------------------------------------------
     def Dump(self) : 
         result = dict()
@@ -113,37 +121,8 @@ class EdgeTypeDecoration(Decoration) :
 
         return result
 
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class CoordDecoration(Decoration) :
-    """ Class -- CoordDecoration
-
-    Decorate a node with an <X, Y> coordinate.
-    """
-    DecorationName = 'Coord'
-
-    # -----------------------------------------------------------------
-    @staticmethod
-    def Load(graph, info) :
-        return CoordDecoration(info['X'], info['Y'])
-
-    # -----------------------------------------------------------------
-    def __init__(self, x, y) :
-        Decoration.__init__(self)
-
-        self.X = x
-        self.Y = y
-
-    # -----------------------------------------------------------------
-    def Dump(self) : 
-        result = Decoration.Dump(self)
-
-        result['X'] = self.X
-        result['Y'] = self.Y
-
-        return result
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-CommonDecorations = [Decoration, NodeTypeDecoration, EdgeTypeDecoration, CoordDecoration]
+CommonDecorations = [Decoration, NodeTypeDecoration, EdgeTypeDecoration]
 
