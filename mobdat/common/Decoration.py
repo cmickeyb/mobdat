@@ -111,12 +111,12 @@ class EdgeTypeDecoration(Decoration) :
 
     # -----------------------------------------------------------------
     def __init__(self, name) :
-        Decoration.Decoration.__init__(self)
+        Decoration.__init__(self)
         self.Name = name
 
     # -----------------------------------------------------------------
     def Dump(self) :
-        result = Decoration.Decoration.Dump(self)
+        result = Decoration.Dump(self)
         result['Name'] = self.Name
 
         return result
