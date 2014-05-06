@@ -47,7 +47,7 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
-from Decoration import CommonDecorations
+from Decoration import *
 from Utilities import GenName
 
 import uuid, re
@@ -75,7 +75,7 @@ class _GraphObject :
         self.Decorations = {}
         self.Collections = {}
 
-        self.AddDecoration(NodeTypeDecoration(self.__Class__.__Name__))
+        self.AddDecoration(NodeTypeDecoration(self.__class__.__name__))
 
     # -----------------------------------------------------------------
     def __getattr__(self, attr) :
