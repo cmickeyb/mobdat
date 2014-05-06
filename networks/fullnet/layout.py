@@ -41,8 +41,9 @@ mobdat.
 
 import os, sys
 
-from mobdat.builder import *
+from mobdat.builder import LayoutBuilder
 from mobdat.common.Utilities import GenName, GenNameFromCoordinates
+from mobdat.common.Business import BusinessType
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
@@ -57,37 +58,37 @@ def ConvertEdgeCoordinate(prefix, p1, p2) :
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
 def BuildNetwork() :
-    global layinfo, locinfo
+    global layinfo
 
     # residence and business nodes
-    rntype = layinfo.AddNodeType('townhouse', 'priority')
-    antype = layinfo.AddNodeType('apartment', 'priority', False)
-    bntype = layinfo.AddNodeType('business', 'priority', False)
+    rntype = layinfo.AddIntersectionType('townhouse', 'priority')
+    antype = layinfo.AddIntersectionType('apartment', 'priority', False)
+    bntype = layinfo.AddIntersectionType('business', 'priority', False)
 
     # basic roadway nodes and edges
-    pntype = layinfo.AddNodeType('priority','priority_stop')
-    sntype = layinfo.AddNodeType('stoplight','traffic_light')
+    pntype = layinfo.AddIntersectionType('priority','priority_stop')
+    sntype = layinfo.AddIntersectionType('stoplight','traffic_light')
 
-    e1A = layinfo.AddEdgeType('etype1A', 1, 70, 2.0, sig='1L')
-    e1B = layinfo.AddEdgeType('etype1B', 1, 40, 1.5, sig='1L')
-    e1C = layinfo.AddEdgeType('etype1C', 1, 20, 1.0, sig='1L')
-    e2A = layinfo.AddEdgeType('etype2A', 2, 70, 3.0, sig='2L')
-    e2B = layinfo.AddEdgeType('etype2B', 2, 40, 2.0, sig='2L')
-    e2C = layinfo.AddEdgeType('etype2C', 2, 20, 1.0, sig='2L')
+    e1A = layinfo.AddRoadType('etype1A', 1, 70, 2.0, sig='1L')
+    e1B = layinfo.AddRoadType('etype1B', 1, 40, 1.5, sig='1L')
+    e1C = layinfo.AddRoadType('etype1C', 1, 20, 1.0, sig='1L')
+    e2A = layinfo.AddRoadType('etype2A', 2, 70, 3.0, sig='2L')
+    e2B = layinfo.AddRoadType('etype2B', 2, 40, 2.0, sig='2L')
+    e2C = layinfo.AddRoadType('etype2C', 2, 20, 1.0, sig='2L')
 
-    e1way = layinfo.AddEdgeType('1way2lane', 2, 40, 2.0, sig='2L', center=True) 
+    e1way = layinfo.AddRoadType('1way2lane', 2, 40, 2.0, sig='2L', center=True) 
 
     # driveway
-    dntype = layinfo.AddNodeType('driveway', 'priority_stop') 
-    edrv = layinfo.AddEdgeType('driveway', 1, 10, 0.5, sig='D')
+    dntype = layinfo.AddIntersectionType('driveway', 'priority_stop') 
+    edrv = layinfo.AddRoadType('driveway', 1, 10, 0.5, sig='D')
 
     # parking lots
-    #plotnode  = layinfo.AddNodeType('parking_drive_intersection', 'priority', False)
-    #plotentry = layinfo.AddEdgeType('parking_entry', 1, 20, 1.0, sig='1L', render=False)
-    #plotdrive = layinfo.AddEdgeType('parking_drive', 1, 10, 0.5, sig='D', render=False)
-    plotnode  = layinfo.AddNodeType('parking_drive_intersection', 'priority')
-    plotentry = layinfo.AddEdgeType('parking_entry', 1, 20, 1.0, sig='P')
-    plotdrive = layinfo.AddEdgeType('parking_drive', 1, 10, 0.5, sig='D')
+    #plotnode  = layinfo.AddIntersectionType('parking_drive_intersection', 'priority', False)
+    #plotentry = layinfo.AddRoadType('parking_entry', 1, 20, 1.0, sig='1L', render=False)
+    #plotdrive = layinfo.AddRoadType('parking_drive', 1, 10, 0.5, sig='D', render=False)
+    plotnode  = layinfo.AddIntersectionType('parking_drive_intersection', 'priority')
+    plotentry = layinfo.AddRoadType('parking_entry', 1, 20, 1.0, sig='P')
+    plotdrive = layinfo.AddRoadType('parking_drive', 1, 10, 0.5, sig='D')
 
     # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     # MAIN GRIDS
@@ -101,16 +102,16 @@ def BuildNetwork() :
     # All of these nodes should be four way stops, they are the
     # two lane intersections
 
-    # layinfo.SetNodeTypeByPattern('main[24]00[EW][24]00[NS]',pntype)
-    # layinfo.SetNodeTypeByPattern('main[24]00[EW]0N',pntype)
+    # layinfo.SetIntersectionTypeByPattern('main[24]00[EW][24]00[NS]',pntype)
+    # layinfo.SetIntersectionTypeByPattern('main[24]00[EW]0N',pntype)
 
     # And then set a bunch of the edges to be two lane instead
     # of the four lane edges we created for the rest of the grid
-    layinfo.SetEdgeTypeByPattern('main[0-9]*[EW]200[NS]=O=main[0-9]*[EW]200[NS]',e1A)
-    layinfo.SetEdgeTypeByPattern('main[0-9]*[EW]400[NS]=O=main[0-9]*[EW]400[NS]',e1A)
+    layinfo.SetRoadTypeByPattern('main[0-9]*[EW]200[NS]=O=main[0-9]*[EW]200[NS]',e1A)
+    layinfo.SetRoadTypeByPattern('main[0-9]*[EW]400[NS]=O=main[0-9]*[EW]400[NS]',e1A)
 
-    layinfo.SetEdgeTypeByPattern('main300[EW][0-9]*[NS]=O=main300[EW][0-9]*[NS]',e1A)
-    layinfo.SetEdgeTypeByPattern('main400[EW][0-9]*[NS]=O=main400[EW][0-9]*[NS]',e1A)
+    layinfo.SetRoadTypeByPattern('main300[EW][0-9]*[NS]=O=main300[EW][0-9]*[NS]',e1A)
+    layinfo.SetRoadTypeByPattern('main400[EW][0-9]*[NS]=O=main400[EW][0-9]*[NS]',e1A)
 
     # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     # PLAZA GRID
@@ -134,50 +135,61 @@ def BuildNetwork() :
     layinfo.DropEdgeByName('plaza0E250N=O=plaza50E250N')
 
     # The one way streets are all 2 lanes
-    layinfo.SetEdgeTypeByPattern('plaza50[EW].*=O=plaza50[EW].*',e1way)
-    layinfo.SetEdgeTypeByPattern('plaza.*250[NS]=O=plaza.*250[NS]',e1way)
+    layinfo.SetRoadTypeByPattern('plaza50[EW].*=O=plaza50[EW].*',e1way)
+    layinfo.SetRoadTypeByPattern('plaza.*250[NS]=O=plaza.*250[NS]',e1way)
 
     # The central north/south road is four lane
-    layinfo.SetEdgeTypeByPattern('plaza[0-9]*[EW]100[NS]=O=plaza[0-9]*[EW]100[NS]',e2A)
-    layinfo.SetEdgeTypeByPattern('plaza[0-9]*[EW]0N=O=plaza[0-9]*[EW]0N',e2A)
-    layinfo.SetEdgeTypeByPattern('plaza0E[0-9]*[NS]=O=plaza0E[0-9]*[NS]',e2A)
-    layinfo.SetEdgeTypeByPattern('plaza0E[0-9]*[NS]=O=plaza0E[0-9]*[NS]',e2A)
+    layinfo.SetRoadTypeByPattern('plaza[0-9]*[EW]100[NS]=O=plaza[0-9]*[EW]100[NS]',e2A)
+    layinfo.SetRoadTypeByPattern('plaza[0-9]*[EW]0N=O=plaza[0-9]*[EW]0N',e2A)
+    layinfo.SetRoadTypeByPattern('plaza0E[0-9]*[NS]=O=plaza0E[0-9]*[NS]',e2A)
+    layinfo.SetRoadTypeByPattern('plaza0E[0-9]*[NS]=O=plaza0E[0-9]*[NS]',e2A)
 
     # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     # CONNECT THE GRIDS
     # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
     # Create nodes at the north and south ends of the plaza
-    layinfo.AddNode(0, -300, sntype, 'main') # south end of the plaza
-    layinfo.AddNode(0, 300, sntype, 'main')  # north end of the plaza
+    layinfo.AddIntersection(0, -300, sntype, 'main') # south end of the plaza
+    layinfo.AddIntersection(0, 300, sntype, 'main')  # north end of the plaza
 
     # And connect them to the east and west main grids
-    layinfo.ConnectNodes(layinfo.Nodes['main100W300N'],layinfo.Nodes['main0E300N'],e2A)
-    layinfo.ConnectNodes(layinfo.Nodes['main100E300N'],layinfo.Nodes['main0E300N'],e2A)
-    layinfo.ConnectNodes(layinfo.Nodes['main100W300S'],layinfo.Nodes['main0E300S'],e2A)
-    layinfo.ConnectNodes(layinfo.Nodes['main100E300S'],layinfo.Nodes['main0E300S'],e2A)
+    layinfo.ConnectIntersections(layinfo.Nodes['main100W300N'],layinfo.Nodes['main0E300N'],e2A)
+    layinfo.ConnectIntersections(layinfo.Nodes['main100E300N'],layinfo.Nodes['main0E300N'],e2A)
+    layinfo.ConnectIntersections(layinfo.Nodes['main100W300S'],layinfo.Nodes['main0E300S'],e2A)
+    layinfo.ConnectIntersections(layinfo.Nodes['main100E300S'],layinfo.Nodes['main0E300S'],e2A)
 
     # Connect the plaza nodes to the north & south ends
-    layinfo.ConnectNodes(layinfo.Nodes['plaza0E250S'],layinfo.Nodes['main0E300S'],e2A)
-    layinfo.ConnectNodes(layinfo.Nodes['plaza0E250N'],layinfo.Nodes['main0E300N'],e2A)
+    layinfo.ConnectIntersections(layinfo.Nodes['plaza0E250S'],layinfo.Nodes['main0E300S'],e2A)
+    layinfo.ConnectIntersections(layinfo.Nodes['plaza0E250N'],layinfo.Nodes['main0E300N'],e2A)
 
     # Connect the plaza nodes to the east and west roads
-    layinfo.ConnectNodes(layinfo.Nodes['main100W100N'],layinfo.Nodes['plaza50W100N'],e2A)
-    layinfo.ConnectNodes(layinfo.Nodes['main100W100S'],layinfo.Nodes['plaza50W100S'],e2A)
-    layinfo.ConnectNodes(layinfo.Nodes['main100E100N'],layinfo.Nodes['plaza50E100N'],e2A)
-    layinfo.ConnectNodes(layinfo.Nodes['main100E100S'],layinfo.Nodes['plaza50E100S'],e2A)
-    layinfo.ConnectNodes(layinfo.Nodes['main100W0N'],layinfo.Nodes['plaza50W0N'],e2A)
-    layinfo.ConnectNodes(layinfo.Nodes['main100E0N'],layinfo.Nodes['plaza50E0N'],e2A)
+    layinfo.ConnectIntersections(layinfo.Nodes['main100W100N'],layinfo.Nodes['plaza50W100N'],e2A)
+    layinfo.ConnectIntersections(layinfo.Nodes['main100W100S'],layinfo.Nodes['plaza50W100S'],e2A)
+    layinfo.ConnectIntersections(layinfo.Nodes['main100E100N'],layinfo.Nodes['plaza50E100N'],e2A)
+    layinfo.ConnectIntersections(layinfo.Nodes['main100E100S'],layinfo.Nodes['plaza50E100S'],e2A)
+    layinfo.ConnectIntersections(layinfo.Nodes['main100W0N'],layinfo.Nodes['plaza50W0N'],e2A)
+    layinfo.ConnectIntersections(layinfo.Nodes['main100E0N'],layinfo.Nodes['plaza50E0N'],e2A)
 
-    layinfo.ConnectNodes(layinfo.Nodes['main100W200S'], layinfo.Nodes['plaza50W200S'], e1A)
-    layinfo.ConnectNodes(layinfo.Nodes['main100E200S'], layinfo.Nodes['plaza50E200S'], e1A)
-    layinfo.ConnectNodes(layinfo.Nodes['main100W200N'], layinfo.Nodes['plaza50W200N'], e1A)
-    layinfo.ConnectNodes(layinfo.Nodes['main100E200N'], layinfo.Nodes['plaza50E200N'], e1A)
+    layinfo.ConnectIntersections(layinfo.Nodes['main100W200S'], layinfo.Nodes['plaza50W200S'], e1A)
+    layinfo.ConnectIntersections(layinfo.Nodes['main100E200S'], layinfo.Nodes['plaza50E200S'], e1A)
+    layinfo.ConnectIntersections(layinfo.Nodes['main100W200N'], layinfo.Nodes['plaza50W200N'], e1A)
+    layinfo.ConnectIntersections(layinfo.Nodes['main100E200N'], layinfo.Nodes['plaza50E200N'], e1A)
 
     # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     # BUILD THE RESIDENTIAL NEIGHBORHOODS
     # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
+    # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    layinfo.AddBusinessLocationProfile('plaza', 50, 25,  { BusinessType.Factory : 1.0, BusinessType.Service : 0.5, BusinessType.Food : 0.25 })
+    layinfo.AddBusinessLocationProfile('mall',  20, 75,  { BusinessType.Factory : 0.1, BusinessType.Service : 1.0, BusinessType.Food : 1.0 })
+    layinfo.AddBusinessLocationProfile('civic', 20, 150, { BusinessType.School : 1.0, BusinessType.Civic : 1.0 })
+
+    layinfo.AddResidentialLocationProfile('townhouse', 7)
+    layinfo.AddResidentialLocationProfile('apartment', 11)
+
+    # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     rgenv = LayoutBuilder.ResidentialGenerator(e1C, dntype, edrv, rntype, bspace = 20, spacing = 10, driveway = 5)
     rgenh = LayoutBuilder.ResidentialGenerator(e1C, dntype, edrv, rntype, bspace = 40, spacing = 10)
 
@@ -185,37 +197,37 @@ def BuildNetwork() :
         for nw in range (-200, 200, 100) :
             node1 = layinfo.Nodes[ConvertNodeCoordinate('main', (ew, nw))]
             node2 = layinfo.Nodes[ConvertNodeCoordinate('main', (ew, nw + 100))]
-            locinfo.CreateCapsule('townhouse', layinfo.GenerateResidential(node1, node2, rgenv))
+            layinfo.AddResidentialLocation('townhouse', layinfo.GenerateResidential(node1, node2, rgenv))
 
     for nw in [-400, 400] :
         for ew in [-300, -200, 100, 200] :
             node1 = layinfo.Nodes[ConvertNodeCoordinate('main', (ew, nw))]
             node2 = layinfo.Nodes[ConvertNodeCoordinate('main', (ew + 100, nw))]
-            locinfo.CreateCapsule('townhouse', layinfo.GenerateResidential(node1, node2, rgenv))
+            layinfo.AddResidentialLocation('townhouse', layinfo.GenerateResidential(node1, node2, rgenv))
 
     rgenv.BothSides = False
-    locinfo.CreateCapsule('townhouse', layinfo.GenerateResidential(layinfo.Nodes['main300W200N'],layinfo.Nodes['main400W200N'], rgenv))
-    locinfo.CreateCapsule('townhouse', layinfo.GenerateResidential(layinfo.Nodes['main300E200N'],layinfo.Nodes['main400E200N'], rgenv))
+    layinfo.AddResidentialLocation('townhouse', layinfo.GenerateResidential(layinfo.Nodes['main300W200N'],layinfo.Nodes['main400W200N'], rgenv))
+    layinfo.AddResidentialLocation('townhouse', layinfo.GenerateResidential(layinfo.Nodes['main300E200N'],layinfo.Nodes['main400E200N'], rgenv))
 
     rgenv.DrivewayLength = - rgenv.DrivewayLength
-    locinfo.CreateCapsule('townhouse', layinfo.GenerateResidential(layinfo.Nodes['main400W200S'],layinfo.Nodes['main300W200S'], rgenv))
-    locinfo.CreateCapsule('townhouse', layinfo.GenerateResidential(layinfo.Nodes['main400E200S'],layinfo.Nodes['main300E200S'], rgenv))
+    layinfo.AddResidentialLocation('townhouse', layinfo.GenerateResidential(layinfo.Nodes['main400W200S'],layinfo.Nodes['main300W200S'], rgenv))
+    layinfo.AddResidentialLocation('townhouse', layinfo.GenerateResidential(layinfo.Nodes['main400E200S'],layinfo.Nodes['main300E200S'], rgenv))
 
     # some of the malls to be marked as residential apartments
     rgenplR = LayoutBuilder.ResidentialGenerator(plotentry, plotnode, plotdrive, antype, driveway = -8, bspace = 5, spacing = 5, both = False)
     rgenplL = LayoutBuilder.ResidentialGenerator(plotentry, plotnode, plotdrive, antype, driveway = 8, bspace = 5, spacing = 5, both = False)
 
     for n in ['main200W200S', 'main100E200S', 'main200E200S', 'main300W200N', 'main200W200N', 'main100E200N'] :
-        locinfo.CreateCapsule('apartment', layinfo.BuildSimpleParkingLotEW(layinfo.Nodes[n], pntype, rgenplR, 'apartment', offset=-15, slength=40, elength=60))
-        locinfo.CreateCapsule('apartment', layinfo.BuildSimpleParkingLotEW(layinfo.Nodes[n], pntype, rgenplL, 'apartment', offset=15, slength=40, elength=60))
+        layinfo.AddResidentialLocation('apartment', layinfo.BuildSimpleParkingLotEW(layinfo.Nodes[n], pntype, rgenplR, 'apartment', offset=-15, slength=40, elength=60))
+        layinfo.AddResidentialLocation('apartment', layinfo.BuildSimpleParkingLotEW(layinfo.Nodes[n], pntype, rgenplL, 'apartment', offset=15, slength=40, elength=60))
 
     for n in ['main200W200S', 'main200W100S', 'main200W200N', 'main200W100N'] : 
-        locinfo.CreateCapsule('apartment', layinfo.BuildSimpleParkingLotNS(layinfo.Nodes[n], pntype, rgenplR, 'apartment', offset=-30))
-        locinfo.CreateCapsule('apartment', layinfo.BuildSimpleParkingLotNS(layinfo.Nodes[n], pntype, rgenplL, 'apartment', offset=30))
+        layinfo.AddResidentialLocation('apartment', layinfo.BuildSimpleParkingLotNS(layinfo.Nodes[n], pntype, rgenplR, 'apartment', offset=-30))
+        layinfo.AddResidentialLocation('apartment', layinfo.BuildSimpleParkingLotNS(layinfo.Nodes[n], pntype, rgenplL, 'apartment', offset=30))
 
     for n in ['main200E100S', 'main200E0N', 'main200E100N'] : 
-        locinfo.CreateCapsule('apartment', layinfo.BuildSimpleParkingLotNS(layinfo.Nodes[n], pntype, rgenplR, 'apartment', offset=-30))
-        locinfo.CreateCapsule('apartment', layinfo.BuildSimpleParkingLotNS(layinfo.Nodes[n], pntype, rgenplL, 'apartment', offset=30))
+        layinfo.AddResidentialLocation('apartment', layinfo.BuildSimpleParkingLotNS(layinfo.Nodes[n], pntype, rgenplR, 'apartment', offset=-30))
+        layinfo.AddResidentialLocation('apartment', layinfo.BuildSimpleParkingLotNS(layinfo.Nodes[n], pntype, rgenplL, 'apartment', offset=30))
 
     # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     # BUILD THE BUSINESS NEIGHBORHOODS
@@ -226,25 +238,25 @@ def BuildNetwork() :
 
     # mark some school
     for n in ['main300W200S', 'main200E200N'] :
-        locinfo.CreateCapsule('civic', layinfo.BuildSimpleParkingLotEW(layinfo.Nodes[n], pntype, rgenplR, 'civic', offset=-15, slength=40, elength=60))
-        locinfo.CreateCapsule('civic', layinfo.BuildSimpleParkingLotEW(layinfo.Nodes[n], pntype, rgenplL, 'civic', offset=15, slength=40, elength=60))
+        layinfo.AddBusinessLocation('civic', layinfo.BuildSimpleParkingLotEW(layinfo.Nodes[n], pntype, rgenplR, 'civic', offset=-15, slength=40, elength=60))
+        layinfo.AddBusinessLocation('civic', layinfo.BuildSimpleParkingLotEW(layinfo.Nodes[n], pntype, rgenplL, 'civic', offset=15, slength=40, elength=60))
 
     # these are the downtown work and shopping plazas
     for ns in range(-200, 300, 50) :
         wname = ConvertNodeCoordinate('plaza', (-50, ns))
-        locinfo.CreateCapsule('plaza', layinfo.BuildSimpleParkingLotSN(layinfo.Nodes[wname], pntype, rgenplL, 'plaza', offset=25, slength = 17.5, elength=32.5))
+        layinfo.AddBusinessLocation('plaza', layinfo.BuildSimpleParkingLotSN(layinfo.Nodes[wname], pntype, rgenplL, 'plaza', offset=25, slength = 17.5, elength=32.5))
 
         ename = ConvertNodeCoordinate('plaza', (50, ns-50))
-        locinfo.CreateCapsule('plaza', layinfo.BuildSimpleParkingLotNS(layinfo.Nodes[ename], pntype, rgenplR, 'plaza', offset=-25, slength = 17.5, elength=32.5))
+        layinfo.AddBusinessLocation('plaza', layinfo.BuildSimpleParkingLotNS(layinfo.Nodes[ename], pntype, rgenplR, 'plaza', offset=-25, slength = 17.5, elength=32.5))
         
     # these are the main business areas
     for n in ['main200W300S', 'main200W0N'] : 
-        locinfo.CreateCapsule('mall', layinfo.BuildSimpleParkingLotNS(layinfo.Nodes[n], pntype, rgenplR, 'mall', offset=-30))
-        locinfo.CreateCapsule('mall', layinfo.BuildSimpleParkingLotNS(layinfo.Nodes[n], pntype, rgenplL, 'mall', offset=30))
+        layinfo.AddBusinessLocation('mall', layinfo.BuildSimpleParkingLotNS(layinfo.Nodes[n], pntype, rgenplR, 'mall', offset=-30))
+        layinfo.AddBusinessLocation('mall', layinfo.BuildSimpleParkingLotNS(layinfo.Nodes[n], pntype, rgenplL, 'mall', offset=30))
 
     for n in ['main200E300S', 'main200E200S', 'main200E200N'] : 
-        locinfo.CreateCapsule('mall', layinfo.BuildSimpleParkingLotNS(layinfo.Nodes[n], pntype, rgenplR, 'mall', offset=-30))
-        locinfo.CreateCapsule('mall', layinfo.BuildSimpleParkingLotNS(layinfo.Nodes[n], pntype, rgenplL, 'mall', offset=30))
+        layinfo.AddBusinessLocation('mall', layinfo.BuildSimpleParkingLotNS(layinfo.Nodes[n], pntype, rgenplR, 'mall', offset=-30))
+        layinfo.AddBusinessLocation('mall', layinfo.BuildSimpleParkingLotNS(layinfo.Nodes[n], pntype, rgenplL, 'mall', offset=30))
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

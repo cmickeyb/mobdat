@@ -38,7 +38,8 @@ network such as building a grid of roads.
 
 """
 
-import os, sys, warnings, copy
+import os, sys, copy
+import logging
 
 # we need to import python modules from the $SUMO_HOME/tools directory
 sys.path.append(os.path.join(os.environ.get("OPENSIM","/share/opensim"),"lib","python"))
@@ -48,7 +49,11 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "
 from mobdat.common import LayoutInfo
 from mobdat.common.LayoutDecoration import *
 from mobdat.common.Utilities import GenName, GenNameFromCoordinates
+from mobdat.common import Graph
+
 import re
+
+logger = logging.getLogger(__name__)
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -56,7 +61,7 @@ class ResidentialGenerator :
 
     # -----------------------------------------------------------------
     def __init__(self, etype, itype, dtype, rtype, driveway = 10, bspace = 20, spacing = 20, both = True) :
-        self.EdgeType = etype
+        self.RoadType = etype
         self.IntersectionType = itype
         self.DrivewayType = dtype
         self.ResidentialType = rtype
@@ -67,16 +72,15 @@ class ResidentialGenerator :
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class Node(LayoutInfo.Node) :
+class Intersection(LayoutInfo.Intersection) :
     WEST  = 0
     NORTH = 1
     EAST  = 2
     SOUTH = 3
 
     # -----------------------------------------------------------------
-    def __init__(self, x, y, ntype, prefix) :
-        LayoutInfo.Node.__init__(self, x, y, GenNameFromCoordinates(x, y, prefix))
-        ntype.AddMember(self)
+    def __init__(self, name, itype, x, y) :
+        LayoutInfo.Intersection.__init__(self, name, itype, x, y)
 
     # -----------------------------------------------------------------
     def _EdgeMapPosition(self, node) :
@@ -142,12 +146,12 @@ class Node(LayoutInfo.Node) :
     def Signature(self) :
         osignature = []
         for e in self.OutputEdgeMap() :
-            sig = e.EdgeType.Signature if e else '0L'
+            sig = e.RoadType.Signature if e else '0L'
             osignature.append(sig)
 
         isignature = []
         for e in self.InputEdgeMap() :
-            sig = e.EdgeType.Signature if e else '0L'
+            sig = e.RoadType.Signature if e else '0L'
             isignature.append(sig)
 
         signature = []
@@ -158,75 +162,130 @@ class Node(LayoutInfo.Node) :
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class Edge(LayoutInfo.Edge) :
+class Road(LayoutInfo.Road) :
     
     # -----------------------------------------------------------------
     def __init__(self, snode, enode, etype) :
-        LayoutInfo.Edge.__init__(self, snode, enode)
+        LayoutInfo.Road.__init__(self, snode, enode)
         etype.AddMember(self)
-
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class Collection(LayoutInfo.Collection) :
-    
-    # -----------------------------------------------------------------
-    def __init__(self, members = [], name = None, prefix = 'col') :
-        LayoutInfo.Collection.__init__(self, members, name, prefix)
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class LayoutBuilder(LayoutInfo.LayoutInfo) :
 
     # -----------------------------------------------------------------
+    @staticmethod
+    def LoadFromFile(filename) :
+        return LayoutInfo.LayoutInfo.LoadFromFile(filename)
+
+    # -----------------------------------------------------------------
     def __init__(self) :
         LayoutInfo.LayoutInfo.__init__(self)
 
-    # -----------------------------------------------------------------
-    def AddEdgeType(self, name, lanes = 1, pri = 70, speed = 2.0, wid = 2.5, sig = '1L', render = True, center = False) :
-        etype = Collection(name = name)
-        etype.AddDecoration(EdgeTypeDecoration(name, lanes, pri, speed, wid, sig, render, center))
-
-        self.AddCollection(etype)
-        return etype
+    # =================================================================
+    # =================================================================
 
     # -----------------------------------------------------------------
-    def AddNodeType(self, name, itype = 'priority', render = True) :
-        ntype = Collection(name = name)
-        ntype.AddDecoration(NodeTypeDecoration(name, itype, render))
-
-        self.AddCollection(ntype)
-        return ntype
-
-    # -----------------------------------------------------------------
-    def AddNode(self, curx, cury, ntype, prefix) :
-        node = Node(curx, cury, ntype, prefix)
-        LayoutInfo.LayoutInfo.AddNode(self, node)
+    def AddIntersectionType(self, name, itype = 'priority', render = True) :
+        node = LayoutInfo.IntersectionType(name, itype, render)
+        LayoutInfo.LayoutInfo.AddIntersectionType(self, node)
 
         return node
 
     # -----------------------------------------------------------------
-    def AddEdge(self, snode, enode, etype) :
-        edge = Edge(snode, enode, etype)
-        LayoutInfo.LayoutInfo.AddEdge(self, edge)
+    def AddIntersection(self, curx, cury, itype, prefix) :
+        name = GenNameFromCoordinates(curx, cury, prefix)
+        node = Intersection(name, itype, curx, cury)
+        LayoutInfo.LayoutInfo.AddIntersection(self, node)
+
+        return node
+
+    # -----------------------------------------------------------------
+    def AddEndPoint(self, curx, cury, ntype, prefix) :
+        name = GenNameFromCoordinates(curx, cury, prefix)
+        node = LayoutInfo.EndPoint(name, ntype, curx, cury)
+        LayoutInfo.LayoutInfo.AddEndPoint(self, node)
+
+        return node
+
+    # -----------------------------------------------------------------
+    def AddBusinessLocationProfile(self, name, employees = 20, customers = 50, types = None) :
+        node = LayoutInfo.BusinessLocationProfile(name, employees, customers, types)
+        LayoutInfo.LayoutInfo.AddBusinessLocationProfile(self, node)
+
+        return node
+
+    # -----------------------------------------------------------------
+    def AddBusinessLocation(self, profname, endpoints) :
+        """
+        Args:
+            profname -- string name of the business location profile collection
+            endpoints -- list of endpoint objects of type LayoutInfo.Endpoint
+        """
+        location = LayoutInfo.BusinessLocation(GenName('bizloc'), self.Collections[profname])
+        for endpoint in endpoints :
+            location.AddEndpointToLocation(endpoint)
+
+        LayoutInfo.LayoutInfo.AddBusinessLocation(self, location)
+
+        return location
+
+    # -----------------------------------------------------------------
+    def AddResidentialLocationProfile(self, name, residents = 5) :
+        node = LayoutInfo.ResidentialLocationProfile(name, residents)
+        LayoutInfo.LayoutInfo.AddResidentialLocationProfile(self, node)
+
+        return node
+
+    # -----------------------------------------------------------------
+    def AddResidentialLocation(self, profname, endpoints) :
+        """
+        Args:
+            profname -- string name of the business location profile collection
+            endpoints -- list of endpoint objects of type LayoutInfo.Endpoint
+        """
+        location = LayoutInfo.ResidentialLocation(GenName('resloc'), self.Collections[profname])
+        for endpoint in endpoints :
+            location.AddEndpointToLocation(endpoint)
+
+        LayoutInfo.LayoutInfo.AddResidentialLocation(self, location)
+
+        return location
+
+    # -----------------------------------------------------------------
+    def AddRoadType(self, name, lanes = 1, pri = 70, speed = 2.0, wid = 2.5, sig = '1L', render = True, center = False) :
+        node = LayoutInfo.RoadType(name, lanes, pri, speed, wid, sig, render, center)
+        LayoutInfo.LayoutInfo.AddRoadType(self, node)
+
+        return node
+
+    # -----------------------------------------------------------------
+    def AddRoad(self, snode, enode, etype) :
+        name = Graph.GenEdgeName(snode, enode)
+        edge = LayoutInfo.Road(name, snode, enode, etype)
+        LayoutInfo.LayoutInfo.AddRoad(self, edge)
         
         return edge
 
+    # =================================================================
+    # =================================================================
+
     # -----------------------------------------------------------------
-    def ConnectNodes(self, node1, node2, etype) :
-        self.AddEdge(node1, node2, etype)
-        self.AddEdge(node2, node1, etype)
+    def ConnectIntersections(self, node1, node2, etype) :
+        self.AddRoad(node1, node2, etype)
+        self.AddRoad(node2, node1, etype)
 
         return True
 
     # -----------------------------------------------------------------
-    def AddNodeBetween(self, node1, node2, dist, ntype, prefix) :
+    def AddIntersectionBetween(self, node1, node2, dist, ntype, prefix) :
         # assumes dist is positive and less than the distance between node1 and node2
         # assumes there is a direct link between node1 and node2
 
         edge1 = self.FindEdgeBetweenNodes(node1, node2)
         edge2 = self.FindEdgeBetweenNodes(node2, node1)
         if edge1 == None and edge2 == None:
-            warnings.warn("no edge found between %s and %s" % (node1.Name, node2.Name))
+            logger.warn("no edge found between %s and %s", node1.Name, node2.Name)
 
         curx = node1.X
         cury = node1.Y
@@ -236,32 +295,32 @@ class LayoutBuilder(LayoutInfo.LayoutInfo) :
         elif node1.Y == node2.Y :
             curx = (node1.X + dist) if node1.X < node2.X else (node1.X - dist)
         else:
-            warnings.warn("expecting north/south or east/west nodes for split")
+            logger.warn("expecting north/south or east/west nodes for split")
             return None
 
-        nnode = self.AddNode(curx, cury, ntype, prefix)
+        nnode = self.AddIntersection(curx, cury, ntype, prefix)
 
         if edge1 :
-            etype1 = edge1.FindDecorationProvider(EdgeTypeDecoration.DecorationName)
+            etype1 = edge1.FindDecorationProvider(RoadTypeDecoration.DecorationName)
             self.DropEdge(edge1)
-            self.AddEdge(node1,nnode,etype1)
-            self.AddEdge(nnode,node2,etype1)
+            self.AddRoad(node1,nnode,etype1)
+            self.AddRoad(nnode,node2,etype1)
 
         if edge2 :
-            etype2 = edge2.FindDecorationProvider(EdgeTypeDecoration.DecorationName)
+            etype2 = edge2.FindDecorationProvider(RoadTypeDecoration.DecorationName)
             self.DropEdge(edge2)
-            self.AddEdge(node2,nnode,etype2)
-            self.AddEdge(nnode,node1,etype2)
+            self.AddRoad(node2,nnode,etype2)
+            self.AddRoad(nnode,node1,etype2)
 
         return nnode
 
     # -----------------------------------------------------------------
-    def SetNodeTypeByPattern(self, pattern, newtype) :
+    def SetIntersectionTypeByPattern(self, pattern, newtype) :
         for name, node in self.Nodes.iteritems() :
             if re.match(pattern, name) :
                 # the node type is actually a decorated collection, need to remove it
                 # from the current type collection before adding it to the new one
-                curtype = node.FindDecorationProvider(NodeTypeDecoration.DecorationName)
+                curtype = node.FindDecorationProvider(IntersectionTypeDecoration.DecorationName)
                 if curtype : curtype.DropMember(node)
                 
                 # and add it to the new collection
@@ -270,12 +329,15 @@ class LayoutBuilder(LayoutInfo.LayoutInfo) :
         return True
 
     # -----------------------------------------------------------------
-    def SetEdgeTypeByPattern(self, pattern, newtype) :
+    def SetRoadTypeByPattern(self, pattern, newtype) :
         for name, edge in self.Edges.iteritems() :
+            if edge.NodeType.Name != LayoutInfo.Road.__name__ :
+                continue
+
             if re.match(pattern, name) :
                 # the edge type is actually a decorated collection, need to remove it
                 # from the current type collection before adding it to the new one
-                curtype = edge.FindDecorationProvider(EdgeTypeDecoration.DecorationName)
+                curtype = edge.FindDecorationProvider(RoadTypeDecoration.DecorationName)
                 if curtype : curtype.DropMember(edge)
                 
                 # and add it to the new collection
@@ -293,15 +355,15 @@ class LayoutBuilder(LayoutInfo.LayoutInfo) :
 
             cury = int(y0)
             while cury <= y1 :
-                node = self.AddNode(curx, cury, ntype, prefix)
+                node = self.AddIntersection(curx, cury, ntype, prefix)
             
                 if curx > x0 :
                     wnode = lastlist.pop(0)
-                    self.ConnectNodes(node, wnode, etype)
+                    self.ConnectIntersections(node, wnode, etype)
 
                 if cury > y0 :
                     snode = thislist[len(thislist) - 1]
-                    self.ConnectNodes(node, snode, etype)
+                    self.ConnectIntersections(node, snode, etype)
 
                 thislist.append(node)
                 cury += int(stepy)
@@ -337,22 +399,25 @@ class LayoutBuilder(LayoutInfo.LayoutInfo) :
         resnodes = []
         cury = node1.Y + rgen.DrivewayBuffer
         while cury + rgen.DrivewayBuffer <= node2.Y :
-            node = self.AddNode(node1.X, cury, rgen.IntersectionType, prefix)
-            self.ConnectNodes(node,lastnode,rgen.EdgeType)
+            # first node is the intersection with the existing road
+            node = self.AddIntersection(node1.X, cury, rgen.IntersectionType, prefix)
+            self.ConnectIntersections(node,lastnode,rgen.RoadType)
             
-            enode = self.AddNode(node1.X + rgen.DrivewayLength, cury, rgen.ResidentialType, prefix)
-            self.ConnectNodes(node,enode,rgen.DrivewayType)
+            # this is the first residential endpoint
+            enode = self.AddEndPoint(node1.X + rgen.DrivewayLength, cury, rgen.ResidentialType, prefix)
+            self.ConnectIntersections(node,enode,rgen.DrivewayType)
             resnodes.append(enode)
 
+            # this is the optional second residential endpoint
             if rgen.BothSides :
-                wnode = self.AddNode(node1.X - rgen.DrivewayLength, cury, rgen.ResidentialType, prefix)
-                self.ConnectNodes(node,wnode,rgen.DrivewayType)
+                wnode = self.AddEndPoint(node1.X - rgen.DrivewayLength, cury, rgen.ResidentialType, prefix)
+                self.ConnectIntersections(node,wnode,rgen.DrivewayType)
                 resnodes.append(wnode)
 
             lastnode = node
             cury += rgen.Spacing
 
-        self.ConnectNodes(lastnode,node2,rgen.EdgeType)
+        self.ConnectIntersections(lastnode,node2,rgen.RoadType)
         return resnodes
 
     # -----------------------------------------------------------------
@@ -362,22 +427,25 @@ class LayoutBuilder(LayoutInfo.LayoutInfo) :
         resnodes = []
         curx = node1.X + rgen.DrivewayBuffer
         while curx + rgen.DrivewayBuffer <= node2.X :
-            node = self.AddNode(curx, node1.Y, rgen.IntersectionType, prefix)
-            self.ConnectNodes(node,lastnode,rgen.EdgeType)
+            # first node is the intersection with the existing road
+            node = self.AddIntersection(curx, node1.Y, rgen.IntersectionType, prefix)
+            self.ConnectIntersections(node,lastnode,rgen.RoadType)
 
-            nnode = self.AddNode(curx, node1.Y + rgen.DrivewayLength, rgen.ResidentialType, prefix)
-            self.ConnectNodes(node,nnode,rgen.DrivewayType)
+            # this is the first residential endpoint
+            nnode = self.AddEndPoint(curx, node1.Y + rgen.DrivewayLength, rgen.ResidentialType, prefix)
+            self.ConnectIntersections(node,nnode,rgen.DrivewayType)
             resnodes.append(nnode)
 
+            # this is the optional second residential endpoint
             if rgen.BothSides :
-                snode = self.AddNode(curx, node1.Y - rgen.DrivewayLength, rgen.ResidentialType, prefix)
-                self.ConnectNodes(node,snode,rgen.DrivewayType)
+                snode = self.AddEndPoint(curx, node1.Y - rgen.DrivewayLength, rgen.ResidentialType, prefix)
+                self.ConnectIntersections(node,snode,rgen.DrivewayType)
                 resnodes.append(snode)
 
             lastnode = node
             curx += rgen.Spacing
 
-        self.ConnectNodes(lastnode,node2,rgen.EdgeType)
+        self.ConnectIntersections(lastnode,node2,rgen.RoadType)
         return resnodes
 
     # -----------------------------------------------------------------
@@ -394,7 +462,7 @@ class LayoutBuilder(LayoutInfo.LayoutInfo) :
         # if the node already exists, don't overwrite the existing type
         cnode1 = edge.StartNode
         if dist1 > 0 :
-            cnode1 = self.AddNodeBetween(edge.StartNode, edge.EndNode, dist1, itype, prefix)
+            cnode1 = self.AddIntersectionBetween(edge.StartNode, edge.EndNode, dist1, itype, prefix)
         
         # find the second split point
         edge = cnode1.NorthEdge()
@@ -404,14 +472,14 @@ class LayoutBuilder(LayoutInfo.LayoutInfo) :
 
         cnode2 = edge.StartNode
         if dist2 > 0 :
-            cnode2 = self.AddNodeBetween(edge.StartNode, edge.EndNode, dist2, itype, prefix)
+            cnode2 = self.AddIntersectionBetween(edge.StartNode, edge.EndNode, dist2, itype, prefix)
 
         # cnode1 and cnode2 are the connection nodes, now build a path between them
-        dnode1 = self.AddNode(cnode1.X + offset, cnode1.Y, rgen.IntersectionType, prefix)
-        dnode2 = self.AddNode(cnode2.X + offset, cnode2.Y, rgen.IntersectionType, prefix)
+        dnode1 = self.AddIntersection(cnode1.X + offset, cnode1.Y, rgen.IntersectionType, prefix)
+        dnode2 = self.AddIntersection(cnode2.X + offset, cnode2.Y, rgen.IntersectionType, prefix)
 
-        self.ConnectNodes(cnode1, dnode1, rgen.EdgeType)
-        self.ConnectNodes(cnode2, dnode2, rgen.EdgeType)
+        self.ConnectIntersections(cnode1, dnode1, rgen.RoadType)
+        self.ConnectIntersections(cnode2, dnode2, rgen.RoadType)
         return self._GenerateResidentialYAxis(dnode1, dnode2, rgen, prefix)
 
     # -----------------------------------------------------------------
@@ -428,7 +496,7 @@ class LayoutBuilder(LayoutInfo.LayoutInfo) :
         # if the node already exists, don't overwrite the existing type
         cnode1 = edge.EndNode
         if dist1 > 0 :
-            cnode1 = self.AddNodeBetween(edge.StartNode, edge.EndNode, dist1, itype, prefix)
+            cnode1 = self.AddIntersectionBetween(edge.StartNode, edge.EndNode, dist1, itype, prefix)
         
         # find the second split point
         edge = cnode1.SouthEdge()
@@ -438,14 +506,14 @@ class LayoutBuilder(LayoutInfo.LayoutInfo) :
 
         cnode2 = edge.EndNode
         if dist2 > 0 :
-            cnode2 = self.AddNodeBetween(edge.StartNode, edge.EndNode, dist2, itype, prefix)
+            cnode2 = self.AddIntersectionBetween(edge.StartNode, edge.EndNode, dist2, itype, prefix)
 
         # cnode1 and cnode2 are the connection nodes, now build a path between them
-        dnode1 = self.AddNode(cnode1.X + offset, cnode1.Y, rgen.IntersectionType, prefix)
-        dnode2 = self.AddNode(cnode2.X + offset, cnode2.Y, rgen.IntersectionType, prefix)
+        dnode1 = self.AddIntersection(cnode1.X + offset, cnode1.Y, rgen.IntersectionType, prefix)
+        dnode2 = self.AddIntersection(cnode2.X + offset, cnode2.Y, rgen.IntersectionType, prefix)
 
-        self.ConnectNodes(cnode1, dnode1, rgen.EdgeType)
-        self.ConnectNodes(cnode2, dnode2, rgen.EdgeType)
+        self.ConnectIntersections(cnode1, dnode1, rgen.RoadType)
+        self.ConnectIntersections(cnode2, dnode2, rgen.RoadType)
         return self._GenerateResidentialYAxis(dnode2, dnode1, rgen, prefix)
 
     # -----------------------------------------------------------------
@@ -462,7 +530,7 @@ class LayoutBuilder(LayoutInfo.LayoutInfo) :
         # if the node already exists, don't overwrite the existing type
         cnode1 = edge.StartNode
         if dist1 > 0 :
-            cnode1 = self.AddNodeBetween(edge.StartNode, edge.EndNode, dist1, itype, prefix)
+            cnode1 = self.AddIntersectionBetween(edge.StartNode, edge.EndNode, dist1, itype, prefix)
         
         # find the second split point
         edge = cnode1.EastEdge()
@@ -472,12 +540,12 @@ class LayoutBuilder(LayoutInfo.LayoutInfo) :
 
         cnode2 = edge.StartNode
         if dist2 > 0 :
-            cnode2 = self.AddNodeBetween(edge.StartNode, edge.EndNode, dist2, itype, prefix)
+            cnode2 = self.AddIntersectionBetween(edge.StartNode, edge.EndNode, dist2, itype, prefix)
 
         # cnode1 and cnode2 are the connection nodes, now build a path between them
-        dnode1 = self.AddNode(cnode1.X, cnode1.Y + offset, rgen.IntersectionType, prefix)
-        dnode2 = self.AddNode(cnode2.X, cnode2.Y + offset, rgen.IntersectionType, prefix)
+        dnode1 = self.AddIntersection(cnode1.X, cnode1.Y + offset, rgen.IntersectionType, prefix)
+        dnode2 = self.AddIntersection(cnode2.X, cnode2.Y + offset, rgen.IntersectionType, prefix)
 
-        self.ConnectNodes(cnode1, dnode1, rgen.EdgeType)
-        self.ConnectNodes(cnode2, dnode2, rgen.EdgeType)
+        self.ConnectIntersections(cnode1, dnode1, rgen.RoadType)
+        self.ConnectIntersections(cnode2, dnode2, rgen.RoadType)
         return self._GenerateResidentialXAxis(dnode1, dnode2, rgen, prefix)
