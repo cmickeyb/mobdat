@@ -1,0 +1,5 @@
+Some design notes.
+
+Builder classes should focus on simplified, contextual interfaces. 
+Info classes handle graph nodes, edges, and collections.
+

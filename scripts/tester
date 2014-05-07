@@ -48,7 +48,7 @@ import json, argparse
 import cmd, readline, traceback
 import re
 
-from mobdat.common import NetworkSettings, NetworkInfo, BusinessInfo, PersonInfo, LocationInfo, Graph
+from mobdat.builder import LayoutBuilder, SocialBuilder
 
 DataBindings = None
 logger = logging.getLogger(__name__)
@@ -85,7 +85,7 @@ def SetupLoggers() :
     logger.addHandler(flog)
 
     clog = logging.StreamHandler()
-    clog.addFilter(logging.Filter(name='mobdat'))
+    #clog.addFilter(logging.Filter(name='mobdat'))
     clog.setFormatter(logging.Formatter('[%(name)s] %(message)s'))
     clog.setLevel(logging.WARN)
     logger.addHandler(clog)
@@ -110,6 +110,95 @@ class TestController(cmd.Cmd) :
     def _DumpDict(self, info) :
         print json.dumps(info, indent=4, sort_keys=True)
 
+    # =================================================================
+    # COMMANDS
+    # =================================================================
+
+    # -----------------------------------------------------------------
+    def do_exec(self, args) :
+        """
+        exec -- Command to run a list of extension files
+        """
+        global DataBindings
+        pargs = args.split()
+        for cf in pargs :
+            try :
+                logger.info('loading extension file %s', cf)
+                execfile(cf, DataBindings)
+                logger.info('loaded extension file %s', cf)
+            except :
+                logger.warn('unhandled error processing extension file %s\n%s', cf, traceback.format_exc(10))
+                # sys.exit(-1)
+
+    # -----------------------------------------------------------------
+    def do_clear(self, args) :
+        """
+        clear -- Command to clear one of the data elements
+            clear layout
+            clear social
+        """
+        global DataBindings
+        pargs = args.split()
+        for cf in pargs :
+            try :
+                if pargs[0] == 'layout' :
+                    DataBindings['layinfo'] = LayoutBuilder.LayoutBuilder()
+                    logger.info('reset layout data')
+                elif pargs[0] == 'social' :
+                    DataBindings['socinfo'] = SocialBuilder.SocialBuilder()
+                    logger.info('reset social data')
+            except :
+                logger.warn('unhandled error processing extension file %s\n%s', cf, traceback.format_exc(10))
+                # sys.exit(-1)
+
+    # -----------------------------------------------------------------
+    def do_load(self, args) :
+        """
+        load -- Command to load a data file
+            load layout <filename>
+            load social <filename>
+        """
+        global DataBindings
+        pargs = args.split()
+        for cf in pargs :
+            try :
+                if pargs[0] == 'layout' :
+                    cf = pargs[1] if len(pargs) == 2 else "layout.js"
+                    DataBindings['layinfo'] = LayoutBuilder.LayoutBuilder.LoadFromFile(cf)
+                    logger.warn('loaded layout data from file %s', cf)
+                elif pargs[0] == 'social' :
+                    cf = pargs[1] if len(pargs) == 2 else "social.js"
+                    DataBindings['socinfo'] = SocialBuilder.SocialBuilder.LoadFromFile(cf)
+                    logger.warn('loaded layout data from file %s', cf)
+            except :
+                logger.warn('unhandled error processing extension file %s\n%s', cf, traceback.format_exc(10))
+                # sys.exit(-1)
+
+    # -----------------------------------------------------------------
+    def do_save(self, args) :
+        """
+        save -- Command to save one of the graphs in a file
+            save layout <filename>
+            save social <filename>
+        """
+        pargs = args.split()
+        try :
+            if pargs[0] == 'layout' :
+                cf = pargs[1] if len(pargs) == 2 else "layout.js"
+                logger.info('saving layout in %s', cf)
+                with open(cf, "w") as fp :
+                    json.dump(DataBindings['layinfo'].Dump(), fp, indent=2, ensure_ascii=True)
+                logger.warn('saved layout data in file %s', cf)
+            elif pargs[0] == 'social' :
+                cf = pargs[1] if len(pargs) == 2 else "layout.js"
+                logger.info('saving social data in %s', cf)
+                with open(cf, "w") as fp :
+                    json.dump(DataBindings['socinfo'].Dump(), fp, indent=2, ensure_ascii=True)
+                logger.warn('saved layout data in file %s', cf)
+        except :
+            logger.warn('unhandled error processing extension file %s\n%s', cf, traceback.format_exc(5))
+            # sys.exit(-1)
+
     # -----------------------------------------------------------------
     def do_node(self, args) :
         """
@@ -122,20 +211,20 @@ class TestController(cmd.Cmd) :
         try :
             if pargs[0] == 'list' :
                 pattern = re.compile(pargs[1] if len(pargs) == 2 else '.*', re.IGNORECASE)
-                for name in DataBindings['netinfo'].Nodes.iterkeys() :
+                for name in DataBindings['layinfo'].Nodes.iterkeys() :
                     if pattern.match(name) : print name
 
             elif pargs[0] == 'near' :
                 xcoord = int(pargs[1])
                 ycoord = int(pargs[2])
                 dist = int(pargs[3])
-                for node in DataBindings['netinfo'].FindNodesInRange(xcoord, ycoord, dist) :
+                for node in DataBindings['layinfo'].FindNodesInRange(xcoord, ycoord, dist) :
                     print node.Name
 
             elif pargs[0] == 'dump' :
                 for name in pargs[1:] :
-                    if name in DataBindings['netinfo'].Nodes :
-                        print self._DumpDict(DataBindings['netinfo'].Nodes[name].Dump())
+                    if name in DataBindings['layinfo'].Nodes :
+                        print self._DumpDict(DataBindings['layinfo'].Nodes[name].Dump())
 
         except :
             print '*** command execution failed'
@@ -152,13 +241,13 @@ class TestController(cmd.Cmd) :
         try :
             if pargs[0] == 'list' :
                 pattern = re.compile(pargs[1] if len(pargs) == 2 else '.*', re.IGNORECASE)
-                for cname in DataBindings['netinfo'].Collections.iterkeys() :
+                for cname in DataBindings['layinfo'].Collections.iterkeys() :
                     if pattern.match(cname) : print cname
 
             elif pargs[0] == 'dump' :
                 for name in pargs[1:] :
-                    if name in DataBindings['netinfo'].Collections :
-                        print self._DumpDict(DataBindings['netinfo'].Collections[name].Dump())
+                    if name in DataBindings['layinfo'].Collections :
+                        print self._DumpDict(DataBindings['layinfo'].Collections[name].Dump())
 
         except :
             print '*** command execution failed'
@@ -247,27 +336,11 @@ class TestController(cmd.Cmd) :
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
 def InitializeDataBindings(settings) :
-    netinfofile = settings["General"].get("NetworkInfoFile","netinfo.js")
-    logger.info('loading network data from %s',netinfofile)
-    netinfo = NetworkInfo.Network.LoadFromFile(netinfofile)
-
-    # load location information
-    locinfofile = settings["General"].get("LocationInfoFile","locinfo.js")
-    logger.info('loading location data from %s',locinfofile)
-    locinfo = LocationInfo.LocationInfo.LoadFromFile(locinfofile, netinfo)
-
-    # write the business information out to the file
-    bizinfofile = settings["General"].get("BusinessInfoFile","bizinfo.js")
-    logger.info('loading business data from %s',bizinfofile)
-    bizinfo = BusinessInfo.BusinessInfo.LoadFromFile(bizinfofile, locinfo)
-
-    # write the person information out to the file
-    perinfofile = settings["General"].get("PersonInfoFile","perinfo.js")
-    logger.info('loading person data from %s',perinfofile)
-    perinfo = PersonInfo.PersonInfo.LoadFromFile(perinfofile, locinfo, bizinfo)
+    layinfo = LayoutBuilder.LayoutBuilder()
+    socinfo = SocialBuilder.SocialBuilder()
 
     global DataBindings
-    DataBindings = {"netinfo" : netinfo, "locinfo" : locinfo, "bizinfo" : bizinfo, "perinfo" : perinfo}
+    DataBindings = {"layinfo" : layinfo, "socinfo" : socinfo}
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
