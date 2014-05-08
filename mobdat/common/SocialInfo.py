@@ -60,68 +60,68 @@ class PersonProfile(Graph.Collection) :
     def __init__(self, name) :
         """
         Args:
-            name -- string
+            profile -- object of type Person.PersonProfile
         """
         Graph.Collection.__init__(self, name = name)
-        
+
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class Person(Graph.Node) :
 
     # -----------------------------------------------------------------
-    def __init__(self, name, profile) :
+    def __init__(self, name) :
         """
         Args:
-            name -- string
-            profile -- object of type SocialInfo.PersonProfile
+            person -- object of type Person.Person
+        """
+        Graph.Node.__init__(self, name = name)
 
-        """
-        Graph.Node.__init__(self, name)
-        profile.AddMember(self)
-
-    # -----------------------------------------------------------------
-    def SetJob(self, job) :
-        """
-        Args:
-            job -- object of type Business.JobProfile
-        """
-        self.AddDecoration(SocialDecoration.JobProfileDecoration(job))
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+class EmployedBy(Graph.Edge) :
 
     # -----------------------------------------------------------------
-    def SetResidence(self, location, endpoint) :
-        """
-        Args:
-            location -- LayoutInfo.ResidentialLocation
-            endpoint -- LayoutInfo.EndPoint
-        """
-        self.AddDecoration(SocialDecoration.ResidenceDecoration(location, endpoint))
+    def __init__(self, person, employer) :
+        Graph.Edge.__init__(self, person, employer)
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class BusinessProfile(Graph.Collection) :
 
     # -----------------------------------------------------------------
-    def __init__(self, name) :
+    def __init__(self, name, biztype, joblist) :
         """
         Args:
-            name -- string
+            name -- string name of the profile
+            biztype -- constant of type SocialDecoration.BusinessType
+            joblist -- dictionary mapping type SocialDecoration.JobDescription --> Deman
         """
         Graph.Collection.__init__(self, name = name)
 
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class Business(Graph.Node) :
+        self.AddDecoration(SocialDecoration.BusinessProfileDecoration(biztype))
+        self.AddDecoration(SocialDecoration.EmploymentProfileDecoration(joblist))
 
     # -----------------------------------------------------------------
-    def __init__(self, name, profile) :
+    def AddServiceProfile(self, bizhours, capacity, servicetime) :
         """
         Args:
-            name -- string
-            profile -- object of type SocialInfo.BusinessProfile
-
+            bizhours -- object of type WeeklySchedule
+            capacity -- integer maximum customer capacity
+            servicetime -- float mean time to service a customer
         """
-        Graph.Node.__init__(self, name)
-        profile.AddMember(self)
+        self.AddDecoration(SocialDecoration.ServiceProfileDecoration(bizhours, capacity, servicetime))
+
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+class Business(Graph.Collection) :
+
+    # -----------------------------------------------------------------
+    def __init__(self, name) :
+        """
+        Args:
+            business -- object of type Business.Business
+        """
+        Graph.Collection.__init__(self, name = name)
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -154,11 +154,13 @@ class SocialInfo(Graph.Graph) :
         self.AddCollection(profile)
 
     # -----------------------------------------------------------------
-    def AddPerson(self, person) :
+    def AddPerson(self, person, profile) :
         """
         Args:
             person -- SocialInfo.Person
+            profile -- SocialInfo.PersonProfile
         """
+        profile.AddMember(person)
         self.AddNode(person)
 
     # -----------------------------------------------------------------
@@ -170,10 +172,13 @@ class SocialInfo(Graph.Graph) :
         self.AddCollection(profile)
 
     # -----------------------------------------------------------------
-    def AddBusiness(self, business) :
+    def AddBusiness(self, business, profile) :
         """
         Args:
             business -- object of type SocialInfo.Business
+            profile -- object of type SocialInfo.BusinessProfile
         """
-        self.AddCollection(biz)
+
+        profile.AddMember(business)
+        self.AddCollection(business)
 

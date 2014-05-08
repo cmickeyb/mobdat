@@ -46,98 +46,263 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
 from mobdat.common.Business import Business, BusinessProfile, JobProfile
+from mobdat.common.Person import Person, PersonProfile
+from mobdat.common.Decoration import Decoration
+
+from mobdat.common.ValueTypes import MakeEnum, DaysOfTheWeek
+from mobdat.common.Schedule import WeeklySchedule
 from mobdat.common.Decoration import Decoration
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class JobProfileDecoration(Decoration) :
-    DecorationName = 'JobProfile'
-    
-    # -----------------------------------------------------------------
-    @staticmethod
-    def Load(graph, info) :
-        jobprofile = JobProfile.Load(info['JobProfile'])
-        return JobProfileDecoration(jobprofile)
+BusinessType = MakeEnum('Unknown', 'Factory', 'Service', 'Civic', 'Entertainment', 'School', 'Retail', 'Food')
 
-    # -----------------------------------------------------------------
-    def __init__(self, jobprofile) :
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+class JobDescription :
+
+    # -------------------------------------------------------
+    @staticmethod
+    def Load(pinfo) :
+        profilename = pinfo['Name']
+        salary = pinfo['Salary']
+        flexible = pinfo['FlexibleHours']
+        schedule = WeeklySchedule(pinfo['Schedule'])
+
+        return JobProfile(profilename, salary, flexible, schedule)
+
+    # -------------------------------------------------------
+    def __init__(self, name, salary, flexible, schedule) :
+        self.Name = name
+        self.Salary = salary
+        self.FlexibleHours = flexible
+        self.Schedule = schedule
+
+    # -------------------------------------------------------
+    def Copy(self) :
+        return JobProfile(self.Name, self.Salary, self.FlexibleHours, self.Schedule)
+
+    # -------------------------------------------------------
+    def Dump(self) :
+        result = dict()
+        result['Name'] = self.Name
+        result['Salary'] = self.Salary
+        result['FlexibleHours'] = self.FlexibleHours
+        result['Schedule'] = self.Schedule.Dump()
+
+        return result
+
+
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+class EmploymentProfileDecoration(Decoration) :
+    DecorationName = 'EmploymentProfile' 
+
+    # -------------------------------------------------------
+    @staticmethod
+    def Load(pinfo) :
+        joblist = dict()
+        for jobinfo in pinfo['JobList'] :
+            joblist[JobDescription.Load(jobinfo['Job'])] = jobinfo['Demand']
+
+        return EmploymentProfileDecoration(joblist)
+
+    # -------------------------------------------------------
+    def __init__(self, joblist) :
         """
         Args:
-            jobprofile -- an object of type Business.JobProfile
+            joblist -- dictionary mapping JobDescription --> Demand
         """
+
         Decoration.__init__(self)
-        self.JobProfile = jobprofile
 
-    # -----------------------------------------------------------------
-    def __getattr__(self, name) :
-            return getattr(self.JobProfile, name)
+        self.JobList = dict()
+        for job, demand in joblist.iteritems() :
+            self.JobList[job.Copy()] = demand
 
-    # -----------------------------------------------------------------
+    # -------------------------------------------------------
+    def PeakEmployeeCount(self, day = DaysOfTheWeek.Mon) :
+        """
+        Compute the peak hourly employee count over the
+        course of a day.
+
+        day -- DaysOfTheWeek enum
+        """
+        
+        # this is the *ugliest* worst performing version of this computation
+        # i can imagine. just dont feel the need to do anything more clever
+        # right now
+        peak = 0
+        for hour in range(0, 24) :
+            count = 0
+            for job, demand in self.JobList.iteritems() :
+                count += demand if job.Schedule.ScheduledAtTime(day, hour) else 0
+
+            peak = count if peak < count else peak
+
+        return peak
+
+    # -------------------------------------------------------
     def Dump(self) :
         result = Decoration.Dump(self)
-        result['JobProfile'] = self.JobProfile.Dump()
-        
+
+        result['JobList'] = []
+        for job, demand in self.JobList.iteritems() :
+            result['JobList'].append({ 'Job' : job.Dump(), 'Demand' : demand})
+
         return result
-    
+
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+class ServiceProfileDecoration(Decoration) :
+    DecorationName = 'ServiceProfile'
+
+    # -------------------------------------------------------
+    @staticmethod
+    def Load(pinfo) :
+        bizhours = WeeklySchedule(pinfo['Schedule'])
+        capacity = pinfo['CustomerCapacity']
+        servicetime = pinfo['ServiceTime']
+
+        return ServiceProfile(bizhours, capacity, servicetime)
+
+    # -------------------------------------------------------
+    def __init__(self, bizhours, capacity, servicetime) :
+        """
+        Args:
+            bizhours -- object of type WeeklySchedule
+            capacity -- integer maximum customer capacity
+            servicetime -- float mean time to service a customer
+        """
+        Decoration.__init__(self)
+
+        self.Schedule = bizhours
+        self.CustomerCapacity = capacity
+        self.ServiceTime = servicetime
+
+    # -------------------------------------------------------
+    def PeakServiceCount(self, days = None) :
+        """
+        Compute the peak number of customers expected during the
+        day. Given that the duration of visits impacts this, the
+        number is really a conservative guess.
+
+        days -- list of DaysOfTheWeek 
+        """
+        
+        if not days :
+            days = range(DaysOfTheWeek.Mon, DaysOfTheWeek.Sun + 1)
+
+        # this is the *ugliest* worst performing version of this computation
+        # i can imagine. just dont feel the need to do anything more clever
+        # right now, note that since capacity is a constant its even dumber
+        # since we know it will either be capacity or 0
+        peak = 0
+        for day in days :
+            for hour in range(0, 24) :
+                if self.Schedule.ScheduledAtTime(day, hour) :
+                    count = self.CustomerCapacity
+                    peak = count if peak < count else peak
+
+        return peak
+
+    # -------------------------------------------------------
+    def Dump(self) :
+        result = Decoration.Dump(self)
+        result['CustomerCapacity'] = self.CustomerCapacity
+        result['ServiceTime'] = self.ServiceTime
+        result['Schedule'] = self.Schedule.Dump()
+
+        return result
+
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class BusinessProfileDecoration(Decoration) :
     DecorationName = 'BusinessProfile'
     
+    # -------------------------------------------------------
+    @staticmethod
+    def Load(pinfo) :
+        return BusinessProfileDecration(pinfo['BusinessType'])
+
+    # -------------------------------------------------------
+    def __init__(self, biztype) :
+        """
+        The business profile class captures the structure of a 
+        generic business pattern. The profile can be used to
+        create specific businesses that match the pattern.
+        
+        biztype -- BusinessType enum
+        """
+
+        self.BusinessType = biztype
+
+    # -------------------------------------------------------
+    def Dump(self) :
+        result = Decoration.Dump(self)
+        result['BusinessType'] = self.BusinessType
+
+        return result
+
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+class PersonProfileDecoration(Decoration) :
+    DecorationName = 'PersonProfile'
+    
     # -----------------------------------------------------------------
     @staticmethod
     def Load(graph, info) :
-        profile = BusinessProfile.Load(info['BusinessProfile'])
-        return BusinessProfileDecoration(profile)
+        profile = PersonProfile.Load(info['PersonProfile'])
+        return PersonProfileDecoration(profile)
 
     # -----------------------------------------------------------------
     def __init__(self, profile) :
         """
         Args:
-            profile -- an object of type Business.BusinessProfile
+            profile -- an object of type Person.PersonProfile
         """
         Decoration.__init__(self)
-        self.BusinessProfile = profile
+        self.PersonProfile = profile
 
     # -----------------------------------------------------------------
     def __getattr__(self, name) :
-            return getattr(self.BusinessProfile, name)
+        return getattr(self.PersonProfile, name)
 
     # -----------------------------------------------------------------
     def Dump(self) :
         result = Decoration.Dump(self)
-        result['BusinessProfile'] = self.BusinessProfile.Dump()
+        result['PersonProfile'] = self.PersonProfile.Dump()
         
         return result
     
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class BusinessDecoration(Decoration) :
-    DecorationName = 'Business'
+class PersonDecoration(Decoration) :
+    DecorationName = 'Person'
     
     # -----------------------------------------------------------------
     @staticmethod
     def Load(graph, info) :
-        employer = Business.Load(info['Business'])
-        return BusinessDecoration(employer)
+        employer = Person.Load(info['Person'])
+        return PersonDecoration(employer)
 
     # -----------------------------------------------------------------
-    def __init__(self, business) :
+    def __init__(self, person) :
         """
         Args:
-            business -- an object of type Business.Business
+            person -- an object of type Person.Person
         """
         Decoration.__init__(self)
-        self.Business = business
+        self.Person = person
 
     # -----------------------------------------------------------------
     def __getattr__(self, name) :
-            return getattr(self.Business, name)
+        return getattr(self.Person, name)
 
     # -----------------------------------------------------------------
     def Dump(self) :
         result = Decoration.Dump(self)
-        result['Business'] = self.Business.Dump()
+        result['Person'] = self.Person.Dump()
         
         return result
     
@@ -176,5 +341,6 @@ class ResidenceDecoration(Decoration) :
     
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-CommonDecorations = [ JobProfileDecoration, BusinessProfileDecoration, BusinessDecoration, ResidenceDecoration ]
+CommonDecorations = [ EmploymentProfileDecoration, ServiceProfileDecoration, BusinessProfileDecoration,
+                      PersonProfileDecoration, PersonDecoration, ResidenceDecoration ]
 

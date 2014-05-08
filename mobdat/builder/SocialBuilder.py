@@ -45,9 +45,8 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
-from mobdat.common.Location import *
 from mobdat.common.Schedule import WeeklySchedule
-from mobdat.common import SocialInfo, Decoration, SocialDecoration, Business
+from mobdat.common import SocialInfo, Decoration, SocialDecoration
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -57,8 +56,7 @@ class SocialBuilder(SocialInfo.SocialInfo) :
     def __init__(self) :
         SocialInfo.SocialInfo.__init__(self)
 
-        self.JobProfiles = {}
-        self.BusinessProfile = {}
+        self.JobDescriptions = {}
 
     # -----------------------------------------------------------------
     def AddPersonProfile(self, name) :
@@ -67,7 +65,7 @@ class SocialBuilder(SocialInfo.SocialInfo) :
             name -- string name of the person
         """
         profile = SocialInfo.PersonProfile(name)
-        SocialInfo.SocialInfo.AddPersonProfile(profile)
+        SocialInfo.SocialInfo.AddPersonProfile(self, profile)
 
         return profile
 
@@ -81,8 +79,8 @@ class SocialBuilder(SocialInfo.SocialInfo) :
             job --
             residence -- 
         """
-        person = SocialInfo.Person(name, profile)
-        SocialInfo.SocialInfo.AddPerson(person)
+        person = SocialInfo.Person(name)
+        SocialInfo.SocialInfo.AddPerson(self, person, profile)
 
         if employer :
             person.SetEmployer(employer)
@@ -97,94 +95,90 @@ class SocialBuilder(SocialInfo.SocialInfo) :
         return person
 
     # -----------------------------------------------------------------
-    def AddJobProfile(self, name, salary, flexible, hours) :
+    def AddJobDescription(self, name, salary, flexible, hours) :
         """
-        AddJobProfile -- add a job profile that 
+        AddJobDescription -- add a job profile that can be accessed by name
         Args:
             name -- unique string name for the job
             salary -- number, salary in dollars
             flexible -- boolean, flag to specify that hours are flexible
             hours -- object of type WeeklySchedule
         """
-        self.JobProfiles[name] = Business.JobProfile(name, salary, flexible, hours)
-        return self.JobProfiles[name]
+
+        self.JobDescriptions[name] = SocialDecoration.JobDescription(name, salary, flexible, hours)
+        return self.JobDescriptions[name]
 
     # -----------------------------------------------------------------
     def _ExpandJobList(self, joblist) :
         """
         Args:
-            joblist -- dictionary that maps job profile names to demand
+            joblist -- dictionary that maps job description names to demand
 
         Returns: 
-            a list of Business.JobProfile objects with demand initialized
+            a dictionary that maps SocialDecoration.JobDescription objects to Demand
         """
 
-        jobs = []
+        jobs = dict()
         for jobname, demand in joblist.iteritems() :
-            jobs.append(self.JobProfiles[jobname].Copy(demand))
+            jobs[self.JobDescriptions[jobname]] = demand
 
         return jobs
 
     # -----------------------------------------------------------------
-    def AddBusinessProfile(self, profile) :
+    def AddBusinessProfile(self, name, biztype, joblist) :
         """
         Args:
-            name -- unique string name for the employer
-            profile -- object of type Business.BusinessProfile
+            name -- unique string name for the business profile
+            biztype -- constant of type SocialDecoration.BusinessType
+            joblist -- dictionary mapping type SocialDecoration.JobDescription --> Demand
+            
         """
-        if profile.ProfileName in self.Collections :
-            return self.Collections[profile.ProfileName]
+        bizprof = SocialInfo.BusinessProfile(name, biztype, joblist)
+        SocialInfo.SocialInfo.AddBusinessProfile(self, bizprof)
 
-        bizprof = SocialInfo.Collection(name = profile.ProfileName)
-        bizprof.AddDecoration(Decoration.NodeTypeDecoration('business-profile'))
-        bizprof.AddDecoration(SocialDecoration.BusinessProfileDecoration(profile))
-
-        self.AddCollection(bizprof)
         return bizprof
 
     # -----------------------------------------------------------------
     def AddFactoryProfile(self, name, joblist) :
         jobs = self._ExpandJobList(joblist)
-
-        return self.AddBusinessProfile(Business.BusinessProfile(name, Business.BusinessType.Factory, jobs))
+        return self.AddBusinessProfile(name, SocialDecoration.BusinessType.Factory, jobs)
 
     # -----------------------------------------------------------------
     def AddRetailProfile(self, name, joblist, bizhours, customers, stime = 0.5) :
         jobs = self._ExpandJobList(joblist)
-        sprofile = Business.ServiceProfile(WeeklySchedule.WorkWeekSchedule(bizhours[0], bizhours[1]), customers, stime)
+        profile = self.AddBusinessProfile(name, SocialDecoration.BusinessType.Service, jobs)
+        profile.AddServiceProfile(WeeklySchedule.WorkWeekSchedule(bizhours[0], bizhours[1]), customers, stime)
 
-        return self.AddBusinessProfile(Business.BusinessProfile(name, Business.BusinessType.Service, jobs, sprofile))
+        return profile
 
     # -----------------------------------------------------------------
     def AddRestaurantProfile(self, name, joblist, bizhours, customers, stime = 1.5) :
         jobs = self._ExpandJobList(joblist)
-        sprofile = Business.ServiceProfile(WeeklySchedule.WorkWeekSchedule(bizhours[0], bizhours[1]), customers, stime)
+        profile = self.AddBusinessProfile(name, SocialDecoration.BusinessType.Food, jobs)
+        profile.AddServiceProfile(WeeklySchedule.WorkWeekSchedule(bizhours[0], bizhours[1]), customers, stime)
 
-        return self.AddBusinessProfile(Business.BusinessProfile(name, Business.BusinessType.Food, jobs, sprofile))
+        return profile
 
     # -----------------------------------------------------------------
     def AddSchoolProfile(self, name, joblist, students) :
         jobs = self._ExpandJobList(joblist)
-        sprofile = Business.ServiceProfile(WeeklySchedule.WorkWeekSchedule(8.0, 15.0), students, 7.0)
+        profile = self.AddBusinessProfile(name, SocialDecoration.BusinessType.School, jobs)
+        profile.AddServiceProfile(WeeklySchedule.WorkWeekSchedule(8.0, 15.0), students, 7.0)
 
-        return self.AddBusinessProfile(Business.BusinessProfile(name, Business.BusinessType.School, jobs, sprofile))
+        return profile
 
     # -----------------------------------------------------------------
-    def AddBusiness(self, business, profile) :
+    def AddBusiness(self, name, profile) :
         """
         Args:
-            business -- object of type Business.Business
-            profile -- object of type SocialInfo.Collection
+            business -- string name of the business to create
+            profile -- object of type SocialInfo.BusinessProfile
         """
 
-        biz = SocialInfo.Collection(name = business.Name)
-        biz.AddDecoration(Decoration.NodeTypeDecoration('business'))
-        biz.AddDecoration(SocialDecoration.BusinessDecoration(business))
+        business = SocialInfo.Business(name)
+        SocialInfo.SocialInfo.AddBusiness(self, business, profile)
 
-        self.AddCollection(biz)
-
-        profile.AddMember(biz)
-        return biz
+        return business
 
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -192,33 +186,33 @@ class SocialBuilder(SocialInfo.SocialInfo) :
 if __name__ == '__main__' :
     builder = SocialBuilder()
 
-    jp1 = builder.AddJobProfile('shift1',    30000,  False, WeeklySchedule.WorkWeekSchedule(4.0, 12.0))
-    jp2 = builder.AddJobProfile('shift2',    30000,  False, WeeklySchedule.WorkWeekSchedule(12.0, 20.00))
-    jp3 = builder.AddJobProfile('shift3',    30000,  False, WeeklySchedule.WorkWeekSchedule(20.0, 4.0))
+    jp1 = builder.AddJobDescription('shift1',    30000,  False, WeeklySchedule.WorkWeekSchedule(4.0, 12.0))
+    jp2 = builder.AddJobDescription('shift2',    30000,  False, WeeklySchedule.WorkWeekSchedule(12.0, 20.00))
+    jp3 = builder.AddJobDescription('shift3',    30000,  False, WeeklySchedule.WorkWeekSchedule(20.0, 4.0))
 
-    builder.AddJobProfile('parttime1', 15000,  False, WeeklySchedule.WorkWeekSchedule(8.0, 12.0))
-    builder.AddJobProfile('parttime2', 15000,  False, WeeklySchedule.WorkWeekSchedule(12.0, 16.0))
-    builder.AddJobProfile('parttime3', 15000,  False, WeeklySchedule.WorkWeekSchedule(16.0, 20.0))
-    builder.AddJobProfile('parttime4', 15000,  False, WeeklySchedule.WorkWeekSchedule(20.0, 24.0))
+    builder.AddJobDescription('parttime1', 15000,  False, WeeklySchedule.WorkWeekSchedule(8.0, 12.0))
+    builder.AddJobDescription('parttime2', 15000,  False, WeeklySchedule.WorkWeekSchedule(12.0, 16.0))
+    builder.AddJobDescription('parttime3', 15000,  False, WeeklySchedule.WorkWeekSchedule(16.0, 20.0))
+    builder.AddJobDescription('parttime4', 15000,  False, WeeklySchedule.WorkWeekSchedule(20.0, 24.0))
 
-    builder.AddJobProfile('worker',    30000,  True,  WeeklySchedule.WorkWeekSchedule(8.0, 17.0))
-    builder.AddJobProfile('seniorwrk', 60000,  True,  WeeklySchedule.WorkWeekSchedule(8.0, 17.0))
-    builder.AddJobProfile('manager',   60000,  True,  WeeklySchedule.WorkWeekSchedule(8.0, 17.0))
-    builder.AddJobProfile('seniormgr', 90000,  True,  WeeklySchedule.WorkWeekSchedule(7.0, 18.0))
-    builder.AddJobProfile('exec',      120000, True,  WeeklySchedule.WorkWeekSchedule(6.0, 18.0))
+    builder.AddJobDescription('worker',    30000,  True,  WeeklySchedule.WorkWeekSchedule(8.0, 17.0))
+    builder.AddJobDescription('seniorwrk', 60000,  True,  WeeklySchedule.WorkWeekSchedule(8.0, 17.0))
+    builder.AddJobDescription('manager',   60000,  True,  WeeklySchedule.WorkWeekSchedule(8.0, 17.0))
+    builder.AddJobDescription('seniormgr', 90000,  True,  WeeklySchedule.WorkWeekSchedule(7.0, 18.0))
+    builder.AddJobDescription('exec',      120000, True,  WeeklySchedule.WorkWeekSchedule(6.0, 18.0))
 
-    builder.AddJobProfile('student',       0,  False, WeeklySchedule.WorkWeekSchedule(8.0, 15.0))
-    builder.AddJobProfile('teacher',   40000,  False, WeeklySchedule.WorkWeekSchedule(7.5, 15.5))
-    builder.AddJobProfile('admin',     30000,  False, WeeklySchedule.WorkWeekSchedule(7.5, 15.5))
-    builder.AddJobProfile('principal', 80000,  True,  WeeklySchedule.WorkWeekSchedule(7.0, 16.5))
+    builder.AddJobDescription('student',       0,  False, WeeklySchedule.WorkWeekSchedule(8.0, 15.0))
+    builder.AddJobDescription('teacher',   40000,  False, WeeklySchedule.WorkWeekSchedule(7.5, 15.5))
+    builder.AddJobDescription('admin',     30000,  False, WeeklySchedule.WorkWeekSchedule(7.5, 15.5))
+    builder.AddJobDescription('principal', 80000,  True,  WeeklySchedule.WorkWeekSchedule(7.0, 16.5))
 
-    builder.AddJobProfile('barrista1', 20000,  False, WeeklySchedule.WorkWeekSchedule(6.0, 10.0))
-    builder.AddJobProfile('barrista2', 20000,  False, WeeklySchedule.WorkWeekSchedule(10.0, 14.0))
-    builder.AddJobProfile('barrista3', 20000,  False, WeeklySchedule.WorkWeekSchedule(14.0, 18.0))
-    builder.AddJobProfile('barrista4', 20000,  False, WeeklySchedule.WorkWeekSchedule(18.0, 22.0))
-    builder.AddJobProfile('barrista4', 20000,  False, WeeklySchedule.WorkWeekSchedule(18.0, 22.0))
-    builder.AddJobProfile('storemgr1', 50000,  False, WeeklySchedule.WorkWeekSchedule(6.0, 14.0))
-    builder.AddJobProfile('storemgr2', 50000,  False, WeeklySchedule.WorkWeekSchedule(14.0, 22.0))
+    builder.AddJobDescription('barrista1', 20000,  False, WeeklySchedule.WorkWeekSchedule(6.0, 10.0))
+    builder.AddJobDescription('barrista2', 20000,  False, WeeklySchedule.WorkWeekSchedule(10.0, 14.0))
+    builder.AddJobDescription('barrista3', 20000,  False, WeeklySchedule.WorkWeekSchedule(14.0, 18.0))
+    builder.AddJobDescription('barrista4', 20000,  False, WeeklySchedule.WorkWeekSchedule(18.0, 22.0))
+    builder.AddJobDescription('barrista4', 20000,  False, WeeklySchedule.WorkWeekSchedule(18.0, 22.0))
+    builder.AddJobDescription('storemgr1', 50000,  False, WeeklySchedule.WorkWeekSchedule(6.0, 14.0))
+    builder.AddJobDescription('storemgr2', 50000,  False, WeeklySchedule.WorkWeekSchedule(14.0, 22.0))
 
     # -----------------------------------------------------------------
     # -----------------------------------------------------------------
@@ -241,7 +235,7 @@ if __name__ == '__main__' :
 
     # -----------------------------------------------------------------
     # -----------------------------------------------------------------
-    emp1 = builder.AddBusiness(Business.Business('biz1'), bp)
+    emp1 = builder.AddBusiness('biz1', bp)
     per1 = builder.AddPerson('per1', emp1, None, jp1, 'res1')
     per2 = builder.AddPerson('per2', emp1, None, jp2, 'res1')
     per3 = builder.AddPerson('per3', emp1, None, jp1, 'res2')
@@ -250,7 +244,7 @@ if __name__ == '__main__' :
     # print emp1.Dump()
     # print emp1.BusinessProfile.Dump()
 
-    print per3.JobProfile.ProfileName
+    print per3.JobDescription.ProfileName
     print per3.Business.Name
     print emp1.BusinessProfile.ProfileName
     print emp1.BusinessProfile.PeakEmployeeCount()
@@ -265,7 +259,7 @@ if __name__ == '__main__' :
     # print emp1a.Dump()
     # print emp1a.BusinessProfile.Dump()
 
-    print per3a.JobProfile.ProfileName
+    print per3a.JobDescription.ProfileName
     print per3a.Business.Name
     print emp1a.BusinessProfile.ProfileName
     print emp1a.BusinessProfile.PeakEmployeeCount()
