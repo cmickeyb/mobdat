@@ -149,16 +149,18 @@ class ResidenceDecoration(Decoration) :
     # -----------------------------------------------------------------
     @staticmethod
     def Load(graph, info) :
-        return ResidenceDecoration(info['Residence'])
+        return ResidenceDecoration(info['LocationName'], info['EndPointName'])
 
     # -----------------------------------------------------------------
-    def __init__(self, residence) :
+    def __init__(self, location, endpoint) :
         """
         Args:
-            residence -- string
+            location -- LayoutInfo.ResidentialLocation
+            endpoint -- LayoutInfo.EndPoint
         """
         Decoration.__init__(self)
-        self.Residence = residence
+        self.LocationName = location.Name
+        self.EndPointName = endpoint.Name
 
     # -----------------------------------------------------------------
     def __getattr__(self, name) :
@@ -167,7 +169,8 @@ class ResidenceDecoration(Decoration) :
     # -----------------------------------------------------------------
     def Dump(self) :
         result = Decoration.Dump(self)
-        result['Residence'] = self.Residence
+        result['LocationName'] = self.LocationName
+        result['EndPointName'] = self.EndPointName
         
         return result
     

@@ -61,27 +61,39 @@ class SocialBuilder(SocialInfo.SocialInfo) :
         self.BusinessProfile = {}
 
     # -----------------------------------------------------------------
-    def AddResidence(self, residence) :
+    def AddPersonProfile(self, name) :
         """
-        Args:
-            residence -- object of type Business.BusinessProfile
+        Args: 
+            name -- string name of the person
         """
-        res = SocialInfo.Collection(name = name)
-        res.AddDecoration(Decoration.NodeTypeDecoration('residence'))
+        profile = SocialInfo.PersonProfile(name)
+        SocialInfo.SocialInfo.AddPersonProfile(profile)
 
-        self.AddCollection(res)
-        return res
+        return profile
 
     # -----------------------------------------------------------------
-    def AddPerson(self, name, employer, profile, jobprofile, residence) :
-        person = SocialInfo.Node(name)
-        person.AddDecoration(Decoration.NodeTypeDecoration('person'))
-        person.AddDecoration(SocialDecoration.JobProfileDecoration(jobprofile))
-        person.AddDecoration(SocialDecoration.ResidenceDecoration(residence))
+    def AddPerson(self, name, profile, employer = None, job = None, residence = None) :
+        """
+        Args: 
+            name -- string name of the person
+            profile -- object of type SocialInfo.PersonProfile
+            employer -- object of type SocialInfo.Business
+            job --
+            residence -- 
+        """
+        person = SocialInfo.Person(name, profile)
+        SocialInfo.SocialInfo.AddPerson(person)
 
-        self.AddNode(person)
+        if employer :
+            person.SetEmployer(employer)
+            employer.AddMember(person)
 
-        employer.AddMember(person)
+        if job :
+            person.SetJob(job)
+
+        if residence :
+            person.SetResidence(residence)
+
         return person
 
     # -----------------------------------------------------------------

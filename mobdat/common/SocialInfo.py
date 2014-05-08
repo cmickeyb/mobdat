@@ -54,27 +54,74 @@ logger = logging.getLogger(__name__)
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class Node(Graph.Node) :
+class PersonProfile(Graph.Collection) :
 
     # -----------------------------------------------------------------
     def __init__(self, name) :
+        """
+        Args:
+            name -- string
+        """
+        Graph.Collection.__init__(self, name = name)
+        
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+class Person(Graph.Node) :
+
+    # -----------------------------------------------------------------
+    def __init__(self, name, profile) :
+        """
+        Args:
+            name -- string
+            profile -- object of type SocialInfo.PersonProfile
+
+        """
         Graph.Node.__init__(self, name)
-
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class Edge(Graph.Edge) :
+        profile.AddMember(self)
 
     # -----------------------------------------------------------------
-    def __init__(self, snode, enode, name = None) :
-        Graph.Edge.__init__(self, snode, enode, name)
-
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class Collection(Graph.Collection) :
+    def SetJob(self, job) :
+        """
+        Args:
+            job -- object of type Business.JobProfile
+        """
+        self.AddDecoration(SocialDecoration.JobProfileDecoration(job))
 
     # -----------------------------------------------------------------
-    def __init__(self, members = [], name = None, prefix = 'col') :
-        Graph.Collection.__init__(self, members, name, prefix)
+    def SetResidence(self, location, endpoint) :
+        """
+        Args:
+            location -- LayoutInfo.ResidentialLocation
+            endpoint -- LayoutInfo.EndPoint
+        """
+        self.AddDecoration(SocialDecoration.ResidenceDecoration(location, endpoint))
+
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+class BusinessProfile(Graph.Collection) :
+
+    # -----------------------------------------------------------------
+    def __init__(self, name) :
+        """
+        Args:
+            name -- string
+        """
+        Graph.Collection.__init__(self, name = name)
+
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+class Business(Graph.Node) :
+
+    # -----------------------------------------------------------------
+    def __init__(self, name, profile) :
+        """
+        Args:
+            name -- string
+            profile -- object of type SocialInfo.BusinessProfile
+
+        """
+        Graph.Node.__init__(self, name)
+        profile.AddMember(self)
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -97,4 +144,36 @@ class SocialInfo(Graph.Graph) :
 
         for dtype in SocialDecoration.CommonDecorations :
             self.AddDecorationHandler(dtype)
-    
+
+    # -----------------------------------------------------------------
+    def AddPersonProfile(self, profile) :
+        """
+        Args:
+            profile -- SocialInfo.PersonProfile
+        """
+        self.AddCollection(profile)
+
+    # -----------------------------------------------------------------
+    def AddPerson(self, person) :
+        """
+        Args:
+            person -- SocialInfo.Person
+        """
+        self.AddNode(person)
+
+    # -----------------------------------------------------------------
+    def AddBusinessProfile(self, profile) :
+        """
+        Args:
+            profile -- object of type SocialInfo.BusinessProfile
+        """
+        self.AddCollection(profile)
+
+    # -----------------------------------------------------------------
+    def AddBusiness(self, business) :
+        """
+        Args:
+            business -- object of type SocialInfo.Business
+        """
+        self.AddCollection(biz)
+
