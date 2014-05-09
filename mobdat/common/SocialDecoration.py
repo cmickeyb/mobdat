@@ -306,7 +306,7 @@ class PersonDecoration(Decoration) :
     
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class JobDecoration(Decoration) :
+class JobDescriptionDecoration(Decoration) :
     DecorationName = 'JobDescription'
     
     # -----------------------------------------------------------------
@@ -343,33 +343,27 @@ class ResidenceDecoration(Decoration) :
     # -----------------------------------------------------------------
     @staticmethod
     def Load(graph, info) :
-        return ResidenceDecoration(info['LocationName'], info['EndPointName'])
+        return ResidenceDecoration(info['LocationName'])
 
     # -----------------------------------------------------------------
-    def __init__(self, location, endpoint) :
+    def __init__(self, location) :
         """
         Args:
-            location -- LayoutInfo.ResidentialLocation
-            endpoint -- LayoutInfo.EndPoint
+            location -- LayoutInfo.ResidentialLocation or LayoutInfo.BusinessLocation or LayoutInfo.EndPoint
         """
         Decoration.__init__(self)
         self.LocationName = location.Name
-        self.EndPointName = endpoint.Name
-
-    # -----------------------------------------------------------------
-    def __getattr__(self, name) :
-            return self.Residence.__dict__[name]
 
     # -----------------------------------------------------------------
     def Dump(self) :
         result = Decoration.Dump(self)
         result['LocationName'] = self.LocationName
-        result['EndPointName'] = self.EndPointName
         
         return result
     
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 CommonDecorations = [ EmploymentProfileDecoration, ServiceProfileDecoration, BusinessProfileDecoration,
-                      PersonProfileDecoration, PersonDecoration, JobDecoration, ResidenceDecoration ]
+                      PersonProfileDecoration, PersonDecoration, JobDescriptionDecoration,
+                      ResidenceDecoration ]
 

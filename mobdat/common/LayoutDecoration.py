@@ -45,7 +45,14 @@ sys.path.append(os.path.join(os.environ.get("OPENSIM","/share/opensim"),"lib","p
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
+import random
+
 from mobdat.common.Decoration import Decoration, CommonDecorations
+
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+def restrict(value, vmax, vmin) :
+    return vmin if value < vmin else (vmax if value > vmax else value)
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -199,31 +206,6 @@ class EndPointDecoration(Decoration) :
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class CapsuleTypeDecoration(Decoration) :
-    DecorationName = 'CapsuleType'
-
-    # -----------------------------------------------------------------
-    @staticmethod
-    def Load(graph, info) :
-        ctype = CapsuleTypeDecoration(info['Name'])
-        return ctype
-
-    # -----------------------------------------------------------------
-    def __init__(self, name) :
-        Decoration.__init__(self)
-
-        self.Name = name
-
-    # -----------------------------------------------------------------
-    def Dump(self) :
-        result = Decoration.Dump(self)
-        
-        result['Name'] = self.Name
-
-        return result
-
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class BusinessLocationProfileDecoration(Decoration) :
     DecorationName = 'BusinessLocationProfile'
     
@@ -239,7 +221,9 @@ class BusinessLocationProfileDecoration(Decoration) :
     def __init__(self, employees = 20, customers = 50, types = None) :
         """
         Args:
-            profile -- an object of type Business.BusinessLocationProfile
+            employees -- integer count of employee capacity
+            customers -- integer count of customer capacity
+            types -- dictionary mapping profiles
         """
         Decoration.__init__(self)
 
@@ -249,7 +233,11 @@ class BusinessLocationProfileDecoration(Decoration) :
 
     # -----------------------------------------------------------------
     def Fitness(self, business) :
-        btype = business.Profile.BusinessType
+        """
+        Args:
+            business -- an object of type LayoutInfo.Business
+        """
+        btype = business.BusinessProfile.BusinessType
         return self.PreferredBusinessTypes[btype] if btype in self.PreferredBusinessTypes else 0.0
 
     # -----------------------------------------------------------------
@@ -265,6 +253,7 @@ class BusinessLocationProfileDecoration(Decoration) :
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class BusinessLocationDecoration(Decoration) :
+    DecorationName = 'BusinessLocation'
 
     # -----------------------------------------------------------------
     @staticmethod
@@ -302,8 +291,13 @@ class BusinessLocationDecoration(Decoration) :
 
     # -----------------------------------------------------------------
     def Fitness(self, business) :
-        ecount = self.PeakEmployeeCount + business.PeakEmployeeCount
-        ccount = self.PeakCustomerCount + business.PeakCustomerCount
+        ecount = self.PeakEmployeeCount
+        if business.FindDecorationProvider('EmploymentProfile') :
+            ecount += business.EmploymentProfile.PeakEmployeeCount()
+
+        ccount = self.PeakCustomerCount
+        if business.FindDecorationProvider('ServiceProfile') :
+            ccount += business.ServiceProfile.PeakServiceCount()
 
         if ecount >= self.EmployeeCapacity : return 0
         if ccount >= self.CustomerCapacity : return 0
@@ -315,8 +309,11 @@ class BusinessLocationDecoration(Decoration) :
 
     # -----------------------------------------------------------------
     def AddBusiness(self, business) :
-        self.PeakEmployeeCount += business.PeakEmployeeCount
-        self.PeakCustomerCount += business.PeakCustomerCount
+        if business.FindDecorationProvider('EmploymentProfile') :
+            self.PeakEmployeeCount += business.EmploymentProfile.PeakEmployeeCount()
+
+        if business.FindDecorationProvider('ServiceProfile') :
+            self.PeakCustomerCount += business.ServiceProfile.PeakServiceCount()
 
     # -----------------------------------------------------------------
     def Dump(self) :
@@ -360,6 +357,7 @@ class ResidentialLocationProfileDecoration(Decoration) :
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class ResidentialLocationDecoration(Decoration) :
+    DecorationName = 'ResidentialLocation'
 
     # -----------------------------------------------------------------
     @staticmethod
@@ -429,6 +427,6 @@ class ResidentialLocationDecoration(Decoration) :
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-CommonDecorations = [ CoordDecoration, IntersectionTypeDecoration, RoadTypeDecoration, CapsuleTypeDecoration, EndPointDecoration,
-                      BusinessLocationProfileDecoration, ResidentialLocationProfileDecoration ]
+CommonDecorations = [ CoordDecoration, IntersectionTypeDecoration, RoadTypeDecoration, 
+                      EndPointDecoration, BusinessLocationProfileDecoration, ResidentialLocationProfileDecoration ]
 

@@ -102,13 +102,35 @@ socinfo.AddSchoolProfile("high-school", { 'teacher' : 30, 'admin' : 8, 'principa
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+# -----------------------------------------------------------------
+def PlaceBusiness(business) :
+    global layinfo
+
+    bestloc = None
+    bestfit = 0
+    for locname, location in layinfo.Nodes.iteritems() :
+        if not location.NodeType.Name == 'BusinessLocation' :
+            continue
+
+        fitness = location.BusinessLocation.Fitness(business)
+        if fitness > bestfit :
+            bestfit = fitness
+            bestloc = location
+
+    if bestloc :
+        bestloc.BusinessLocation.AddBusiness(business)
+        business.SetResidence(bestloc)
+
+    return bestloc
+
+# -----------------------------------------------------------------
 def PlaceBusinesses() :
-    global layinfo, socinfo
+    global socinfo
 
     profiles = {}
-    for profname, profile in socinfo.Collections.iteritems() :
+    for profname, profile in socinfo.Nodes.iteritems() :
         if profile.NodeType.Name == 'BusinessProfile' :
-            print profname
             profiles[profname] = profile
 
     while len(profiles) > 0 :
@@ -119,7 +141,7 @@ def PlaceBusinesses() :
         name = GenName(pname)
         business = socinfo.AddBusiness(name, profile)
 
-        location = socinfo.PlaceBusiness(business, locinfo)
+        location = PlaceBusiness(business)
 
         # if we could not place the business, then all locations
         # have fitness of 0... so don't try again
@@ -134,12 +156,15 @@ def CountJobs() :
     global socinfo
     JobCount = {}
 
-    for biz in socinfo.BusinessList.itervalues() :
-        bprof = biz.Profile
-        for job in bprof.JobList :
-            if job.ProfileName not in JobCount :
-                JobCount[job.ProfileName] = 0
-            JobCount[job.ProfileName] += job.Demand
+    for name, biz in socinfo.Nodes.iteritems() :
+        if biz.NodeType.Name != 'Business' :
+            continue
+
+        bprof = biz.EmploymentProfile
+        for job, demand in bprof.JobList.iteritems() :
+            if job.Name not in JobCount :
+                JobCount[job.Name] = 0
+            JobCount[job.Name] += demand
 
     people = 0
     names = sorted(JobCount.keys())

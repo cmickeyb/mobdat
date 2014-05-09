@@ -54,7 +54,7 @@ logger = logging.getLogger(__name__)
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class PersonProfile(Graph.Collection) :
+class PersonProfile(Graph.Node) :
 
     # -----------------------------------------------------------------
     def __init__(self, name) :
@@ -62,7 +62,7 @@ class PersonProfile(Graph.Collection) :
         Args:
             profile -- object of type Person.PersonProfile
         """
-        Graph.Collection.__init__(self, name = name)
+        Graph.Node.__init__(self, name = name)
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -82,7 +82,7 @@ class Person(Graph.Node) :
         Args:
             job -- object of type SocialDecoration.JobDescription
         """
-        self.AddDecoration(SocialDecoration.JobDecoration(job))
+        self.AddDecoration(SocialDecoration.JobDescriptionDecoration(job))
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -94,7 +94,7 @@ class EmployedBy(Graph.Edge) :
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class BusinessProfile(Graph.Collection) :
+class BusinessProfile(Graph.Node) :
 
     # -----------------------------------------------------------------
     def __init__(self, name, biztype, joblist) :
@@ -104,7 +104,7 @@ class BusinessProfile(Graph.Collection) :
             biztype -- constant of type SocialDecoration.BusinessType
             joblist -- dictionary mapping type SocialDecoration.JobDescription --> Deman
         """
-        Graph.Collection.__init__(self, name = name)
+        Graph.Node.__init__(self, name = name)
 
         self.AddDecoration(SocialDecoration.BusinessProfileDecoration(biztype))
         self.AddDecoration(SocialDecoration.EmploymentProfileDecoration(joblist))
@@ -121,7 +121,7 @@ class BusinessProfile(Graph.Collection) :
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class Business(Graph.Collection) :
+class Business(Graph.Node) :
 
     # -----------------------------------------------------------------
     def __init__(self, name) :
@@ -129,7 +129,15 @@ class Business(Graph.Collection) :
         Args:
             business -- object of type Business.Business
         """
-        Graph.Collection.__init__(self, name = name)
+        Graph.Node.__init__(self, name = name)
+
+    # -----------------------------------------------------------------
+    def SetResidence(self, location) :
+        """
+        Args:
+            location -- object of type BusinessLocation
+        """
+        self.AddDecoration(SocialDecoration.ResidenceDecoration(location))
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -162,7 +170,7 @@ class SocialInfo(Graph.Graph) :
         Args:
             profile -- SocialInfo.PersonProfile
         """
-        self.AddCollection(profile)
+        self.AddNode(profile)
 
     # -----------------------------------------------------------------
     def AddPerson(self, person, profile) :
@@ -183,7 +191,7 @@ class SocialInfo(Graph.Graph) :
         Args:
             profile -- object of type SocialInfo.BusinessProfile
         """
-        self.AddCollection(profile)
+        self.AddNode(profile)
 
     # -----------------------------------------------------------------
     def AddBusiness(self, business, profile) :
@@ -194,7 +202,7 @@ class SocialInfo(Graph.Graph) :
         """
 
         profile.AddMember(business)
-        self.AddCollection(business)
+        self.AddNode(business)
 
     # =================================================================
     # =================================================================

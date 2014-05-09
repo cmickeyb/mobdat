@@ -222,7 +222,7 @@ class LayoutBuilder(LayoutInfo.LayoutInfo) :
             profname -- string name of the business location profile collection
             endpoints -- list of endpoint objects of type LayoutInfo.Endpoint
         """
-        location = LayoutInfo.BusinessLocation(GenName('bizloc'), self.Collections[profname])
+        location = LayoutInfo.BusinessLocation(GenName('bizloc'), self.Nodes[profname])
         for endpoint in endpoints :
             location.AddEndpointToLocation(endpoint)
 
@@ -244,7 +244,7 @@ class LayoutBuilder(LayoutInfo.LayoutInfo) :
             profname -- string name of the business location profile collection
             endpoints -- list of endpoint objects of type LayoutInfo.Endpoint
         """
-        location = LayoutInfo.ResidentialLocation(GenName('resloc'), self.Collections[profname])
+        location = LayoutInfo.ResidentialLocation(GenName('resloc'), self.Nodes[profname])
         for endpoint in endpoints :
             location.AddEndpointToLocation(endpoint)
 

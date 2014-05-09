@@ -46,51 +46,67 @@ sys.path.append(os.path.join(os.environ.get("OPENSIM","/share/opensim"),"lib","p
 #sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 #sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
-from mobdat.common.Person import Person
 from mobdat.common.Utilities import GenName
 
 import random
 
+# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+wprof = socinfo.AddPersonProfile('worker')
+sprof = socinfo.AddPersonProfile('student')
+hprof = socinfo.AddPersonProfile('homemaker')
+
+# for vtype in laysettings.VehicleTypes.itervalues() :
+#     print vtype.Name
+#     for ptype in vtype.ProfileTypes :
+#         socinfo.PersonProfiles[ptype].AddVehicleType(vtype.Name, vtype.Rate)
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-locinfo.AddResidentialLocationProfile('townhouse', 7)
-locinfo.AddResidentialLocationProfile('apartment', 11)
 
-for lprof in ['townhouse', 'apartment'] :
-    for rcapsule in locinfo.CapsuleTypeMap[lprof] :
-        locinfo.AddResidentialLocation(rcapsule, locinfo.ResidentialLocationProfiles[lprof])
+# -----------------------------------------------------------------
+def PlacePerson(person) :
+    bestloc = None
+    bestfit = 0
+    for locname, location in layinfo.Nodes.iteritems() :
+        if not location.NodeType.Name == 'ResidentialLocation' :
+            continue
 
-# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-perinfo.AddPersonProfile('worker')
-perinfo.AddPersonProfile('student')
-perinfo.AddPersonProfile('homemaker')
+        fitness = location.ResidentialLocationProfile.Fitness(person)
+        if fitness > bestfit :
+            bestfit = fitness
+            bestloc = location
 
-for vtype in laysettings.VehicleTypes.itervalues() :
-    print vtype.Name
-    for ptype in vtype.ProfileTypes :
-        perinfo.PersonProfiles[ptype].AddVehicleType(vtype.Name, vtype.Rate)
+    if bestloc :
+        endpoint = bestloc.ResidentialLocation.AddPerson(person)
+        person.SetResidence(endpoint)
 
-# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    return bestloc
+
+# -----------------------------------------------------------------
 def PlacePeople() :
-    global bizinfo, perinfo
+    global socinfo
 
-    profile = perinfo.PersonProfiles['worker']
+    profile = socinfo.FindNodeByName('worker')
+
+    bizlist = {}
+    for name, biz in socinfo.Nodes.iteritems() :
+        if biz.NodeType.Name == 'Business' :
+            bizlist[name] = biz
 
     people = 0
-    for biz in bizinfo.BusinessList.itervalues() :
-        bprof = biz.Profile
-        for job in bprof.JobList :
-            for p in range(0, job.Demand) :
+    for name, biz in bizlist.iteritems() :
+        bprof = biz.EmploymentProfile
+        for job, demand in bprof.JobList.iteritems() :
+            for p in range(0, demand) :
                 people += 1
-                name = GenName(profile.ProfileName)
-                person = Person(name, profile, biz, job)
-                location = perinfo.PlacePerson(person, locinfo)
+                name = GenName(wprof.Name)
+                person = socinfo.AddPerson(name, wprof, biz, job)
+                location = PlacePerson(person)
                 if not location :
                     print 'ran out of residences after %s people' % people
                     return
+
 
     print 'created %s people' % people
 

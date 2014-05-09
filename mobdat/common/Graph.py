@@ -154,28 +154,6 @@ class _GraphObject :
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class Node(_GraphObject) :
-
-    # -----------------------------------------------------------------
-    @staticmethod
-    def Load(graph, ninfo) :
-        node = Node(ninfo['Name'])
-        node.LoadDecorations(graph, ninfo)
-            
-        return node
-
-    # -----------------------------------------------------------------
-    def __init__(self, name = None, prefix = 'node') :
-        if not name : name = GenNodeName(prefix)
-        _GraphObject.__init__(self, name)
-
-    # -----------------------------------------------------------------
-    def Dump(self) :
-        result = _GraphObject.Dump(self)
-        return result
-
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class Edge(_GraphObject) :
 
     # -----------------------------------------------------------------
@@ -213,37 +191,30 @@ class Edge(_GraphObject) :
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class Collection(_GraphObject) :
+class Node(_GraphObject) :
 
     # -----------------------------------------------------------------
     @staticmethod
-    def Load(graph, cinfo) :
-        collection = Collection(name = cinfo['Name'])
-        collection.LoadDecorations(graph, cinfo)
-
-        return collection
+    def Load(graph, ninfo) :
+        node = Node(name = ninfo['Name'])
+        node.LoadDecorations(graph, ninfo)
+            
+        return node
 
     # -----------------------------------------------------------------
-    def __init__(self, members = [], name = None, prefix = 'col') :
+    @staticmethod
+    def LoadMembers(graph, ninfo) :
+        node = graph.Nodes[ninfo['Name']]
+        for mname in ninfo['Members'] :
+            node.AddMember(graph.FindByName(mname))
+
+    # -----------------------------------------------------------------
+    def __init__(self, members = [], name = None, prefix = 'node') :
         if not name : name = GenNodeName(prefix)
         _GraphObject.__init__(self, name)
 
         self.Members = []
         for member in members :
-            self.AddMember(member)
-
-    # -----------------------------------------------------------------
-    def _LoadMembers(self, graph, cinfo) :
-        for mname in cinfo['Members'] :
-            if mname in graph.Edges :
-                member = graph.Edges[mname]
-            elif mname in graph.Nodes :
-                member = graph.Nodes[mname]
-            elif mname in graph.Collections :
-                member = graph.Collections[mname]
-            else :
-                raise NameError("graph contains no object named %s" % mname)
-            
             self.AddMember(member)
 
     # -----------------------------------------------------------------
@@ -296,7 +267,6 @@ class Graph :
     def __init__(self) :
         self.DecorationMap = {}
 
-        self.Collections = {}
         self.Edges = {}
         self.Nodes = {}
 
@@ -312,11 +282,6 @@ class Graph :
             nodes.append(node.Dump())
         result['Nodes'] = nodes
 
-        collections = []
-        for collection in self.Collections.itervalues() :
-            collections.append(collection.Dump())
-        result['Collections'] = collections
-
         edges = []
         for edge in self.Edges.itervalues() :
             edges.append(edge.Dump())
@@ -330,22 +295,43 @@ class Graph :
         Load the graph from the dictionary representation
         """
         for ninfo in info['Nodes'] :
-            node = Node.Load(self, ninfo)
-            self.Nodes[node.Name] = node
+            self.AddNode(Node.Load(self, ninfo))
 
-        for cinfo in info['Collections'] :
-            collection = Collection.Load(self, cinfo)
-            self.Collections[collection.Name] = collection
-            
         for einfo in info['Edges'] :
-            edge = Edge.Load(self, einfo)
-            self.Edges[edge.Name] = edge
+            self.AddEdge(Edge.Load(self, einfo))
 
         # setting up the membership after creating all the
         # collections makes it possible to have collections within collections
-        for cinfo in info['Collections'] :
-            collection = self.Collections[cinfo['Name']]
-            collection._LoadMembers(self, cinfo)
+        for ninfo in info['Nodes'] :
+            Node.LoadMembers(self, ninfo)
+
+    # -----------------------------------------------------------------
+    def AddDecorationHandler(self, handler) :
+        self.DecorationMap[handler.DecorationName] = handler
+
+    # -----------------------------------------------------------------
+    def LoadDecoration(self, dinfo) :
+        handler = self.DecorationMap[dinfo['__TYPE__']]
+        if handler :
+            return handler.Load(self, dinfo)
+
+        # if we don't have a handler, thats ok we just dont load the 
+        # decoration, note the missing decoration in the logs however
+        logger.info('no decoration handler found for type %s', dinfo['__TYPE__'])
+        return None
+
+    # -----------------------------------------------------------------
+    def FindByName(self, name) :
+        if name in self.Nodes :
+            return self.Nodes[name]
+        elif name in self.Edges :
+            return self.Edges[name]
+        else :
+            raise NameError("graph contains no object named %s" % mname)
+
+    # =================================================================
+    # NODE methods
+    # =================================================================
 
     # -----------------------------------------------------------------
     def AddNode(self, node) :
@@ -355,8 +341,14 @@ class Graph :
     def DropNode(self, node) :
         # need to use values because dropping the member in the collection
         # will change the list of connections here
+
+        # drop this node from other nodes where it is a member
         for collection in node.Collections.values() :
             collection.DropMember(node)
+
+        # drop all nodes that are a member of this one
+        for obj in node.Members[:] :
+            node.DropMember(obj)
 
         for edge in node.InputEdges[:] :
             self.DropEdge(edge)
@@ -382,6 +374,17 @@ class Graph :
                 self.DropNode(node)
 
         return True
+
+    # -----------------------------------------------------------------
+    def FindNodeByName(self, name) :
+        if name in self.Nodes :
+            return self.Nodes[name]
+        else :
+            raise NameError("graph contains no object named %s" % mname)
+
+    # =================================================================
+    # EDGE methods
+    # =================================================================
 
     # -----------------------------------------------------------------
     def AddEdge(self, edge) :
@@ -419,37 +422,19 @@ class Graph :
         return True
 
     # -----------------------------------------------------------------
+    def FindEdgeByName(self, name) :
+        if name in self.Edges :
+            return self.Edges[name]
+        else :
+            raise NameError("graph contains no object named %s" % mname)
+            
+    # -----------------------------------------------------------------
     def FindEdgeBetweenNodes(self, node1, node2) :
         for e in node1.OutputEdges :
             if e.EndNode == node2 :
                 return e
         return None
 
-    # -----------------------------------------------------------------
-    def AddCollection(self, collection) :
-        self.Collections[collection.Name] = collection
-
-    # -----------------------------------------------------------------
-    def DropCollection(self, collection) :
-        for obj in collection.Members[:] :
-            obj.DropFromCollection(collection)
-
-        del self.Collections[collection.Name]
-
-    # -----------------------------------------------------------------
-    def AddDecorationHandler(self, handler) :
-        self.DecorationMap[handler.DecorationName] = handler
-
-    # -----------------------------------------------------------------
-    def LoadDecoration(self, dinfo) :
-        handler = self.DecorationMap[dinfo['__TYPE__']]
-        if handler :
-            return handler.Load(self, dinfo)
-
-        # if we don't have a handler, thats ok we just dont load the 
-        # decoration, note the missing decoration in the logs however
-        logger.info('no decoration handler found for type %s', dinfo['__TYPE__'])
-        return None
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
