@@ -66,11 +66,9 @@ def Controller(settings, pushlist) :
     laysettings = LayoutSettings.LayoutSettings(settings)
 
     layinfo = LayoutBuilder.LayoutBuilder()
-    locinfo = LocationBuilder.LocationBuilder(layinfo)
-    bizinfo = BusinessBuilder.BusinessBuilder()
-    perinfo = PersonBuilder.PersonBuilder()
+    socinfo = SocialBuilder.SocialBuilder()
 
-    dbbindings = {"laysettings" : laysettings, "layinfo" : layinfo, "locinfo" : locinfo, "bizinfo" : bizinfo, "perinfo" : perinfo}
+    dbbindings = {"laysettings" : laysettings, "layinfo" : layinfo, "socinfo" : socinfo}
 
     for cf in settings["Builder"].get("ExtensionFiles",[]) :
         try :
@@ -96,22 +94,9 @@ def Controller(settings, pushlist) :
         json.dump(layinfo.Dump(), fp, indent=2, ensure_ascii=True)
 
     # write the network information back out to the layinfo file
-    locinfofile = settings["General"].get("LocationInfoFile","locinfo.js")
-    logger.info('saving location data to %s',locinfofile)
+    socinfofile = settings["General"].get("SocialInfoFile","socinfo.js")
+    logger.info('saving social data to %s',socinfofile)
 
-    with open(locinfofile, "w") as fp :
-        json.dump(locinfo.Dump(), fp, indent=2, ensure_ascii=True)
+    with open(socinfofile, "w") as fp :
+        json.dump(socinfo.Dump(), fp, indent=2, ensure_ascii=True)
 
-    # write the business information out to the file
-    bizinfofile = settings["General"].get("BusinessInfoFile","bizinfo.js")
-    logger.info('saving business data to %s',bizinfofile)
-
-    with open(bizinfofile, "w") as fp :
-        json.dump(bizinfo.Dump(), fp, indent=2, ensure_ascii=True)
-
-    # write the person information out to the file
-    perinfofile = settings["General"].get("PersonInfoFile","perinfo.js")
-    logger.info('saving person data to %s',perinfofile)
-
-    with open(perinfofile, "w") as fp :
-        json.dump(perinfo.Dump(), fp, indent=2, ensure_ascii=True)
