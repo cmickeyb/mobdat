@@ -75,6 +75,9 @@ class _GraphObject :
         self.Decorations = {}
         self.Collections = {}
 
+        self.OutputEdges = []
+        self.InputEdges = []
+
         self.AddDecoration(NodeTypeDecoration(self.__class__.__name__))
 
     # -----------------------------------------------------------------
@@ -84,6 +87,26 @@ class _GraphObject :
             return provider.Decorations[attr]
 
         raise AttributeError("%r object has no attribute %r" % (self.__class__, attr))
+
+    # -----------------------------------------------------------------
+    def Deref(self, etype) :
+        """
+        Args:
+            etype -- string name of an edge type
+        """
+        for edge in self.OutputEdges :
+            if edge.NodeType.Name == etype :
+                return edge.EndNode
+
+        raise AttributeError("%r object has no edge of type %r" % (self.__class__, etype))
+
+    # -----------------------------------------------------------------
+    def AddInputEdge(self, edge) :
+        self.InputEdges.append(edge)
+
+    # -----------------------------------------------------------------
+    def AddOutputEdge(self, edge) :
+        self.OutputEdges.append(edge)
 
     # -----------------------------------------------------------------
     def AddToCollection(self, collection) :
@@ -146,17 +169,6 @@ class Node(_GraphObject) :
         if not name : name = GenNodeName(prefix)
         _GraphObject.__init__(self, name)
 
-        self.OutputEdges = []
-        self.InputEdges = []
-
-    # -----------------------------------------------------------------
-    def AddInputEdge(self, edge) :
-        self.InputEdges.append(edge)
-
-    # -----------------------------------------------------------------
-    def AddOutputEdge(self, edge) :
-        self.OutputEdges.append(edge)
-
     # -----------------------------------------------------------------
     def Dump(self) :
         result = _GraphObject.Dump(self)
@@ -169,8 +181,10 @@ class Edge(_GraphObject) :
     # -----------------------------------------------------------------
     @staticmethod
     def Load(graph, einfo) :
-        snode = graph.Nodes[einfo['StartNode']]
-        enode = graph.Nodes[einfo['EndNode']]
+        sname = einfo['StartNode']
+        snode = graph.Nodes[sname] if sname in graph.Nodes else graph.Collections[sname]
+        ename = einfo['EndNode']
+        enode = graph.Nodes[ename] if ename in graph.Nodes else graph.Collections[ename]
         edge = Edge(snode, enode, einfo['Name'])
 
         edge.LoadDecorations(graph, einfo)
@@ -293,6 +307,11 @@ class Graph :
     def Dump(self) :
         result = dict()
 
+        nodes = []
+        for node in self.Nodes.itervalues() :
+            nodes.append(node.Dump())
+        result['Nodes'] = nodes
+
         collections = []
         for collection in self.Collections.itervalues() :
             collections.append(collection.Dump())
@@ -302,11 +321,6 @@ class Graph :
         for edge in self.Edges.itervalues() :
             edges.append(edge.Dump())
         result['Edges'] = edges
-
-        nodes = []
-        for node in self.Nodes.itervalues() :
-            nodes.append(node.Dump())
-        result['Nodes'] = nodes
 
         return result
     
@@ -318,14 +332,14 @@ class Graph :
         for ninfo in info['Nodes'] :
             node = Node.Load(self, ninfo)
             self.Nodes[node.Name] = node
-            
-        for einfo in info['Edges'] :
-            edge = Edge.Load(self, einfo)
-            self.Edges[edge.Name] = edge
 
         for cinfo in info['Collections'] :
             collection = Collection.Load(self, cinfo)
             self.Collections[collection.Name] = collection
+            
+        for einfo in info['Edges'] :
+            edge = Edge.Load(self, einfo)
+            self.Edges[edge.Name] = edge
 
         # setting up the membership after creating all the
         # collections makes it possible to have collections within collections

@@ -45,8 +45,6 @@ sys.path.append(os.path.join(os.environ.get("OPENSIM","/share/opensim"),"lib","p
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
-from mobdat.common.Business import Business, BusinessProfile, JobProfile
-from mobdat.common.Person import Person, PersonProfile
 from mobdat.common.Decoration import Decoration
 
 from mobdat.common.ValueTypes import MakeEnum, DaysOfTheWeek
@@ -69,7 +67,7 @@ class JobDescription :
         flexible = pinfo['FlexibleHours']
         schedule = WeeklySchedule(pinfo['Schedule'])
 
-        return JobProfile(profilename, salary, flexible, schedule)
+        return JobDescription(profilename, salary, flexible, schedule)
 
     # -------------------------------------------------------
     def __init__(self, name, salary, flexible, schedule) :
@@ -80,7 +78,7 @@ class JobDescription :
 
     # -------------------------------------------------------
     def Copy(self) :
-        return JobProfile(self.Name, self.Salary, self.FlexibleHours, self.Schedule)
+        return JobDescription(self.Name, self.Salary, self.FlexibleHours, self.Schedule)
 
     # -------------------------------------------------------
     def Dump(self) :
@@ -100,7 +98,7 @@ class EmploymentProfileDecoration(Decoration) :
 
     # -------------------------------------------------------
     @staticmethod
-    def Load(pinfo) :
+    def Load(graph, pinfo) :
         joblist = dict()
         for jobinfo in pinfo['JobList'] :
             joblist[JobDescription.Load(jobinfo['Job'])] = jobinfo['Demand']
@@ -159,12 +157,12 @@ class ServiceProfileDecoration(Decoration) :
 
     # -------------------------------------------------------
     @staticmethod
-    def Load(pinfo) :
+    def Load(graph, pinfo) :
         bizhours = WeeklySchedule(pinfo['Schedule'])
         capacity = pinfo['CustomerCapacity']
         servicetime = pinfo['ServiceTime']
 
-        return ServiceProfile(bizhours, capacity, servicetime)
+        return ServiceProfileDecoration(bizhours, capacity, servicetime)
 
     # -------------------------------------------------------
     def __init__(self, bizhours, capacity, servicetime) :
@@ -222,8 +220,8 @@ class BusinessProfileDecoration(Decoration) :
     
     # -------------------------------------------------------
     @staticmethod
-    def Load(pinfo) :
-        return BusinessProfileDecration(pinfo['BusinessType'])
+    def Load(graph, pinfo) :
+        return BusinessProfileDecoration(pinfo['BusinessType'])
 
     # -------------------------------------------------------
     def __init__(self, biztype) :
@@ -308,6 +306,37 @@ class PersonDecoration(Decoration) :
     
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+class JobDecoration(Decoration) :
+    DecorationName = 'JobDescription'
+    
+    # -----------------------------------------------------------------
+    @staticmethod
+    def Load(graph, info) :
+        job = JobDescription.Load(info['Job'])
+        return JobDecoration(job)
+
+    # -----------------------------------------------------------------
+    def __init__(self, job) :
+        """
+        Args:
+            job -- object of type JobDescription
+        """
+        Decoration.__init__(self)
+        self.JobDescription = job.Copy()
+
+    # -----------------------------------------------------------------
+    def __getattr__(self, name) :
+        return getattr(self.JobDescription, name)
+
+    # -----------------------------------------------------------------
+    def Dump(self) :
+        result = Decoration.Dump(self)
+        result['Job'] = self.JobDescription.Dump()
+        
+        return result
+    
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class ResidenceDecoration(Decoration) :
     DecorationName = 'Residence'
     
@@ -342,5 +371,5 @@ class ResidenceDecoration(Decoration) :
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 CommonDecorations = [ EmploymentProfileDecoration, ServiceProfileDecoration, BusinessProfileDecoration,
-                      PersonProfileDecoration, PersonDecoration, ResidenceDecoration ]
+                      PersonProfileDecoration, PersonDecoration, JobDecoration, ResidenceDecoration ]
 

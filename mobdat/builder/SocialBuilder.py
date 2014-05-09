@@ -76,21 +76,20 @@ class SocialBuilder(SocialInfo.SocialInfo) :
             name -- string name of the person
             profile -- object of type SocialInfo.PersonProfile
             employer -- object of type SocialInfo.Business
-            job --
+            job -- object of type SocialDecoration.JobDescription
             residence -- 
         """
         person = SocialInfo.Person(name)
         SocialInfo.SocialInfo.AddPerson(self, person, profile)
 
         if employer :
-            person.SetEmployer(employer)
-            employer.AddMember(person)
+            self.SetEmployer(person, employer)
 
         if job :
             person.SetJob(job)
 
-        if residence :
-            person.SetResidence(residence)
+#        if residence :
+#            person.SetResidence(residence)
 
         return person
 
@@ -235,22 +234,24 @@ if __name__ == '__main__' :
 
     # -----------------------------------------------------------------
     # -----------------------------------------------------------------
+    pprof = builder.AddPersonProfile('normal')
+
     emp1 = builder.AddBusiness('biz1', bp)
-    per1 = builder.AddPerson('per1', emp1, None, jp1, 'res1')
-    per2 = builder.AddPerson('per2', emp1, None, jp2, 'res1')
-    per3 = builder.AddPerson('per3', emp1, None, jp1, 'res2')
+    per1 = builder.AddPerson('per1', pprof, emp1, jp1, 'res1')
+    per2 = builder.AddPerson('per2', pprof, emp1, jp2, 'res1')
+    per3 = builder.AddPerson('per3', pprof, emp1, jp1, 'res2')
 
     print '---------- BEFORE ----------'
     # print emp1.Dump()
     # print emp1.BusinessProfile.Dump()
 
-    print per3.JobDescription.ProfileName
-    print per3.Business.Name
-    print emp1.BusinessProfile.ProfileName
-    print emp1.BusinessProfile.PeakEmployeeCount()
+    print per3.JobDescription.Name
+    print per3.Deref('EmployedBy').Name
+    print emp1.BusinessProfile.BusinessType
+    print emp1.EmploymentProfile.PeakEmployeeCount()
 
     nbuilder = SocialInfo.SocialInfo()
-    nbuilder.Load( builder.Dump())
+    nbuilder.Load(builder.Dump())
 
     print '---------- AFTER ----------'
     emp1a = nbuilder.Collections['biz1']
@@ -259,7 +260,7 @@ if __name__ == '__main__' :
     # print emp1a.Dump()
     # print emp1a.BusinessProfile.Dump()
 
-    print per3a.JobDescription.ProfileName
-    print per3a.Business.Name
-    print emp1a.BusinessProfile.ProfileName
-    print emp1a.BusinessProfile.PeakEmployeeCount()
+    print per3a.JobDescription.Name
+    print per3a.Deref('EmployedBy').Name
+    print emp1a.BusinessProfile.BusinessType
+    print emp1a.EmploymentProfile.PeakEmployeeCount()

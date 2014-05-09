@@ -76,6 +76,14 @@ class Person(Graph.Node) :
         """
         Graph.Node.__init__(self, name = name)
 
+    # -----------------------------------------------------------------
+    def SetJob(self, job) :
+        """
+        Args:
+            job -- object of type SocialDecoration.JobDescription
+        """
+        self.AddDecoration(SocialDecoration.JobDecoration(job))
+
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class EmployedBy(Graph.Edge) :
@@ -145,6 +153,9 @@ class SocialInfo(Graph.Graph) :
         for dtype in SocialDecoration.CommonDecorations :
             self.AddDecorationHandler(dtype)
 
+    # =================================================================
+    # =================================================================
+
     # -----------------------------------------------------------------
     def AddPersonProfile(self, profile) :
         """
@@ -162,6 +173,9 @@ class SocialInfo(Graph.Graph) :
         """
         profile.AddMember(person)
         self.AddNode(person)
+
+    # =================================================================
+    # =================================================================
 
     # -----------------------------------------------------------------
     def AddBusinessProfile(self, profile) :
@@ -182,3 +196,16 @@ class SocialInfo(Graph.Graph) :
         profile.AddMember(business)
         self.AddCollection(business)
 
+    # =================================================================
+    # =================================================================
+
+    # -----------------------------------------------------------------
+    def SetEmployer(self, person, business) :
+        """
+        Args:
+            person -- object of type SocialInfo.Person
+            business -- object of type SocialInfo.Business
+        """
+
+        self.AddEdge(EmployedBy(person, business))
+        
