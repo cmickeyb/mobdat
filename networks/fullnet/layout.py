@@ -43,7 +43,7 @@ import os, sys
 
 from mobdat.builder import LayoutBuilder
 from mobdat.common.Utilities import GenName, GenNameFromCoordinates
-from mobdat.common.Business import BusinessType
+from mobdat.common.SocialDecoration import BusinessType
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------

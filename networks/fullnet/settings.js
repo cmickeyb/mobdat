@@ -5,10 +5,8 @@
         "Interval" : 0.200,
         "SecondsPerStep" : 2.0,
         "StartTimeOfDay" : 6.0,
-        "BusinessInfoFile" : "networks/fullnet/data/bizinfo.js",
-	"LocationInfoFile" : "networks/fullnet/data/locinfo.js",
 	"LayoutInfoFile" : "networks/fullnet/data/layinfo.js",
-        "PersonInfoFile" : "networks/fullnet/data/perinfo.js",
+        "SocialInfoFile" : "networks/fullnet/data/socinfo.js",
         "Connectors" : ["opensim", "sumo", "social", "stats"]
     },
 
