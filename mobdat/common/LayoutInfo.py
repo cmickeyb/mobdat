@@ -167,6 +167,7 @@ class ResidentialLocation(Graph.Node) :
         """
         Graph.Node.__init__(self, name = name)
         
+        self.AddDecoration(ResidentialLocationDecoration())
         profile.AddMember(self)
 
     # -----------------------------------------------------------------

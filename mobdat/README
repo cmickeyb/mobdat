@@ -3,3 +3,7 @@ Some design notes.
 Builder classes should focus on simplified, contextual interfaces. 
 Info classes handle graph nodes, edges, and collections.
 
+Graph collection represents an "is-a" relationship which is why node
+decorations are inherited through collections. 
+
+Graph edge represents, among other things, a "has-a" relationship. 

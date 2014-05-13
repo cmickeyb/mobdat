@@ -72,7 +72,7 @@ socinfo.AddJobDescription('barrista1', 20000,  False, WeeklySchedule.WorkWeekSch
 socinfo.AddJobDescription('barrista2', 20000,  False, WeeklySchedule.WorkWeekSchedule(10.0, 14.0))
 socinfo.AddJobDescription('barrista3', 20000,  False, WeeklySchedule.WorkWeekSchedule(14.0, 18.0))
 socinfo.AddJobDescription('barrista4', 20000,  False, WeeklySchedule.WorkWeekSchedule(18.0, 22.0))
-socinfo.AddJobDescription('barrista4', 20000,  False, WeeklySchedule.WorkWeekSchedule(18.0, 22.0))
+
 socinfo.AddJobDescription('storemgr1', 50000,  False, WeeklySchedule.WorkWeekSchedule(6.0, 14.0))
 socinfo.AddJobDescription('storemgr2', 50000,  False, WeeklySchedule.WorkWeekSchedule(14.0, 22.0))
 

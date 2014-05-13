@@ -88,8 +88,8 @@ class SocialBuilder(SocialInfo.SocialInfo) :
         if job :
             person.SetJob(job)
 
-#        if residence :
-#            person.SetResidence(residence)
+        if residence :
+            person.SetResidence(residence)
 
         return person
 

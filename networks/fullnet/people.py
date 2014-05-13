@@ -72,7 +72,7 @@ def PlacePerson(person) :
         if not location.NodeType.Name == 'ResidentialLocation' :
             continue
 
-        fitness = location.ResidentialLocationProfile.Fitness(person)
+        fitness = location.ResidentialLocation.Fitness(person)
         if fitness > bestfit :
             bestfit = fitness
             bestloc = location

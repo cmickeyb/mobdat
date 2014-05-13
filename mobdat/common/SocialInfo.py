@@ -60,7 +60,7 @@ class PersonProfile(Graph.Node) :
     def __init__(self, name) :
         """
         Args:
-            profile -- object of type Person.PersonProfile
+            name -- string name 
         """
         Graph.Node.__init__(self, name = name)
 
@@ -72,7 +72,7 @@ class Person(Graph.Node) :
     def __init__(self, name) :
         """
         Args:
-            person -- object of type Person.Person
+            name -- string name 
         """
         Graph.Node.__init__(self, name = name)
 
@@ -84,12 +84,25 @@ class Person(Graph.Node) :
         """
         self.AddDecoration(SocialDecoration.JobDescriptionDecoration(job))
 
+    # -----------------------------------------------------------------
+    def SetResidence(self, location) :
+        """
+        Args:
+            location -- object of type ResidentialLocation or LayoutInfo.EndPoint
+        """
+        self.AddDecoration(SocialDecoration.ResidenceDecoration(location))
+
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class EmployedBy(Graph.Edge) :
 
     # -----------------------------------------------------------------
     def __init__(self, person, employer) :
+        """
+        Args:
+            person -- object of type SocialInfo.Person
+            employer -- object of type SocialInfo.Business
+        """
         Graph.Edge.__init__(self, person, employer)
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -102,7 +115,7 @@ class BusinessProfile(Graph.Node) :
         Args:
             name -- string name of the profile
             biztype -- constant of type SocialDecoration.BusinessType
-            joblist -- dictionary mapping type SocialDecoration.JobDescription --> Deman
+            joblist -- dictionary mapping type SocialDecoration.JobDescription --> Demand
         """
         Graph.Node.__init__(self, name = name)
 

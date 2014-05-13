@@ -181,12 +181,12 @@ def BuildNetwork() :
 
     # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-    layinfo.AddBusinessLocationProfile('plaza', 50, 25,  { BusinessType.Factory : 1.0, BusinessType.Service : 0.5, BusinessType.Food : 0.25 })
-    layinfo.AddBusinessLocationProfile('mall',  20, 75,  { BusinessType.Factory : 0.1, BusinessType.Service : 1.0, BusinessType.Food : 1.0 })
+    layinfo.AddBusinessLocationProfile('plaza', 40, 25,  { BusinessType.Factory : 1.0, BusinessType.Service : 0.5, BusinessType.Food : 0.25 })
+    layinfo.AddBusinessLocationProfile('mall',  15, 75,  { BusinessType.Factory : 0.1, BusinessType.Service : 1.0, BusinessType.Food : 1.0 })
     layinfo.AddBusinessLocationProfile('civic', 20, 150, { BusinessType.School : 1.0, BusinessType.Civic : 1.0 })
 
     layinfo.AddResidentialLocationProfile('townhouse', 7)
-    layinfo.AddResidentialLocationProfile('apartment', 11)
+    layinfo.AddResidentialLocationProfile('apartment', 12)
 
     # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
