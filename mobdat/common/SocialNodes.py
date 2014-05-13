@@ -47,89 +47,97 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
-from mobdat.common import Graph, Decoration
-from mobdat.common import SocialNodes, SocialEdges, SocialDecoration
-
-import json
+from mobdat.common import Graph, Decoration, SocialDecoration
 
 logger = logging.getLogger(__name__)
 
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+class PersonProfile(Graph.Node) :
+
+    # -----------------------------------------------------------------
+    def __init__(self, name) :
+        """
+        Args:
+            name -- string name 
+        """
+        Graph.Node.__init__(self, name = name)
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class SocialInfo(Graph.Graph) :
+class Person(Graph.Node) :
 
     # -----------------------------------------------------------------
-    @staticmethod
-    def LoadFromFile(filename) :
-        with open(filename, 'r') as fp :
-            data = json.load(fp)
-
-        graph = SocialInfo()
-        graph.Load(data)
-
-        return graph
-
-    # -----------------------------------------------------------------
-    def __init__(self) :
-        Graph.Graph.__init__(self)
-
-        for dtype in SocialDecoration.Decorations :
-            self.AddDecorationHandler(dtype)
-
-    # =================================================================
-    # =================================================================
-
-    # -----------------------------------------------------------------
-    def AddPersonProfile(self, profile) :
+    def __init__(self, name) :
         """
         Args:
-            profile -- SocialNodes.PersonProfile
+            name -- string name 
         """
-        self.AddNode(profile)
+        Graph.Node.__init__(self, name = name)
 
     # -----------------------------------------------------------------
-    def AddPerson(self, person, profile) :
+    def SetJob(self, job) :
         """
         Args:
-            person -- SocialNodes.Person
-            profile -- SocialNodes.PersonProfile
+            job -- object of type SocialDecoration.JobDescription
         """
-        profile.AddMember(person)
-        self.AddNode(person)
-
-    # =================================================================
-    # =================================================================
+        self.AddDecoration(SocialDecoration.JobDescriptionDecoration(job))
 
     # -----------------------------------------------------------------
-    def AddBusinessProfile(self, profile) :
+    def SetResidence(self, location) :
         """
         Args:
-            profile -- object of type SocialNodes.BusinessProfile
+            location -- object of type ResidentialLocation or LayoutInfo.EndPoint
         """
-        self.AddNode(profile)
+        self.AddDecoration(SocialDecoration.ResidenceDecoration(location))
+
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+class BusinessProfile(Graph.Node) :
 
     # -----------------------------------------------------------------
-    def AddBusiness(self, business, profile) :
+    def __init__(self, name, biztype, joblist) :
         """
         Args:
-            business -- object of type SocialNodes.Business
-            profile -- object of type SocialNodes.BusinessProfile
+            name -- string name of the profile
+            biztype -- constant of type SocialDecoration.BusinessType
+            joblist -- dictionary mapping type SocialDecoration.JobDescription --> Demand
         """
+        Graph.Node.__init__(self, name = name)
 
-        profile.AddMember(business)
-        self.AddNode(business)
-
-    # =================================================================
-    # =================================================================
+        self.AddDecoration(SocialDecoration.BusinessProfileDecoration(biztype))
+        self.AddDecoration(SocialDecoration.EmploymentProfileDecoration(joblist))
 
     # -----------------------------------------------------------------
-    def SetEmployer(self, person, business) :
+    def AddServiceProfile(self, bizhours, capacity, servicetime) :
         """
         Args:
-            person -- object of type SocialNodes.Person
-            business -- object of type SocialNodes.Business
+            bizhours -- object of type WeeklySchedule
+            capacity -- integer maximum customer capacity
+            servicetime -- float mean time to service a customer
         """
+        self.AddDecoration(SocialDecoration.ServiceProfileDecoration(bizhours, capacity, servicetime))
 
-        self.AddEdge(SocialEdges.EmployedBy(person, business))
-        
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+class Business(Graph.Node) :
+
+    # -----------------------------------------------------------------
+    def __init__(self, name) :
+        """
+        Args:
+            business -- object of type Business.Business
+        """
+        Graph.Node.__init__(self, name = name)
+
+    # -----------------------------------------------------------------
+    def SetResidence(self, location) :
+        """
+        Args:
+            location -- object of type BusinessLocation
+        """
+        self.AddDecoration(SocialDecoration.ResidenceDecoration(location))
+
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+Nodes = [ PersonProfile, Person, BusinessProfile, Business ]

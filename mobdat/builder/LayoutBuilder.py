@@ -46,8 +46,7 @@ sys.path.append(os.path.join(os.environ.get("OPENSIM","/share/opensim"),"lib","p
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
-from mobdat.common import LayoutInfo
-from mobdat.common.LayoutDecoration import *
+from mobdat.common import LayoutInfo, LayoutNodes, LayoutEdges, LayoutDecoration
 from mobdat.common.Utilities import GenName, GenNameFromCoordinates
 from mobdat.common import Graph
 
@@ -72,105 +71,6 @@ class ResidentialGenerator :
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class Intersection(LayoutInfo.Intersection) :
-    WEST  = 0
-    NORTH = 1
-    EAST  = 2
-    SOUTH = 3
-
-    # -----------------------------------------------------------------
-    def __init__(self, name, itype, x, y) :
-        LayoutInfo.Intersection.__init__(self, name, itype, x, y)
-
-    # -----------------------------------------------------------------
-    def _EdgeMapPosition(self, node) :
-        deltax = node.X - self.X
-        deltay = node.Y - self.Y
-        # west
-        if deltax < 0 and deltay == 0 :
-            return self.WEST
-        # north
-        elif deltax == 0 and deltay > 0 :
-            return self.NORTH
-        # east
-        elif deltax > 0 and deltay == 0 :
-            return self.EAST
-        # south
-        elif deltax == 0 and deltay < 0 :
-            return self.SOUTH
-
-        # this means that self & node are at the same location
-        return -1 
-
-    # -----------------------------------------------------------------
-    def WestEdge(self) :
-        emap = self.OutputEdgeMap()
-        return emap[self.WEST]
-
-    # -----------------------------------------------------------------
-    def NorthEdge(self) :
-        emap = self.OutputEdgeMap()
-        return emap[self.NORTH]
-
-    # -----------------------------------------------------------------
-    def EastEdge(self) :
-        emap = self.OutputEdgeMap()
-        return emap[self.EAST]
-
-    # -----------------------------------------------------------------
-    def SouthEdge(self) :
-        emap = self.OutputEdgeMap()
-        return emap[self.SOUTH]
-
-    # -----------------------------------------------------------------
-    def OutputEdgeMap(self) :
-        edgemap = [None, None, None, None]
-        for e in self.OutputEdges :
-            position = self._EdgeMapPosition(e.EndNode)
-            edgemap[position] = e
-
-        return edgemap
-
-    # -----------------------------------------------------------------
-    def InputEdgeMap(self) :
-        edgemap = [None, None, None, None]
-        for e in self.InputEdges :
-            position = self._EdgeMapPosition(e.StartNode)
-            edgemap[position] = e
-
-        return edgemap
-
-    # -----------------------------------------------------------------
-    # signature returned is west, north, east, south
-    # -----------------------------------------------------------------
-    def Signature(self) :
-        osignature = []
-        for e in self.OutputEdgeMap() :
-            sig = e.RoadType.Signature if e else '0L'
-            osignature.append(sig)
-
-        isignature = []
-        for e in self.InputEdgeMap() :
-            sig = e.RoadType.Signature if e else '0L'
-            isignature.append(sig)
-
-        signature = []
-        for i in range(0,4) :
-            signature.append("{0}/{1}".format(osignature[i], isignature[i]))
-
-        return signature
-
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class Road(LayoutInfo.Road) :
-    
-    # -----------------------------------------------------------------
-    def __init__(self, snode, enode, etype) :
-        LayoutInfo.Road.__init__(self, snode, enode)
-        etype.AddMember(self)
-
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class LayoutBuilder(LayoutInfo.LayoutInfo) :
 
     # -----------------------------------------------------------------
@@ -187,7 +87,7 @@ class LayoutBuilder(LayoutInfo.LayoutInfo) :
 
     # -----------------------------------------------------------------
     def AddIntersectionType(self, name, itype = 'priority', render = True) :
-        node = LayoutInfo.IntersectionType(name, itype, render)
+        node = LayoutNodes.IntersectionType(name, itype, render)
         LayoutInfo.LayoutInfo.AddIntersectionType(self, node)
 
         return node
@@ -195,7 +95,7 @@ class LayoutBuilder(LayoutInfo.LayoutInfo) :
     # -----------------------------------------------------------------
     def AddIntersection(self, curx, cury, itype, prefix) :
         name = GenNameFromCoordinates(curx, cury, prefix)
-        node = Intersection(name, itype, curx, cury)
+        node = LayoutNodes.Intersection(name, itype, curx, cury)
         LayoutInfo.LayoutInfo.AddIntersection(self, node)
 
         return node
@@ -203,14 +103,14 @@ class LayoutBuilder(LayoutInfo.LayoutInfo) :
     # -----------------------------------------------------------------
     def AddEndPoint(self, curx, cury, ntype, prefix) :
         name = GenNameFromCoordinates(curx, cury, prefix)
-        node = LayoutInfo.EndPoint(name, ntype, curx, cury)
+        node = LayoutNodes.EndPoint(name, ntype, curx, cury)
         LayoutInfo.LayoutInfo.AddEndPoint(self, node)
 
         return node
 
     # -----------------------------------------------------------------
     def AddBusinessLocationProfile(self, name, employees = 20, customers = 50, types = None) :
-        node = LayoutInfo.BusinessLocationProfile(name, employees, customers, types)
+        node = LayoutNodes.BusinessLocationProfile(name, employees, customers, types)
         LayoutInfo.LayoutInfo.AddBusinessLocationProfile(self, node)
 
         return node
@@ -220,9 +120,9 @@ class LayoutBuilder(LayoutInfo.LayoutInfo) :
         """
         Args:
             profname -- string name of the business location profile collection
-            endpoints -- list of endpoint objects of type LayoutInfo.Endpoint
+            endpoints -- list of endpoint objects of type LayoutNodes.Endpoint
         """
-        location = LayoutInfo.BusinessLocation(GenName('bizloc'), self.Nodes[profname])
+        location = LayoutNodes.BusinessLocation(GenName('bizloc'), self.Nodes[profname])
         for endpoint in endpoints :
             location.AddEndpointToLocation(endpoint)
 
@@ -232,7 +132,7 @@ class LayoutBuilder(LayoutInfo.LayoutInfo) :
 
     # -----------------------------------------------------------------
     def AddResidentialLocationProfile(self, name, residents = 5) :
-        node = LayoutInfo.ResidentialLocationProfile(name, residents)
+        node = LayoutNodes.ResidentialLocationProfile(name, residents)
         LayoutInfo.LayoutInfo.AddResidentialLocationProfile(self, node)
 
         return node
@@ -242,9 +142,9 @@ class LayoutBuilder(LayoutInfo.LayoutInfo) :
         """
         Args:
             profname -- string name of the business location profile collection
-            endpoints -- list of endpoint objects of type LayoutInfo.Endpoint
+            endpoints -- list of endpoint objects of type LayoutNodes.Endpoint
         """
-        location = LayoutInfo.ResidentialLocation(GenName('resloc'), self.Nodes[profname])
+        location = LayoutNodes.ResidentialLocation(GenName('resloc'), self.Nodes[profname])
         for endpoint in endpoints :
             location.AddEndpointToLocation(endpoint)
 
@@ -254,7 +154,7 @@ class LayoutBuilder(LayoutInfo.LayoutInfo) :
 
     # -----------------------------------------------------------------
     def AddRoadType(self, name, lanes = 1, pri = 70, speed = 2.0, wid = 2.5, sig = '1L', render = True, center = False) :
-        node = LayoutInfo.RoadType(name, lanes, pri, speed, wid, sig, render, center)
+        node = LayoutNodes.RoadType(name, lanes, pri, speed, wid, sig, render, center)
         LayoutInfo.LayoutInfo.AddRoadType(self, node)
 
         return node
@@ -262,7 +162,7 @@ class LayoutBuilder(LayoutInfo.LayoutInfo) :
     # -----------------------------------------------------------------
     def AddRoad(self, snode, enode, etype) :
         name = Graph.GenEdgeName(snode, enode)
-        edge = LayoutInfo.Road(name, snode, enode, etype)
+        edge = LayoutEdges.Road(name, snode, enode, etype)
         LayoutInfo.LayoutInfo.AddRoad(self, edge)
         
         return edge
@@ -301,13 +201,13 @@ class LayoutBuilder(LayoutInfo.LayoutInfo) :
         nnode = self.AddIntersection(curx, cury, ntype, prefix)
 
         if edge1 :
-            etype1 = edge1.FindDecorationProvider(RoadTypeDecoration.DecorationName)
+            etype1 = edge1.FindDecorationProvider(LayoutDecoration.RoadTypeDecoration.DecorationName)
             self.DropEdge(edge1)
             self.AddRoad(node1,nnode,etype1)
             self.AddRoad(nnode,node2,etype1)
 
         if edge2 :
-            etype2 = edge2.FindDecorationProvider(RoadTypeDecoration.DecorationName)
+            etype2 = edge2.FindDecorationProvider(LayoutDecoration.RoadTypeDecoration.DecorationName)
             self.DropEdge(edge2)
             self.AddRoad(node2,nnode,etype2)
             self.AddRoad(nnode,node1,etype2)
@@ -320,7 +220,7 @@ class LayoutBuilder(LayoutInfo.LayoutInfo) :
             if re.match(pattern, name) :
                 # the node type is actually a decorated collection, need to remove it
                 # from the current type collection before adding it to the new one
-                curtype = node.FindDecorationProvider(IntersectionTypeDecoration.DecorationName)
+                curtype = node.FindDecorationProvider(LayoutDecoration.IntersectionTypeDecoration.DecorationName)
                 if curtype : curtype.DropMember(node)
                 
                 # and add it to the new collection
@@ -331,13 +231,13 @@ class LayoutBuilder(LayoutInfo.LayoutInfo) :
     # -----------------------------------------------------------------
     def SetRoadTypeByPattern(self, pattern, newtype) :
         for name, edge in self.Edges.iteritems() :
-            if edge.NodeType.Name != LayoutInfo.Road.__name__ :
+            if edge.NodeType.Name != LayoutEdges.Road.__name__ :
                 continue
 
             if re.match(pattern, name) :
                 # the edge type is actually a decorated collection, need to remove it
                 # from the current type collection before adding it to the new one
-                curtype = edge.FindDecorationProvider(RoadTypeDecoration.DecorationName)
+                curtype = edge.FindDecorationProvider(LayoutDecoration.RoadTypeDecoration.DecorationName)
                 if curtype : curtype.DropMember(edge)
                 
                 # and add it to the new collection

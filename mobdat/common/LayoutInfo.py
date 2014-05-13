@@ -47,209 +47,12 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
-from mobdat.common.Decoration import *
-from mobdat.common.LayoutDecoration import *
-from mobdat.common import Graph
+from mobdat.common import Graph, Decoration
+from mobdat.common import LayoutNodes, LayoutEdges, LayoutDecoration
 
-import uuid, re
-import json
+import json, re
 
 logger = logging.getLogger(__name__)
-
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class IntersectionType(Graph.Node) :
-    """
-    The IntersectionType class is used to specify parameters for rendering
-    intersections in Sumo and OpenSim.
-    """
-
-    # -----------------------------------------------------------------
-    def __init__(self, name, itype, render) :
-        """
-        Args:
-            name -- string
-            itype -- string, indicates the stop light type for the intersection
-            render -- boolean, flag to indicate that opensim should render the object
-        """
-        Graph.Node.__init__(self, name = name)
-
-        self.AddDecoration(IntersectionTypeDecoration(name, itype, render))
-
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class Intersection(Graph.Node) :
-
-    # -----------------------------------------------------------------
-    def __init__(self, name, itype, x, y) :
-        """
-        Args:
-            name -- string
-            itype -- object of type Layout.IntersectionType
-            x, y -- integer coordinates
-        """
-        Graph.Node.__init__(self, name = name)
-        
-        self.AddDecoration(CoordDecoration(x, y))
-        itype.AddMember(self)
-
-    # -----------------------------------------------------------------
-    @property
-    def X(self) :
-        return self.Coord.X
-
-    # -----------------------------------------------------------------
-    @property
-    def Y(self) :
-        return self.Coord.Y
-
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class EndPoint(Graph.Node) :
-
-    # -----------------------------------------------------------------
-    def __init__(self, name, itype, x, y) :
-        """
-        Args:
-            name -- string
-            itype -- object of type Layout.IntersectionType
-            x, y -- integer coordinates
-        """
-        Graph.Node.__init__(self, name = name)
-        
-        self.AddDecoration(CoordDecoration(x, y))
-        itype.AddMember(self)
-
-    # -----------------------------------------------------------------
-    @property
-    def X(self) :
-        return self.Coord.X
-
-    # -----------------------------------------------------------------
-    @property
-    def Y(self) :
-        return self.Coord.Y
-
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class BusinessLocation(Graph.Node) :
-
-    # -----------------------------------------------------------------
-    def __init__(self, name, profile) :
-        """
-        Args:
-            name -- string
-            profile -- object of type BusinessLocationProfile
-        """
-        Graph.Node.__init__(self, name = name)
-        
-        self.AddDecoration(BusinessLocationDecoration())
-        profile.AddMember(self)
-
-    # -----------------------------------------------------------------
-    def AddEndpointToLocation(self, endpoint) :
-        """
-        Args:
-            endpoint -- object of type LayoutInfo.EndPoint
-        """
-        self.AddMember(endpoint)
-
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class ResidentialLocation(Graph.Node) :
-
-    # -----------------------------------------------------------------
-    def __init__(self, name, profile) :
-        """
-        Args:
-            name -- string
-            profile -- object of type ResidentialLocationProfile
-        """
-        Graph.Node.__init__(self, name = name)
-        
-        self.AddDecoration(ResidentialLocationDecoration())
-        profile.AddMember(self)
-
-    # -----------------------------------------------------------------
-    def AddEndpointToLocation(self, endpoint) :
-        """
-        Args:
-            endpoint -- object of type LayoutInfo.EndPoint
-        """
-        self.AddMember(endpoint)
-
-
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class BusinessLocationProfile(Graph.Node) :
-
-    # -----------------------------------------------------------------
-    def __init__(self, name, employees, customers, types) :
-        """
-        Args:
-            name -- string
-            employees -- integer, max number of employees per node
-            customers -- integer, max number of customers per node
-            types -- dict mapping Business.BusinessTypes to count
-        """
-        Graph.Node.__init__(self, name = name)
-        
-        self.AddDecoration(BusinessLocationProfileDecoration(employees, customers, types))
-
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class ResidentialLocationProfile(Graph.Node) :
-
-    # -----------------------------------------------------------------
-    def __init__(self, name, residents) :
-        """
-        Args:
-            residents -- integer, max number of residents per node
-        """
-        Graph.Node.__init__(self, name = name)
-        
-        self.AddDecoration(ResidentialLocationProfileDecoration(residents))
-
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class RoadType(Graph.Node) :
-    """
-    The RoadType class is used to specify parameters for rendering roads
-    in Sumo and OpenSim.
-    """
-
-    # -----------------------------------------------------------------
-    def __init__(self, name, lanes, pri, speed, wid, sig, render, center) :
-        """
-        Args:
-            name -- string
-            lanes -- integer, number of lanes in the road
-            pri -- integer, priority for stop lights
-            speed -- float, maximum speed allowed on the road
-            sig -- string, signature
-            render -- boolean, flag to indicate whether opensim should render
-            center -- boolean, flag to indicate the coordinate origin 
-        """
-        Graph.Node.__init__(self, name = name)
-
-        self.AddDecoration(RoadTypeDecoration(name, lanes, pri, speed, wid, sig, render, center))
-
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class Road(Graph.Edge) :
-    def __init__(self, name, snode, enode, etype) :
-        """
-        Args:
-            snode -- object of type Intersection
-            enode -- object of type Intersection
-            etype -- object of type LayoutInfo.RoadType (Graph.Node)
-            name -- string
-        """
-        Graph.Edge.__init__(self, snode, enode, name)
-
-        self.AddDecoration(EdgeTypeDecoration('Road'))
-        etype.AddMember(self)
-
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -270,7 +73,7 @@ class LayoutInfo(Graph.Graph) :
     def __init__(self) :
         Graph.Graph.__init__(self)
 
-        for dtype in CommonDecorations :
+        for dtype in LayoutDecoration.CommonDecorations :
             self.AddDecorationHandler(dtype)
 
     # =================================================================
@@ -280,7 +83,7 @@ class LayoutInfo(Graph.Graph) :
     def AddIntersectionType(self, itype) :
         """
         Args:
-            itype -- object of type LayoutInfo.IntersectionType
+            itype -- object of type LayoutNodes.IntersectionType
         """
         self.AddNode(itype)
         
@@ -288,7 +91,7 @@ class LayoutInfo(Graph.Graph) :
     def AddIntersection(self, intersection) :
         """
         Args:
-            intersection -- object of type LayoutInfo.Intersection
+            intersection -- object of type LayoutNodes.Intersection
         """
         self.AddNode(intersection)
         
@@ -296,7 +99,7 @@ class LayoutInfo(Graph.Graph) :
     def AddEndPoint(self, endpoint) :
         """
         Args:
-            endpoint -- object of type LayoutInfo.Intersection
+            endpoint -- object of type LayoutNodes.Intersection
         """
         self.AddNode(endpoint)
         
@@ -304,7 +107,7 @@ class LayoutInfo(Graph.Graph) :
     def AddBusinessLocationProfile(self, profile) :
         """
         Args:
-            profile -- object of type LayoutInfo.BusinessLocationProfile
+            profile -- object of type LayoutNodes.BusinessLocationProfile
         """
         self.AddNode(profile)
 
@@ -312,7 +115,7 @@ class LayoutInfo(Graph.Graph) :
     def AddResidentialLocationProfile(self, profile) :
         """
         Args:
-            profile -- object of type LayoutInfo.ResidentialLocationProfile
+            profile -- object of type LayoutNodes.ResidentialLocationProfile
         """
         self.AddNode(profile)
 
@@ -320,7 +123,7 @@ class LayoutInfo(Graph.Graph) :
     def AddBusinessLocation(self, location) :
         """
         Args:
-            location -- object of type LayoutInfo.BusinessLocation
+            location -- object of type LayoutNodes.BusinessLocation
         """
         self.AddNode(location)
 
@@ -328,7 +131,7 @@ class LayoutInfo(Graph.Graph) :
     def AddResidentialLocation(self, location) :
         """
         Args:
-            location -- object of type LayoutInfo.ResidentialLocation
+            location -- object of type LayoutNodes.ResidentialLocation
         """
         self.AddNode(location)
 
@@ -336,7 +139,7 @@ class LayoutInfo(Graph.Graph) :
     def AddRoadType(self, roadtype) :
         """
         Args:
-            roadtype -- object of type LayoutInfo.RoadType
+            roadtype -- object of type LayoutNodes.RoadType
         """
         self.AddNode(roadtype)
 
@@ -344,7 +147,7 @@ class LayoutInfo(Graph.Graph) :
     def AddRoad(self, road) :
         """
         Args:
-            profile -- object of type LayoutInfo.Road
+            profile -- object of type LayoutEdges.Road
         """
         self.AddEdge(road)
 

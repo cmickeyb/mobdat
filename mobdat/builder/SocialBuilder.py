@@ -46,7 +46,8 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
 from mobdat.common.Schedule import WeeklySchedule
-from mobdat.common import SocialInfo, Decoration, SocialDecoration
+from mobdat.common import Graph, Decoration
+from mobdat.common import SocialInfo, SocialNodes, SocialEdges, SocialDecoration
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -56,72 +57,31 @@ class SocialBuilder(SocialInfo.SocialInfo) :
     def __init__(self) :
         SocialInfo.SocialInfo.__init__(self)
 
-        self.JobDescriptions = {}
-
     # -----------------------------------------------------------------
     def AddPersonProfile(self, name) :
         """
         Args: 
             name -- string name of the person
         """
-        profile = SocialInfo.PersonProfile(name)
+        profile = SocialNodes.PersonProfile(name)
         SocialInfo.SocialInfo.AddPersonProfile(self, profile)
 
         return profile
 
     # -----------------------------------------------------------------
-    def AddPerson(self, name, profile, employer = None, job = None, residence = None) :
+    def AddPerson(self, name, profile) :
         """
         Args: 
             name -- string name of the person
-            profile -- object of type SocialInfo.PersonProfile
-            employer -- object of type SocialInfo.Business
+            profile -- object of type SocialNodes.PersonProfile
+            employer -- object of type SocialNodes.Business
             job -- object of type SocialDecoration.JobDescription
             residence -- 
         """
-        person = SocialInfo.Person(name)
+        person = SocialNodes.Person(name)
         SocialInfo.SocialInfo.AddPerson(self, person, profile)
 
-        if employer :
-            self.SetEmployer(person, employer)
-
-        if job :
-            person.SetJob(job)
-
-        if residence :
-            person.SetResidence(residence)
-
         return person
-
-    # -----------------------------------------------------------------
-    def AddJobDescription(self, name, salary, flexible, hours) :
-        """
-        AddJobDescription -- add a job profile that can be accessed by name
-        Args:
-            name -- unique string name for the job
-            salary -- number, salary in dollars
-            flexible -- boolean, flag to specify that hours are flexible
-            hours -- object of type WeeklySchedule
-        """
-
-        self.JobDescriptions[name] = SocialDecoration.JobDescription(name, salary, flexible, hours)
-        return self.JobDescriptions[name]
-
-    # -----------------------------------------------------------------
-    def _ExpandJobList(self, joblist) :
-        """
-        Args:
-            joblist -- dictionary that maps job description names to demand
-
-        Returns: 
-            a dictionary that maps SocialDecoration.JobDescription objects to Demand
-        """
-
-        jobs = dict()
-        for jobname, demand in joblist.iteritems() :
-            jobs[self.JobDescriptions[jobname]] = demand
-
-        return jobs
 
     # -----------------------------------------------------------------
     def AddBusinessProfile(self, name, biztype, joblist) :
@@ -132,49 +92,20 @@ class SocialBuilder(SocialInfo.SocialInfo) :
             joblist -- dictionary mapping type SocialDecoration.JobDescription --> Demand
             
         """
-        bizprof = SocialInfo.BusinessProfile(name, biztype, joblist)
+        bizprof = SocialNodes.BusinessProfile(name, biztype, joblist)
         SocialInfo.SocialInfo.AddBusinessProfile(self, bizprof)
 
         return bizprof
-
-    # -----------------------------------------------------------------
-    def AddFactoryProfile(self, name, joblist) :
-        jobs = self._ExpandJobList(joblist)
-        return self.AddBusinessProfile(name, SocialDecoration.BusinessType.Factory, jobs)
-
-    # -----------------------------------------------------------------
-    def AddRetailProfile(self, name, joblist, bizhours, customers, stime = 0.5) :
-        jobs = self._ExpandJobList(joblist)
-        profile = self.AddBusinessProfile(name, SocialDecoration.BusinessType.Service, jobs)
-        profile.AddServiceProfile(WeeklySchedule.WorkWeekSchedule(bizhours[0], bizhours[1]), customers, stime)
-
-        return profile
-
-    # -----------------------------------------------------------------
-    def AddRestaurantProfile(self, name, joblist, bizhours, customers, stime = 1.5) :
-        jobs = self._ExpandJobList(joblist)
-        profile = self.AddBusinessProfile(name, SocialDecoration.BusinessType.Food, jobs)
-        profile.AddServiceProfile(WeeklySchedule.WorkWeekSchedule(bizhours[0], bizhours[1]), customers, stime)
-
-        return profile
-
-    # -----------------------------------------------------------------
-    def AddSchoolProfile(self, name, joblist, students) :
-        jobs = self._ExpandJobList(joblist)
-        profile = self.AddBusinessProfile(name, SocialDecoration.BusinessType.School, jobs)
-        profile.AddServiceProfile(WeeklySchedule.WorkWeekSchedule(8.0, 15.0), students, 7.0)
-
-        return profile
 
     # -----------------------------------------------------------------
     def AddBusiness(self, name, profile) :
         """
         Args:
             business -- string name of the business to create
-            profile -- object of type SocialInfo.BusinessProfile
+            profile -- object of type SocialNodes.BusinessProfile
         """
 
-        business = SocialInfo.Business(name)
+        business = SocialNodes.Business(name)
         SocialInfo.SocialInfo.AddBusiness(self, business, profile)
 
         return business

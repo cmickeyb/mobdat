@@ -385,7 +385,7 @@ class ResidentialLocationDecoration(Decoration) :
         return restrict(random.gauss(1.0 - invweight, 0.1), 0, 1.0) * pfitness
 
     # -----------------------------------------------------------------
-    def AddPerson(self, person) :
+    def AddResident(self, person) :
         bestcnt = self.HostObject.ResidentialLocationProfile.ResidentsPerNode + 1
         bestfit = None
 
@@ -405,7 +405,7 @@ class ResidentialLocationDecoration(Decoration) :
         return bestfit
 
     # -----------------------------------------------------------------
-    def AddPersonToNode(self, person, nodename) :
+    def AddResidentToNode(self, person, nodename) :
         """
         AddPersonToNode -- add a person to a specific node
 

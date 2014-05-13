@@ -1,7 +1,9 @@
 Some design notes.
 
-Builder classes should focus on simplified, contextual interfaces. 
-Info classes handle graph nodes, edges, and collections.
+Builder classes should focus on simplified, contextual interfaces.  Info
+classes handle graph nodes, edges, and collections.  The node and edge
+classes should initialize themselves only. Relationships to other
+objects should happen in the Info classes.
 
 Graph collection represents an "is-a" relationship which is why node
 decorations are inherited through collections. 

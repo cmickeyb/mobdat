@@ -363,7 +363,7 @@ class ResidenceDecoration(Decoration) :
     
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-CommonDecorations = [ EmploymentProfileDecoration, ServiceProfileDecoration, BusinessProfileDecoration,
-                      PersonProfileDecoration, PersonDecoration, JobDescriptionDecoration,
-                      ResidenceDecoration ]
+Decorations = [ EmploymentProfileDecoration, ServiceProfileDecoration, BusinessProfileDecoration,
+                PersonProfileDecoration, PersonDecoration, JobDescriptionDecoration,
+                ResidenceDecoration ]
 

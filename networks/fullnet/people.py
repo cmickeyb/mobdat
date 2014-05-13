@@ -65,20 +65,26 @@ hprof = socinfo.AddPersonProfile('homemaker')
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 # -----------------------------------------------------------------
+ResidentialNodes = None
+
 def PlacePerson(person) :
+    global ResidentialNodes
+    if not ResidentialNodes :
+        ResidentialNodes = []
+        for location in layinfo.Nodes.itervalues() :
+            if location.NodeType.Name == 'ResidentialLocation' :
+                ResidentialNodes.append(location)
+
     bestloc = None
     bestfit = 0
-    for locname, location in layinfo.Nodes.iteritems() :
-        if not location.NodeType.Name == 'ResidentialLocation' :
-            continue
-
+    for location in ResidentialNodes :
         fitness = location.ResidentialLocation.Fitness(person)
         if fitness > bestfit :
             bestfit = fitness
             bestloc = location
 
     if bestloc :
-        endpoint = bestloc.ResidentialLocation.AddPerson(person)
+        endpoint = bestloc.ResidentialLocation.AddResident(person)
         person.SetResidence(endpoint)
 
     return bestloc
@@ -101,7 +107,10 @@ def PlacePeople() :
             for p in range(0, demand) :
                 people += 1
                 name = GenName(wprof.Name)
-                person = socinfo.AddPerson(name, wprof, biz, job)
+                person = socinfo.AddPerson(name, wprof)
+                person.SetJob(job)
+                socinfo.SetEmployer(person, biz)
+
                 location = PlacePerson(person)
                 if not location :
                     print 'ran out of residences after %s people' % people
