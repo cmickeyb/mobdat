@@ -82,7 +82,7 @@ def PlacePerson(person) :
 
     if bestloc :
         endpoint = bestloc.ResidentialLocation.AddResident(person)
-        person.SetResidence(endpoint)
+        world.SetResidence(person, endpoint)
 
     return bestloc
 

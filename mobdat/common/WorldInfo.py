@@ -133,7 +133,18 @@ class WorldInfo(Graph.Graph) :
 
         self.AddEdge(SocialEdges.EmployedBy(person, business))
         self.AddEdge(SocialEdges.Employs(business, person))
-        
+
+    # -----------------------------------------------------------------
+    def SetResidence(self, entity, location) :
+        """
+        Args:
+            entity -- object of type SocialNodes.Person or SocialNodes.Business
+            location -- object of type LayoutNodes.BusinessLocation, LayoutNodes.ResidentialLocation or LayoutNodes.EndPoint
+        """
+
+        self.AddEdge(SocialEdges.ResidesAt(entity, location))
+        self.AddEdge(SocialEdges.ResidentsOf(location, entity))
+
     # =================================================================
     # =================================================================
 

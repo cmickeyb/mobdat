@@ -79,4 +79,30 @@ class Employs(Graph.Edge) :
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+class ResidesAt(Graph.Edge) :
+
+    # -----------------------------------------------------------------
+    def __init__(self, entity, location) :
+        """
+        Args:
+            entity -- object of type SocialNodes.Person or SocialNodes.Business
+            location -- object of type LayoutNodes.BusinessLocation, LayoutNodes.ResidentialLocation or LayoutNodes.EndPoint
+        """
+        Graph.Edge.__init__(self, entity, location)
+
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+class ResidentsOf(Graph.Edge) :
+
+    # -----------------------------------------------------------------
+    def __init__(self, location, entity) :
+        """
+        Args:
+            location -- object of type LayoutNodes.BusinessLocation, LayoutNodes.ResidentialLocation or LayoutNodes.EndPoint
+            entity -- object of type SocialNodes.Person or SocialNodes.Business
+        """
+        Graph.Edge.__init__(self, location, entity)
+
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 Edges = [ EmployedBy, Employs ]

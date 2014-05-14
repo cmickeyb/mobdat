@@ -85,14 +85,6 @@ class Person(Graph.Node) :
         """
         self.AddDecoration(SocialDecoration.JobDescriptionDecoration(job))
 
-    # -----------------------------------------------------------------
-    def SetResidence(self, location) :
-        """
-        Args:
-            location -- object of type ResidentialLocation or LayoutInfo.EndPoint
-        """
-        self.AddDecoration(SocialDecoration.ResidenceDecoration(location))
-
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class BusinessProfile(Graph.Node) :
@@ -133,14 +125,6 @@ class Business(Graph.Node) :
         Graph.Node.__init__(self, name = name)
 
         profile.AddMember(self)
-
-    # -----------------------------------------------------------------
-    def SetResidence(self, location) :
-        """
-        Args:
-            location -- object of type BusinessLocation
-        """
-        self.AddDecoration(SocialDecoration.ResidenceDecoration(location))
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
