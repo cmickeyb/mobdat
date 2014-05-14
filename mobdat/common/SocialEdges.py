@@ -66,4 +66,17 @@ class EmployedBy(Graph.Edge) :
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-Edges = [ EmployedBy ]
+class Employs(Graph.Edge) :
+
+    # -----------------------------------------------------------------
+    def __init__(self, employer, person) :
+        """
+        Args:
+            person -- object of type SocialInfo.Person
+            employer -- object of type SocialInfo.Business
+        """
+        Graph.Edge.__init__(self, employer, person)
+
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+Edges = [ EmployedBy, Employs ]

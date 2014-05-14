@@ -52,14 +52,14 @@ import random
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-wprof = socinfo.AddPersonProfile('worker')
-sprof = socinfo.AddPersonProfile('student')
-hprof = socinfo.AddPersonProfile('homemaker')
+wprof = world.AddPersonProfile('worker')
+sprof = world.AddPersonProfile('student')
+hprof = world.AddPersonProfile('homemaker')
 
 # for vtype in laysettings.VehicleTypes.itervalues() :
 #     print vtype.Name
 #     for ptype in vtype.ProfileTypes :
-#         socinfo.PersonProfiles[ptype].AddVehicleType(vtype.Name, vtype.Rate)
+#         world.PersonProfiles[ptype].AddVehicleType(vtype.Name, vtype.Rate)
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -71,7 +71,7 @@ def PlacePerson(person) :
     global ResidentialNodes
     if not ResidentialNodes :
         ResidentialNodes = []
-        for location in layinfo.Nodes.itervalues() :
+        for location in world.Nodes.itervalues() :
             if location.NodeType.Name == 'ResidentialLocation' :
                 ResidentialNodes.append(location)
 
@@ -91,12 +91,12 @@ def PlacePerson(person) :
 
 # -----------------------------------------------------------------
 def PlacePeople() :
-    global socinfo
+    global world
 
-    profile = socinfo.FindNodeByName('worker')
+    profile = world.FindNodeByName('worker')
 
     bizlist = {}
-    for name, biz in socinfo.Nodes.iteritems() :
+    for name, biz in world.Nodes.iteritems() :
         if biz.NodeType.Name == 'Business' :
             bizlist[name] = biz
 
@@ -107,9 +107,9 @@ def PlacePeople() :
             for p in range(0, demand) :
                 people += 1
                 name = GenName(wprof.Name)
-                person = socinfo.AddPerson(name, wprof)
+                person = world.AddPerson(name, wprof)
                 person.SetJob(job)
-                socinfo.SetEmployer(person, biz)
+                world.SetEmployer(person, biz)
 
                 location = PlacePerson(person)
                 if not location :

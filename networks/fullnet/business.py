@@ -85,39 +85,39 @@ def ExpandJobList(joblist) :
 
 # -----------------------------------------------------------------
 def AddFactoryProfile(name, joblist) :
-    global socinfo
+    global world
 
     jobs = ExpandJobList(joblist)
-    profile = socinfo.AddBusinessProfile(name, SocialDecoration.BusinessType.Factory, jobs)
+    profile = world.AddBusinessProfile(name, SocialDecoration.BusinessType.Factory, jobs)
 
     return profile
 
 # -----------------------------------------------------------------
 def AddRetailProfile(name, joblist, bizhours, customers, stime = 0.5) :
-    global socinfo
+    global world
 
     jobs = ExpandJobList(joblist)
-    profile = socinfo.AddBusinessProfile(name, SocialDecoration.BusinessType.Service, jobs)
+    profile = world.AddBusinessProfile(name, SocialDecoration.BusinessType.Service, jobs)
     profile.AddServiceProfile(WeeklySchedule.WorkWeekSchedule(bizhours[0], bizhours[1]), customers, stime)
 
     return profile
 
 # -----------------------------------------------------------------
 def AddRestaurantProfile(name, joblist, bizhours, customers, stime = 1.5) :
-    global socinfo
+    global world
 
     jobs = ExpandJobList(joblist)
-    profile = socinfo.AddBusinessProfile(name, SocialDecoration.BusinessType.Food, jobs)
+    profile = world.AddBusinessProfile(name, SocialDecoration.BusinessType.Food, jobs)
     profile.AddServiceProfile(WeeklySchedule.WorkWeekSchedule(bizhours[0], bizhours[1]), customers, stime)
 
     return profile
 
 # -----------------------------------------------------------------
 def AddSchoolProfile(name, joblist, students) :
-    global socinfo
+    global world
 
     jobs = ExpandJobList(joblist)
-    profile = socinfo.AddBusinessProfile(name, SocialDecoration.BusinessType.School, jobs)
+    profile = world.AddBusinessProfile(name, SocialDecoration.BusinessType.School, jobs)
     profile.AddServiceProfile(WeeklySchedule.WorkWeekSchedule(8.0, 15.0), students, 7.0)
 
     return profile
@@ -182,11 +182,11 @@ AddSchoolProfile("high-school", { 'teacher' : 30, 'admin' : 8, 'principal' : 4},
 
 # -----------------------------------------------------------------
 def PlaceBusiness(business) :
-    global layinfo
+    global world
 
     bestloc = None
     bestfit = 0
-    for locname, location in layinfo.Nodes.iteritems() :
+    for locname, location in world.Nodes.iteritems() :
         if not location.NodeType.Name == 'BusinessLocation' :
             continue
 
@@ -203,10 +203,10 @@ def PlaceBusiness(business) :
 
 # -----------------------------------------------------------------
 def PlaceBusinesses() :
-    global socinfo
+    global world
 
     profiles = {}
-    for profname, profile in socinfo.Nodes.iteritems() :
+    for profname, profile in world.Nodes.iteritems() :
         if profile.NodeType.Name == 'BusinessProfile' :
             profiles[profname] = profile
 
@@ -216,7 +216,7 @@ def PlaceBusinesses() :
         profile = profiles[pname]
 
         name = GenName(pname)
-        business = socinfo.AddBusiness(name, profile)
+        business = world.AddBusiness(name, profile)
 
         location = PlaceBusiness(business)
 
@@ -230,10 +230,10 @@ PlaceBusinesses()
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 def CountJobs() :
-    global socinfo
+    global world
     JobCount = {}
 
-    for name, biz in socinfo.Nodes.iteritems() :
+    for name, biz in world.Nodes.iteritems() :
         if biz.NodeType.Name != 'Business' :
             continue
 

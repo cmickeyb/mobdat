@@ -46,7 +46,10 @@ sys.path.append(os.path.join(os.environ.get("OPENSIM","/share/opensim"),"lib","p
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
-from mobdat.common import LayoutInfo, LayoutNodes, LayoutEdges, LayoutDecoration
+from mobdat.common import WorldInfo
+from mobdat.common import LayoutNodes, LayoutEdges, LayoutDecoration
+from mobdat.common import SocialNodes, SocialEdges, SocialDecoration
+
 from mobdat.common.Utilities import GenName, GenNameFromCoordinates
 from mobdat.common import Graph
 
@@ -71,47 +74,89 @@ class ResidentialGenerator :
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class LayoutBuilder(LayoutInfo.LayoutInfo) :
-
-    # -----------------------------------------------------------------
-    @staticmethod
-    def LoadFromFile(filename) :
-        return LayoutInfo.LayoutInfo.LoadFromFile(filename)
+class WorldBuilder(WorldInfo.WorldInfo) :
 
     # -----------------------------------------------------------------
     def __init__(self) :
-        LayoutInfo.LayoutInfo.__init__(self)
+        WorldInfo.WorldInfo.__init__(self)
 
     # =================================================================
     # =================================================================
 
     # -----------------------------------------------------------------
-    def AddIntersectionType(self, name, itype = 'priority', render = True) :
-        node = LayoutNodes.IntersectionType(name, itype, render)
-        LayoutInfo.LayoutInfo.AddIntersectionType(self, node)
+    def AddPersonProfile(self, name) :
+        """
+        Args: 
+            name -- string name of the person
+        """
+        profile = SocialNodes.PersonProfile(name)
+        WorldInfo.WorldInfo.AddPersonProfile(self, profile)
 
-        return node
+        return profile
 
     # -----------------------------------------------------------------
-    def AddIntersection(self, curx, cury, itype, prefix) :
-        name = GenNameFromCoordinates(curx, cury, prefix)
-        node = LayoutNodes.Intersection(name, itype, curx, cury)
-        LayoutInfo.LayoutInfo.AddIntersection(self, node)
+    def AddPerson(self, name, profile) :
+        """
+        Args: 
+            name -- string name of the person
+            profile -- object of type SocialNodes.PersonProfile
+            employer -- object of type SocialNodes.Business
+            job -- object of type SocialDecoration.JobDescription
+            residence -- 
+        """
+        person = SocialNodes.Person(name, profile)
+        WorldInfo.WorldInfo.AddPerson(self, person)
 
-        return node
+        return person
+
+    # =================================================================
+    # =================================================================
+
+    # -----------------------------------------------------------------
+    def AddBusinessProfile(self, name, biztype, joblist) :
+        """
+        Args:
+            name -- unique string name for the business profile
+            biztype -- constant of type SocialDecoration.BusinessType
+            joblist -- dictionary mapping type SocialDecoration.JobDescription --> Demand
+            
+        """
+        bizprof = SocialNodes.BusinessProfile(name, biztype, joblist)
+        WorldInfo.WorldInfo.AddBusinessProfile(self, bizprof)
+
+        return bizprof
+
+    # -----------------------------------------------------------------
+    def AddBusiness(self, name, profile) :
+        """
+        Args:
+            business -- string name of the business to create
+            profile -- object of type SocialNodes.BusinessProfile
+        """
+
+        business = SocialNodes.Business(name, profile)
+        WorldInfo.WorldInfo.AddBusiness(self, business)
+
+        return business
+
+    # =================================================================
+    # =================================================================
 
     # -----------------------------------------------------------------
     def AddEndPoint(self, curx, cury, ntype, prefix) :
         name = GenNameFromCoordinates(curx, cury, prefix)
         node = LayoutNodes.EndPoint(name, ntype, curx, cury)
-        LayoutInfo.LayoutInfo.AddEndPoint(self, node)
+        WorldInfo.WorldInfo.AddEndPoint(self, node)
 
         return node
+
+    # =================================================================
+    # =================================================================
 
     # -----------------------------------------------------------------
     def AddBusinessLocationProfile(self, name, employees = 20, customers = 50, types = None) :
         node = LayoutNodes.BusinessLocationProfile(name, employees, customers, types)
-        LayoutInfo.LayoutInfo.AddBusinessLocationProfile(self, node)
+        WorldInfo.WorldInfo.AddBusinessLocationProfile(self, node)
 
         return node
 
@@ -126,14 +171,17 @@ class LayoutBuilder(LayoutInfo.LayoutInfo) :
         for endpoint in endpoints :
             location.AddEndpointToLocation(endpoint)
 
-        LayoutInfo.LayoutInfo.AddBusinessLocation(self, location)
+        WorldInfo.WorldInfo.AddBusinessLocation(self, location)
 
         return location
+
+    # =================================================================
+    # =================================================================
 
     # -----------------------------------------------------------------
     def AddResidentialLocationProfile(self, name, residents = 5) :
         node = LayoutNodes.ResidentialLocationProfile(name, residents)
-        LayoutInfo.LayoutInfo.AddResidentialLocationProfile(self, node)
+        WorldInfo.WorldInfo.AddResidentialLocationProfile(self, node)
 
         return node
 
@@ -148,14 +196,35 @@ class LayoutBuilder(LayoutInfo.LayoutInfo) :
         for endpoint in endpoints :
             location.AddEndpointToLocation(endpoint)
 
-        LayoutInfo.LayoutInfo.AddResidentialLocation(self, location)
+        WorldInfo.WorldInfo.AddResidentialLocation(self, location)
 
         return location
+
+    # =================================================================
+    # =================================================================
+
+    # -----------------------------------------------------------------
+    def AddIntersectionType(self, name, itype = 'priority', render = True) :
+        node = LayoutNodes.IntersectionType(name, itype, render)
+        WorldInfo.WorldInfo.AddIntersectionType(self, node)
+
+        return node
+
+    # -----------------------------------------------------------------
+    def AddIntersection(self, curx, cury, itype, prefix) :
+        name = GenNameFromCoordinates(curx, cury, prefix)
+        node = LayoutNodes.Intersection(name, itype, curx, cury)
+        WorldInfo.WorldInfo.AddIntersection(self, node)
+
+        return node
+
+    # =================================================================
+    # =================================================================
 
     # -----------------------------------------------------------------
     def AddRoadType(self, name, lanes = 1, pri = 70, speed = 2.0, wid = 2.5, sig = '1L', render = True, center = False) :
         node = LayoutNodes.RoadType(name, lanes, pri, speed, wid, sig, render, center)
-        LayoutInfo.LayoutInfo.AddRoadType(self, node)
+        WorldInfo.WorldInfo.AddRoadType(self, node)
 
         return node
 
@@ -163,9 +232,43 @@ class LayoutBuilder(LayoutInfo.LayoutInfo) :
     def AddRoad(self, snode, enode, etype) :
         name = Graph.GenEdgeName(snode, enode)
         edge = LayoutEdges.Road(name, snode, enode, etype)
-        LayoutInfo.LayoutInfo.AddRoad(self, edge)
+        WorldInfo.WorldInfo.AddRoad(self, edge)
         
         return edge
+
+    # =================================================================
+    # =================================================================
+
+    # -----------------------------------------------------------------
+    def SetIntersectionTypeByPattern(self, pattern, newtype) :
+        for name, node in self.Nodes.iteritems() :
+            if re.match(pattern, name) :
+                # the node type is actually a decorated collection, need to remove it
+                # from the current type collection before adding it to the new one
+                curtype = node.FindDecorationProvider(LayoutDecoration.IntersectionTypeDecoration.DecorationName)
+                if curtype : curtype.DropMember(node)
+                
+                # and add it to the new collection
+                newtype.AddMember(node)
+
+        return True
+
+    # -----------------------------------------------------------------
+    def SetRoadTypeByPattern(self, pattern, newtype) :
+        for name, edge in self.Edges.iteritems() :
+            if edge.NodeType.Name != LayoutEdges.Road.__name__ :
+                continue
+
+            if re.match(pattern, name) :
+                # the edge type is actually a decorated collection, need to remove it
+                # from the current type collection before adding it to the new one
+                curtype = edge.FindDecorationProvider(LayoutDecoration.RoadTypeDecoration.DecorationName)
+                if curtype : curtype.DropMember(edge)
+                
+                # and add it to the new collection
+                newtype.AddMember(edge)
+
+        return True
 
     # =================================================================
     # =================================================================
@@ -214,36 +317,8 @@ class LayoutBuilder(LayoutInfo.LayoutInfo) :
 
         return nnode
 
-    # -----------------------------------------------------------------
-    def SetIntersectionTypeByPattern(self, pattern, newtype) :
-        for name, node in self.Nodes.iteritems() :
-            if re.match(pattern, name) :
-                # the node type is actually a decorated collection, need to remove it
-                # from the current type collection before adding it to the new one
-                curtype = node.FindDecorationProvider(LayoutDecoration.IntersectionTypeDecoration.DecorationName)
-                if curtype : curtype.DropMember(node)
-                
-                # and add it to the new collection
-                newtype.AddMember(node)
-
-        return True
-
-    # -----------------------------------------------------------------
-    def SetRoadTypeByPattern(self, pattern, newtype) :
-        for name, edge in self.Edges.iteritems() :
-            if edge.NodeType.Name != LayoutEdges.Road.__name__ :
-                continue
-
-            if re.match(pattern, name) :
-                # the edge type is actually a decorated collection, need to remove it
-                # from the current type collection before adding it to the new one
-                curtype = edge.FindDecorationProvider(LayoutDecoration.RoadTypeDecoration.DecorationName)
-                if curtype : curtype.DropMember(edge)
-                
-                # and add it to the new collection
-                newtype.AddMember(edge)
-
-        return True
+    # =================================================================
+    # =================================================================
 
     # -----------------------------------------------------------------
     def GenerateGrid(self, x0, y0, x1, y1, stepx, stepy, ntype, etype, prefix = 'node') :
@@ -270,6 +345,9 @@ class LayoutBuilder(LayoutInfo.LayoutInfo) :
 
             lastlist = thislist
             curx += int(stepx)
+
+    # =================================================================
+    # =================================================================
 
     # -----------------------------------------------------------------
     def GenerateResidential(self, node1, node2, rgen, prefix = 'res') :
@@ -347,6 +425,9 @@ class LayoutBuilder(LayoutInfo.LayoutInfo) :
 
         self.ConnectIntersections(lastnode,node2,rgen.RoadType)
         return resnodes
+
+    # =================================================================
+    # =================================================================
 
     # -----------------------------------------------------------------
     def BuildSimpleParkingLotNS(self, origin, itype, rgen, prefix = 'tile', slength = 30, elength = 70, offset = 25) :

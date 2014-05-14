@@ -49,7 +49,7 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "
 import json
 
 from mobdat.common import LayoutSettings
-from mobdat.builder import *
+from mobdat.builder import WorldBuilder, OpenSimBuilder, SumoBuilder
 
 logger = logging.getLogger(__name__)
 
@@ -64,18 +64,16 @@ def Controller(settings, pushlist) :
     """
 
     laysettings = LayoutSettings.LayoutSettings(settings)
+    world = WorldBuilder.WorldBuilder()
 
-    layinfo = LayoutBuilder.LayoutBuilder()
-    socinfo = SocialBuilder.SocialBuilder()
-
-    dbbindings = {"laysettings" : laysettings, "layinfo" : layinfo, "socinfo" : socinfo}
+    dbbindings = {"laysettings" : laysettings, "world" : world}
 
     for cf in settings["Builder"].get("ExtensionFiles",[]) :
         try :
             execfile(cf, dbbindings)
             logger.info('loaded extension file %s', cf)
         except :
-            logger.warn('unhandled error processing extension file %s\n%s', cf, traceback.format_exc(5))
+            logger.warn('unhandled error processing extension file %s\n%s', cf, traceback.format_exc(10))
             sys.exit(-1)
 
     for push in pushlist :
@@ -87,16 +85,8 @@ def Controller(settings, pushlist) :
             sc.PushNetworkToSumo()
 
     # write the network information back out to the layinfo file
-    layinfofile = settings["General"].get("LayoutInfoFile","layinfo.js")
-    logger.info('saving network data to %s',layinfofile)
+    infofile = settings["General"].get("WorldInfoFile","info.js")
+    logger.info('saving world data to %s',infofile)
 
-    with open(layinfofile, "w") as fp :
-        json.dump(layinfo.Dump(), fp, indent=2, ensure_ascii=True)
-
-    # write the network information back out to the layinfo file
-    socinfofile = settings["General"].get("SocialInfoFile","socinfo.js")
-    logger.info('saving social data to %s',socinfofile)
-
-    with open(socinfofile, "w") as fp :
-        json.dump(socinfo.Dump(), fp, indent=2, ensure_ascii=True)
-
+    with open(infofile, "w") as fp :
+        json.dump(world.Dump(), fp, indent=2, ensure_ascii=True)

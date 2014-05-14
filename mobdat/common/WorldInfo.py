@@ -49,23 +49,25 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "
 
 from mobdat.common import Graph, Decoration
 from mobdat.common import LayoutNodes, LayoutEdges, LayoutDecoration
+from mobdat.common import SocialNodes, SocialEdges, SocialDecoration
 
-import json, re
+import json
 
 logger = logging.getLogger(__name__)
 
+
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class LayoutInfo(Graph.Graph) :
+class WorldInfo(Graph.Graph) :
 
     # -----------------------------------------------------------------
     @staticmethod
     def LoadFromFile(filename) :
         with open(filename, 'r') as fp :
-            netdata = json.load(fp)
+            data = json.load(fp)
 
-        graph = LayoutInfo()
-        graph.Load(netdata)
+        graph = WorldInfo()
+        graph.Load(data)
 
         return graph
 
@@ -76,25 +78,65 @@ class LayoutInfo(Graph.Graph) :
         for dtype in LayoutDecoration.CommonDecorations :
             self.AddDecorationHandler(dtype)
 
+        for dtype in SocialDecoration.Decorations :
+            self.AddDecorationHandler(dtype)
+
     # =================================================================
     # =================================================================
 
     # -----------------------------------------------------------------
-    def AddIntersectionType(self, itype) :
+    def AddPersonProfile(self, profile) :
         """
         Args:
-            itype -- object of type LayoutNodes.IntersectionType
+            profile -- SocialNodes.PersonProfile
         """
-        self.AddNode(itype)
-        
+        self.AddNode(profile)
+
     # -----------------------------------------------------------------
-    def AddIntersection(self, intersection) :
+    def AddPerson(self, person) :
         """
         Args:
-            intersection -- object of type LayoutNodes.Intersection
+            person -- SocialNodes.Person
         """
-        self.AddNode(intersection)
+        self.AddNode(person)
+
+    # =================================================================
+    # =================================================================
+
+    # -----------------------------------------------------------------
+    def AddBusinessProfile(self, profile) :
+        """
+        Args:
+            profile -- object of type SocialNodes.BusinessProfile
+        """
+        self.AddNode(profile)
+
+    # -----------------------------------------------------------------
+    def AddBusiness(self, business) :
+        """
+        Args:
+            business -- object of type SocialNodes.Business
+        """
+
+        self.AddNode(business)
+
+    # =================================================================
+    # =================================================================
+
+    # -----------------------------------------------------------------
+    def SetEmployer(self, person, business) :
+        """
+        Args:
+            person -- object of type SocialNodes.Person
+            business -- object of type SocialNodes.Business
+        """
+
+        self.AddEdge(SocialEdges.EmployedBy(person, business))
+        self.AddEdge(SocialEdges.Employs(business, person))
         
+    # =================================================================
+    # =================================================================
+
     # -----------------------------------------------------------------
     def AddEndPoint(self, endpoint) :
         """
@@ -135,6 +177,28 @@ class LayoutInfo(Graph.Graph) :
         """
         self.AddNode(location)
 
+    # =================================================================
+    # =================================================================
+
+    # -----------------------------------------------------------------
+    def AddIntersectionType(self, itype) :
+        """
+        Args:
+            itype -- object of type LayoutNodes.IntersectionType
+        """
+        self.AddNode(itype)
+        
+    # -----------------------------------------------------------------
+    def AddIntersection(self, intersection) :
+        """
+        Args:
+            intersection -- object of type LayoutNodes.Intersection
+        """
+        self.AddNode(intersection)
+        
+    # =================================================================
+    # =================================================================
+
     # -----------------------------------------------------------------
     def AddRoadType(self, roadtype) :
         """
@@ -148,37 +212,6 @@ class LayoutInfo(Graph.Graph) :
         """
         Args:
             profile -- object of type LayoutEdges.Road
+            etype -- object of type LayoutInfo.RoadType (Graph.Node)
         """
         self.AddEdge(road)
-
-    # =================================================================
-    # =================================================================
-
-    # -----------------------------------------------------------------
-    def FindNodesInRange(self, x, y, dist) :
-        result = []
-        sqdist = int(dist) * int(dist)
-        for n in self.Nodes.itervalues() :
-            cdist = (n.Coord.X - x)**2 + (n.Coord.Y - y)**2
-            if cdist < sqdist :
-                result.append(n)
-
-        return result
-
-    # -----------------------------------------------------------------
-    def FindClosestNode(self, node) :
-        cnode = None
-        cdist = 0
-
-        for n in self.Nodes.itervalues() :
-            if cnode== None :
-                cnode = n
-                cdist = (cnode.X - node.X)**2 + (cnode.Y - node.Y)**2
-                continue
-            dist = (n.X - node.X)**2 + (n.Y - node.Y)**2
-            if (dist < cdist) :
-                cnode = n
-                cdist = dist
-            
-        return cnode
-

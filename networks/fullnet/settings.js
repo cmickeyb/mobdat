@@ -5,8 +5,7 @@
         "Interval" : 0.200,
         "SecondsPerStep" : 2.0,
         "StartTimeOfDay" : 6.0,
-	"LayoutInfoFile" : "networks/fullnet/data/layinfo.js",
-        "SocialInfoFile" : "networks/fullnet/data/socinfo.js",
+	"WorldInfoFile" : "networks/fullnet/data/worldinfo.js",
         "Connectors" : ["opensim", "sumo", "social", "stats"]
     },
 

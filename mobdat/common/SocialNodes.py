@@ -68,12 +68,14 @@ class PersonProfile(Graph.Node) :
 class Person(Graph.Node) :
 
     # -----------------------------------------------------------------
-    def __init__(self, name) :
+    def __init__(self, name, profile) :
         """
         Args:
             name -- string name 
         """
         Graph.Node.__init__(self, name = name)
+
+        profile.AddMember(self)
 
     # -----------------------------------------------------------------
     def SetJob(self, job) :
@@ -123,12 +125,14 @@ class BusinessProfile(Graph.Node) :
 class Business(Graph.Node) :
 
     # -----------------------------------------------------------------
-    def __init__(self, name) :
+    def __init__(self, name, profile) :
         """
         Args:
             business -- object of type Business.Business
         """
         Graph.Node.__init__(self, name = name)
+
+        profile.AddMember(self)
 
     # -----------------------------------------------------------------
     def SetResidence(self, location) :
