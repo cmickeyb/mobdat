@@ -70,10 +70,7 @@ ResidentialNodes = None
 def PlacePerson(person) :
     global ResidentialNodes
     if not ResidentialNodes :
-        ResidentialNodes = []
-        for location in world.Nodes.itervalues() :
-            if location.NodeType.Name == 'ResidentialLocation' :
-                ResidentialNodes.append(location)
+        ResidentialNodes = world.FindNodes(nodetype = 'ResidentialLocation')
 
     bestloc = None
     bestfit = 0
@@ -96,9 +93,8 @@ def PlacePeople() :
     profile = world.FindNodeByName('worker')
 
     bizlist = {}
-    for name, biz in world.Nodes.iteritems() :
-        if biz.NodeType.Name == 'Business' :
-            bizlist[name] = biz
+    for name, biz in world.IterNodes(nodetype = 'Business') :
+        bizlist[name] = biz
 
     people = 0
     for name, biz in bizlist.iteritems() :

@@ -241,32 +241,23 @@ class WorldBuilder(WorldInfo.WorldInfo) :
 
     # -----------------------------------------------------------------
     def SetIntersectionTypeByPattern(self, pattern, newtype) :
-        for name, node in self.Nodes.iteritems() :
-            if re.match(pattern, name) :
-                # the node type is actually a decorated collection, need to remove it
-                # from the current type collection before adding it to the new one
-                curtype = node.FindDecorationProvider(LayoutDecoration.IntersectionTypeDecoration.DecorationName)
-                if curtype : curtype.DropMember(node)
+        for name, node in self.IterNodes(pattern, LayoutNodes.Intersection.__name__) :
+            curtype = node.FindDecorationProvider(LayoutDecoration.IntersectionTypeDecoration.DecorationName)
+            if curtype : curtype.DropMember(node)
                 
-                # and add it to the new collection
-                newtype.AddMember(node)
+            # and add it to the new collection
+            newtype.AddMember(node)
 
         return True
 
     # -----------------------------------------------------------------
     def SetRoadTypeByPattern(self, pattern, newtype) :
-        for name, edge in self.Edges.iteritems() :
-            if edge.NodeType.Name != LayoutEdges.Road.__name__ :
-                continue
-
-            if re.match(pattern, name) :
-                # the edge type is actually a decorated collection, need to remove it
-                # from the current type collection before adding it to the new one
-                curtype = edge.FindDecorationProvider(LayoutDecoration.RoadTypeDecoration.DecorationName)
-                if curtype : curtype.DropMember(edge)
+        for name, edge in self.IterEdges(pattern = pattern, edgetype = LayoutEdges.Road.__name__) :
+            curtype = edge.FindDecorationProvider(LayoutDecoration.RoadTypeDecoration.DecorationName)
+            if curtype : curtype.DropMember(edge)
                 
-                # and add it to the new collection
-                newtype.AddMember(edge)
+            # and add it to the new collection
+            newtype.AddMember(edge)
 
         return True
 

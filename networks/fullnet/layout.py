@@ -94,7 +94,7 @@ plotdrive = world.AddRoadType('parking_drive', 1, 10, 0.5, sig='D')
 # Create the main east and west grids and drop the corner nodes
 world.GenerateGrid(-400, -400, -100, 400, 100, 100, sntype, e2A, 'main')
 world.GenerateGrid(100, -400, 400, 400, 100, 100, sntype, e2A, 'main')
-world.DropNodesByPattern('main400[EW][34]00[SN]')
+world.DropNodes(pattern = 'main400[EW][34]00[SN]')
 
 # All of these nodes should be four way stops, they are the
 # two lane intersections

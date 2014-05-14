@@ -259,11 +259,6 @@ class Graph :
         return graph
 
     # -----------------------------------------------------------------
-    @staticmethod
-    def GenGroupDecorationKey(dname, iname) :
-        return "%s=O=%s" % (dname, iname)
-
-    # -----------------------------------------------------------------
     def __init__(self) :
         self.DecorationMap = {}
 
@@ -305,6 +300,10 @@ class Graph :
         for ninfo in info['Nodes'] :
             Node.LoadMembers(self, ninfo)
 
+    # =================================================================
+    # DECORATION METHODS
+    # =================================================================
+
     # -----------------------------------------------------------------
     def AddDecorationHandler(self, handler) :
         self.DecorationMap[handler.DecorationName] = handler
@@ -319,6 +318,10 @@ class Graph :
         # decoration, note the missing decoration in the logs however
         logger.info('no decoration handler found for type %s', dinfo['__TYPE__'])
         return None
+
+    # =================================================================
+    # UTILITY METHODS
+    # =================================================================
 
     # -----------------------------------------------------------------
     def FindByName(self, name) :
@@ -359,28 +362,66 @@ class Graph :
         del self.Nodes[node.Name]
 
     # -----------------------------------------------------------------
-    def DropNodeByName(self, name) :
-        if name not in self.Nodes :
-            logger.info('unable to drop unknown node %s', name)
-            return False
-
-        self.DropNode(self.Nodes[name])
-        return True
-
-    # -----------------------------------------------------------------
-    def DropNodesByPattern(self, pattern) :
-        for name, node in self.Nodes.items() :
-            if re.match(pattern, name) :
-                self.DropNode(node)
-
-        return True
-
-    # -----------------------------------------------------------------
     def FindNodeByName(self, name) :
         if name in self.Nodes :
             return self.Nodes[name]
         else :
             raise NameError("graph contains no object named %s" % mname)
+
+    # -----------------------------------------------------------------
+    def DropNodeByName(self, name) :
+        if name not in self.Nodes :
+            return
+
+        self.DropNode(self.Nodes[name])
+
+    # -----------------------------------------------------------------
+    def DropNodes(self, pattern = None, nodetype = None) :
+        """
+        Args:
+            pattern -- string representing a regular expression
+            nodetype -- string name of a node type
+        """
+        nodes = self.FindNodes(pattern, nodetype)
+        for node in nodes :
+            self.DropNode(node)
+
+        return True
+
+    # -----------------------------------------------------------------
+    def FindNodes(self, pattern = None, nodetype = None) :
+        """
+        Args:
+            pattern -- string representing a regular expression
+            nodetype -- string name of a node type
+        """
+        nodes = []
+        for name, node in self.Nodes.iteritems() :
+            if nodetype and node.NodeType.Name != nodetype :
+                continue
+
+            if pattern and not re.match(pattern, name) :
+                continue
+
+            nodes.append(node)
+
+        return nodes
+
+    # -----------------------------------------------------------------
+    def IterNodes(self, pattern = None, nodetype = None) :
+        """
+        Args:
+            pattern -- string representing a regular expression
+            nodetype -- string name of a node type
+        """
+        for name, node in self.Nodes.iteritems() :
+            if nodetype and node.NodeType.Name != nodetype :
+                continue
+
+            if pattern and not re.match(pattern, name) :
+                continue
+
+            yield name, node
 
     # =================================================================
     # EDGE methods
@@ -410,6 +451,55 @@ class Graph :
             return True
 
         return self.DropEdge(self.Edges[name])
+
+    # -----------------------------------------------------------------
+    def DropEdges(self, pattern = None, edgetype = None) :
+        """
+        Args:
+            pattern -- string representing a regular expression
+            edgetype -- string name of a edge type
+        """
+        edges = self.FindEdges(pattern, edgetype)
+        for edge in edges :
+            self.DropEdge(edge)
+
+        return True
+
+    # -----------------------------------------------------------------
+    def FindEdges(self, pattern = None, edgetype = None) :
+        """
+        Args:
+            pattern -- string representing a regular expression
+            edgetype -- string name of a edge type
+        """
+        edges = []
+        for name, edge in self.Edges.iteritems() :
+            if edgetype and edge.NodeType.Name != edgetype :
+                continue
+
+            if pattern and not re.match(pattern, name) :
+                continue
+
+            edges.append(edge)
+
+        return edges
+
+    # -----------------------------------------------------------------
+    def IterEdges(self, pattern = None, edgetype = None) :
+        """
+        Args:
+            pattern -- string representing a regular expression
+            edgetype -- string name of a edge type
+        """
+        for name, edge in self.Edges.iteritems() :
+            if edgetype and edge.NodeType.Name != edgetype :
+                continue
+
+            if pattern and not re.match(pattern, name) :
+                continue
+
+            yield name, edge
+
 
     # -----------------------------------------------------------------
     def DropEdgesByPattern(self, pattern) :

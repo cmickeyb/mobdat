@@ -186,10 +186,7 @@ def PlaceBusiness(business) :
 
     bestloc = None
     bestfit = 0
-    for locname, location in world.Nodes.iteritems() :
-        if not location.NodeType.Name == 'BusinessLocation' :
-            continue
-
+    for locname, location in world.IterNodes(nodetype = 'BusinessLocation') :
         fitness = location.BusinessLocation.Fitness(business)
         if fitness > bestfit :
             bestfit = fitness
@@ -206,9 +203,8 @@ def PlaceBusinesses() :
     global world
 
     profiles = {}
-    for profname, profile in world.Nodes.iteritems() :
-        if profile.NodeType.Name == 'BusinessProfile' :
-            profiles[profname] = profile
+    for profname, profile in world.IterNodes(nodetype = 'BusinessProfile') :
+        profiles[profname] = profile
 
     while len(profiles) > 0 :
         # this is a uniform distribution of businesses from the options
@@ -233,10 +229,7 @@ def CountJobs() :
     global world
     JobCount = {}
 
-    for name, biz in world.Nodes.iteritems() :
-        if biz.NodeType.Name != 'Business' :
-            continue
-
+    for name, biz in world.IterNodes(nodetype = 'Business') :
         bprof = biz.EmploymentProfile
         for job, demand in bprof.JobList.iteritems() :
             if job.Name not in JobCount :
