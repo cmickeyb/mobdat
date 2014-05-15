@@ -56,10 +56,14 @@ wprof = world.AddPersonProfile('worker')
 sprof = world.AddPersonProfile('student')
 hprof = world.AddPersonProfile('homemaker')
 
-# for vtype in laysettings.VehicleTypes.itervalues() :
-#     print vtype.Name
-#     for ptype in vtype.ProfileTypes :
-#         world.PersonProfiles[ptype].AddVehicleType(vtype.Name, vtype.Rate)
+pmap = {}
+pmap['worker'] = wprof
+pmap['student'] = sprof
+pmap['homemaker'] = hprof
+
+for vtype in laysettings.VehicleTypes.itervalues() :
+    for ptype in vtype.ProfileTypes :
+        pmap[ptype].VehicleType.AddVehicleType(vtype.Name, vtype.Rate)
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -106,6 +110,8 @@ def PlacePeople() :
                 person = world.AddPerson(name, wprof)
                 person.SetJob(job)
                 world.SetEmployer(person, biz)
+
+                person.SetVehicle(wprof.VehicleType.PickVehicleType())
 
                 location = PlacePerson(person)
                 if not location :

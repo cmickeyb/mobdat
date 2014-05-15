@@ -51,6 +51,8 @@ from mobdat.common.ValueTypes import MakeEnum, DaysOfTheWeek
 from mobdat.common.Schedule import WeeklySchedule
 from mobdat.common.Decoration import Decoration
 
+import random
+
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 BusinessType = MakeEnum('Unknown', 'Factory', 'Service', 'Civic', 'Entertainment', 'School', 'Retail', 'Food')
@@ -244,68 +246,6 @@ class BusinessProfileDecoration(Decoration) :
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class PersonProfileDecoration(Decoration) :
-    DecorationName = 'PersonProfile'
-    
-    # -----------------------------------------------------------------
-    @staticmethod
-    def Load(graph, info) :
-        profile = PersonProfile.Load(info['PersonProfile'])
-        return PersonProfileDecoration(profile)
-
-    # -----------------------------------------------------------------
-    def __init__(self, profile) :
-        """
-        Args:
-            profile -- an object of type Person.PersonProfile
-        """
-        Decoration.__init__(self)
-        self.PersonProfile = profile
-
-    # -----------------------------------------------------------------
-    def __getattr__(self, name) :
-        return getattr(self.PersonProfile, name)
-
-    # -----------------------------------------------------------------
-    def Dump(self) :
-        result = Decoration.Dump(self)
-        result['PersonProfile'] = self.PersonProfile.Dump()
-        
-        return result
-    
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class PersonDecoration(Decoration) :
-    DecorationName = 'Person'
-    
-    # -----------------------------------------------------------------
-    @staticmethod
-    def Load(graph, info) :
-        employer = Person.Load(info['Person'])
-        return PersonDecoration(employer)
-
-    # -----------------------------------------------------------------
-    def __init__(self, person) :
-        """
-        Args:
-            person -- an object of type Person.Person
-        """
-        Decoration.__init__(self)
-        self.Person = person
-
-    # -----------------------------------------------------------------
-    def __getattr__(self, name) :
-        return getattr(self.Person, name)
-
-    # -----------------------------------------------------------------
-    def Dump(self) :
-        result = Decoration.Dump(self)
-        result['Person'] = self.Person.Dump()
-        
-        return result
-    
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class JobDescriptionDecoration(Decoration) :
     DecorationName = 'JobDescription'
     
@@ -334,36 +274,90 @@ class JobDescriptionDecoration(Decoration) :
         result['Job'] = self.JobDescription.Dump()
         
         return result
-    
+
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class ResidenceDecoration(Decoration) :
-    DecorationName = 'Residence'
+class VehicleTypeDecoration(Decoration) :
+    DecorationName = 'VehicleType'
     
     # -----------------------------------------------------------------
     @staticmethod
     def Load(graph, info) :
-        return ResidenceDecoration(info['LocationName'])
+        decr = VehicleTypeDecoration()
+        for name, rate in info['VehicleTypes'].iteritems() :
+            decr.AddVehicleType(name, rate)
+
+        return decr
 
     # -----------------------------------------------------------------
-    def __init__(self, location) :
+    def __init__(self) :
         """
         Args:
-            location -- LayoutInfo.ResidentialLocation or LayoutInfo.BusinessLocation or LayoutInfo.EndPoint
         """
         Decoration.__init__(self)
-        self.LocationName = location.Name
+
+        self.VehicleTypeMap = {}
+        self.VehicleTypeList = None
+
+    # -----------------------------------------------------------------
+    def AddVehicleType(self, name, rate) :
+        """
+        Args:
+            name -- string, name of a vehicle type defined in layoutsettings
+            rate -- relative frequency of occurance 
+        """
+        self.VehicleTypeMap[name] = rate
+        self.VehicleTypeList = None  # so we'll rebuild the map when needed
+
+    # -----------------------------------------------------------------
+    def PickVehicleType(self) :
+        if not self.VehicleTypeList :
+            self.VehicleTypeList = []
+            for name, rate in self.VehicleTypeMap.iteritems() :
+                self.VehicleTypeList.extend([name for x in range(rate)])
+
+        return random.choice(self.VehicleTypeList)
 
     # -----------------------------------------------------------------
     def Dump(self) :
         result = Decoration.Dump(self)
-        result['LocationName'] = self.LocationName
-        
+        result['VehicleTypeMap'] = self.VehicleTypeMap
+
+        return result
+
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+class VehicleDecoration(Decoration) :
+    DecorationName = 'Vehicle'
+    
+    # -----------------------------------------------------------------
+    @staticmethod
+    def Load(graph, info) :
+        return VehicleDecoration(info['VehicleName'], info['VehicleType'])
+
+    # -----------------------------------------------------------------
+    def __init__(self, name, vehicletype) :
+        """
+        Args:
+            name -- string, the name of the vehicle
+            vehicletype -- string, the name of the vehicle type
+        """
+        Decoration.__init__(self)
+
+        self.VehicleName = name
+        self.VehicleType = vehicletype
+
+    # -----------------------------------------------------------------
+    def Dump(self) :
+        result = Decoration.Dump(self)
+        result['VehicleName'] = self.VehicleName
+        result['VehicleType'] = self.VehicleType
+
         return result
     
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 Decorations = [ EmploymentProfileDecoration, ServiceProfileDecoration, BusinessProfileDecoration,
-                PersonProfileDecoration, PersonDecoration, JobDescriptionDecoration,
-                ResidenceDecoration ]
+                JobDescriptionDecoration,
+                VehicleTypeDecoration, VehicleDecoration ]
 

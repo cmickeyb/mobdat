@@ -48,6 +48,7 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
 from mobdat.common import Graph, Decoration, SocialDecoration
+from mobdat.common.Utilities import GenName
 
 logger = logging.getLogger(__name__)
 
@@ -62,6 +63,7 @@ class PersonProfile(Graph.Node) :
             name -- string name 
         """
         Graph.Node.__init__(self, name = name)
+        self.AddDecoration(SocialDecoration.VehicleTypeDecoration())
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -84,6 +86,17 @@ class Person(Graph.Node) :
             job -- object of type SocialDecoration.JobDescription
         """
         self.AddDecoration(SocialDecoration.JobDescriptionDecoration(job))
+
+    # -----------------------------------------------------------------
+    def SetVehicle(self, vehicletype) :
+        """
+        Args:
+            job -- object of type SocialDecoration.JobDescription
+        """
+        name = GenName('veh' + vehicletype)
+        self.AddDecoration(SocialDecoration.VehicleDecoration(name, vehicletype))
+
+        return name
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -125,6 +138,7 @@ class Business(Graph.Node) :
         Graph.Node.__init__(self, name = name)
 
         profile.AddMember(self)
+
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
