@@ -101,6 +101,34 @@ class _GraphObject :
         raise AttributeError("%r object has no edge of type %r" % (self.__class__, etype))
 
     # -----------------------------------------------------------------
+    def _FindEdges(self, edgelist, edgetype) :
+        edges = []
+        for edge in edgelist :
+            if edgetype and edge.NodeType.Name != edgetype :
+                continue
+            edges.append(edge)
+        return edges
+
+    def FindInputEdges(self, edgetype = None) :
+        return self._FindEdges(self.InputEdges, edgetype)
+
+    def FindOutputEdges(self, edgetype = None) :
+        return self._FindEdges(self.OutputEdges, edgetype)
+
+    # -----------------------------------------------------------------
+    def _IterEdges(self, edgelist, edgetype) :
+        for edge in edgelist :
+            if edgetype and edge.NodeType.Name != edgetype :
+                continue
+            yield edge
+
+    def IterInputEdges(self, edgetype = None) :
+        return self._IterEdges(self.InputEdges, edgetype)
+
+    def IterOutputEdges(self, edgetype = None) :
+        return self._IterEdges(self.OutputEdges, edgetype)
+
+    # -----------------------------------------------------------------
     def AddInputEdge(self, edge) :
         self.InputEdges.append(edge)
 

@@ -179,7 +179,8 @@ class EndPointDecoration(Decoration) :
     @property
     def SourceName(self) :
         """Generate the name to be used when vehicles leave this node"""
-        return self.HostObject.InputEdges[0].Name
+        edges = self.HostObject.FindInputEdges('Road')
+        return edges[0]
 
     # -----------------------------------------------------------------
     @property

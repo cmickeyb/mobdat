@@ -47,19 +47,20 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "
 
 import uuid
 import OpenSimRemoteControl
+from mobdat.common import Graph
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class OpenSimBuilder :
 
     # -----------------------------------------------------------------
-    def __init__(self, settings, layinfo, laysettings) :
+    def __init__(self, settings, world, laysettings) :
         self.Logger = logging.getLogger(__name__)
 
-        self.LayoutInfo = layinfo
+        self.World = world
         self.LayoutSettings = laysettings
 
-        self.EdgeMap = {}
+        self.RoadMap = {}
         self.NodeMap = {}
 
         try :
@@ -174,71 +175,81 @@ class OpenSimBuilder :
     # -----------------------------------------------------------------
     def PushNetworkToOpenSim(self) :
         self.CreateNodes()
-        self.CreateEdges()
+        self.CreateRoads()
 
     # -----------------------------------------------------------------
-    def CreateEdges(self) :
+    def CreateRoads(self) :
 
-        for edge in self.LayoutInfo.Edges.itervalues() :
-            if edge.Name in self.EdgeMap :
+        for rname, road in self.World.IterEdges(edgetype = 'Road') :
+            if rname in self.RoadMap :
                 continue
 
-            if edge.EdgeType.Name not in self.LayoutSettings.RoadTypeMap :
-                self.Logger.warn('Failed to find asset for %s' % (edge.EdgeType.Name))
+            if road.RoadType.Name not in self.LayoutSettings.RoadTypeMap :
+                self.Logger.warn('Failed to find asset for %s' % (road.RoadType.Name))
                 continue 
 
-            # check to see if we need to render this edge at all
-            if edge.EdgeType.Render :
-                asset = self.LayoutSettings.RoadTypeMap[edge.EdgeType.Name][0].AssetID
-                zoff = self.LayoutSettings.RoadTypeMap[edge.EdgeType.Name][0].ZOffset
+            # check to see if we need to render this road at all
+            if road.RoadType.Render :
+                asset = self.LayoutSettings.RoadTypeMap[road.RoadType.Name][0].AssetID
+                zoff = self.LayoutSettings.RoadTypeMap[road.RoadType.Name][0].ZOffset
 
                 if type(asset) == dict :
                     asset = self.FindAssetInObject(asset)
-                    self.LayoutSettings.RoadTypeMap[edge.EdgeType.Name][0].AssetID = asset
+                    self.LayoutSettings.RoadTypeMap[road.RoadType.Name][0].AssetID = asset
 
-                (p1x, p1y, p2x, p2y) = self.ComputeLocation(edge.StartNode, edge.EndNode)
+                (p1x, p1y, p2x, p2y) = self.ComputeLocation(road.StartNode, road.EndNode)
                 startparms = "{ 'spoint' : '<%f, %f, %f>', 'epoint' : '<%f, %f, %f>' }" % (p1x, p1y, zoff, p2x, p2y, zoff)
 
                 if abs(p1x - p2x) > 0.1 or abs(p1y - p2y) > 0.1 :
-                    result = self.OpenSimConnector.CreateObject(asset, pos=[p1x, p1y, zoff], name=edge.Name, parm=startparms)
+                    result = self.OpenSimConnector.CreateObject(asset, pos=[p1x, p1y, zoff], name=road.Name, parm=startparms)
 
-            self.EdgeMap[edge.GenEdgeName(edge.StartNode, edge.EndNode)] = True
-            self.EdgeMap[edge.GenEdgeName(edge.EndNode, edge.StartNode)] = True
+            # build the map so that we do render the reverse roads
+            self.RoadMap[Graph.GenEdgeName(road.StartNode, road.EndNode)] = True
+            self.RoadMap[Graph.GenEdgeName(road.EndNode, road.StartNode)] = True
     
+
+    # -----------------------------------------------------------------
+    def CreateNode(self, name, node) :
+        tname = node.IntersectionType.Name
+        sig1 = node.Signature()
+
+        if tname not in self.LayoutSettings.IntersectionTypeMap :
+            self.Logger.warn('Unable to locate node type %s' % (tname))
+            return
+
+        success = False
+        for itype in self.LayoutSettings.IntersectionTypeMap[tname] :
+            sig2 = itype.Signature
+
+            rot = self.ComputeRotation(sig1, sig2)
+            if rot >= 0 :
+                self.NodeMap[name] = itype
+
+                p1x = node.X + self.WorldCenterX
+                p1y = node.Y + self.WorldCenterY
+                p1z = itype.ZOffset
+                asset = itype.AssetID
+                if type(asset) == dict :
+                    asset = self.FindAssetInObject(asset)
+                    itype.AssetID = asset
+
+                startparms = "{ 'center' : '<%f, %f, %f>', 'angle' : %f }" % (p1x, p1y, p1z, 90.0 * rot)
+
+                if node.IntersectionType.Render :
+                    result = self.OpenSimConnector.CreateObject(asset, pos=[p1x, p1y, p1z], name=name, parm=startparms)
+
+                success = True
+                break
+
+        if not success :
+            self.NodeMap[name] = self.LayoutSettings.IntersectionTypeMap[tname][0]
+            self.Logger.warn("No match for node %s with type %s and signature %s" % (name, tname, sig1))
+
     # -----------------------------------------------------------------
     def CreateNodes(self) :
-        for node in self.LayoutInfo.Nodes.itervalues() :
-            tname = node.NodeType.Name
-            sig1 = node.Signature()
 
-            if tname not in self.LayoutSettings.IntersectionTypeMap :
-                self.Logger.warn('Unable to locate node type %s' % (tname))
-                continue
+        for name, node in self.World.IterNodes(nodetype = 'Intersection') :
+            self.CreateNode(name, node)
 
-            success = False
-            for itype in self.LayoutSettings.IntersectionTypeMap[tname] :
-                sig2 = itype.Signature
-
-                rot = self.ComputeRotation(sig1, sig2)
-                if rot >= 0 :
-                    self.NodeMap[node.Name] = itype
-
-                    p1x = node.X + self.WorldCenterX
-                    p1y = node.Y + self.WorldCenterY
-                    p1z = itype.ZOffset
-                    asset = itype.AssetID
-                    if type(asset) == dict :
-                        asset = self.FindAssetInObject(asset)
-                        itype.AssetID = asset
-
-                    startparms = "{ 'center' : '<%f, %f, %f>', 'angle' : %f }" % (p1x, p1y, p1z, 90.0 * rot)
-
-                    if node.NodeType.Render :
-                        result = self.OpenSimConnector.CreateObject(asset, pos=[p1x, p1y, p1z], name=node.Name, parm=startparms)
-
-                    success = True
-                    break
-
-            if not success :
-                self.NodeMap[node.Name] = self.LayoutSettings.IntersectionTypeMap[tname][0]
-                self.Logger.warn("No match for node %s with type %s and signature %s" % (node.Name, tname, sig1))
+        for name, node in self.World.IterNodes(nodetype = 'EndPoint') :
+            self.CreateNode(name, node)

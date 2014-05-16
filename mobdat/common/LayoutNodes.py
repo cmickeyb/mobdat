@@ -146,7 +146,7 @@ class Intersection(Graph.Node) :
     # -----------------------------------------------------------------
     def OutputEdgeMap(self) :
         edgemap = [None, None, None, None]
-        for e in self.OutputEdges :
+        for e in self.IterOutputEdges('Road') :
             position = self._EdgeMapPosition(e.EndNode)
             edgemap[position] = e
 
@@ -155,7 +155,7 @@ class Intersection(Graph.Node) :
     # -----------------------------------------------------------------
     def InputEdgeMap(self) :
         edgemap = [None, None, None, None]
-        for e in self.InputEdges :
+        for e in self.IterInputEdges('Road') :
             position = self._EdgeMapPosition(e.StartNode)
             edgemap[position] = e
 
@@ -183,7 +183,8 @@ class Intersection(Graph.Node) :
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class EndPoint(Graph.Node) :
+##class EndPoint(Graph.Node) :
+class EndPoint(Intersection) :
 
     # -----------------------------------------------------------------
     def __init__(self, name, itype, x, y) :
@@ -193,21 +194,8 @@ class EndPoint(Graph.Node) :
             itype -- object of type Layout.IntersectionType
             x, y -- integer coordinates
         """
-        Graph.Node.__init__(self, name = name)
-        
-        self.AddDecoration(LayoutDecoration.CoordDecoration(x, y))
+        Intersection.__init__(self, name, itype, x, y)
         self.AddDecoration(LayoutDecoration.EndPointDecoration())
-        itype.AddMember(self)
-
-    # -----------------------------------------------------------------
-    @property
-    def X(self) :
-        return self.Coord.X
-
-    # -----------------------------------------------------------------
-    @property
-    def Y(self) :
-        return self.Coord.Y
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
