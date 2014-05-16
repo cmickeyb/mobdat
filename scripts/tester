@@ -48,7 +48,7 @@ import json, argparse
 import cmd, readline, traceback
 import re
 
-from mobdat.builder import LayoutBuilder, SocialBuilder
+from mobdat.builder import WorldBuilder
 
 DataBindings = None
 logger = logging.getLogger(__name__)
@@ -128,112 +128,97 @@ class TestController(cmd.Cmd) :
                 logger.info('loaded extension file %s', cf)
             except :
                 logger.warn('unhandled error processing extension file %s\n%s', cf, traceback.format_exc(10))
-                # sys.exit(-1)
 
     # -----------------------------------------------------------------
     def do_clear(self, args) :
         """
-        clear -- Command to clear one of the data elements
-            clear layout
-            clear social
+        clear -- Command to clear world data
         """
         global DataBindings
-        pargs = args.split()
-        for cf in pargs :
-            try :
-                if pargs[0] == 'layout' :
-                    DataBindings['layinfo'] = LayoutBuilder.LayoutBuilder()
-                    logger.info('reset layout data')
-                elif pargs[0] == 'social' :
-                    DataBindings['socinfo'] = SocialBuilder.SocialBuilder()
-                    logger.info('reset social data')
-            except :
-                logger.warn('unhandled error processing extension file %s\n%s', cf, traceback.format_exc(10))
-                # sys.exit(-1)
+        try :
+            DataBindings['world'] = WorldBuilder.WorldBuilder()
+            logger.info('reset world data')
+        except :
+            logger.warn('unhandled error processing extension file %s\n%s', cf, traceback.format_exc(10))
 
     # -----------------------------------------------------------------
     def do_load(self, args) :
         """
         load -- Command to load a data file
-            load layout <filename>
-            load social <filename>
+            load <filename>
         """
         global DataBindings
         pargs = args.split()
-        for cf in pargs :
-            try :
-                if pargs[0] == 'layout' :
-                    cf = pargs[1] if len(pargs) == 2 else "layout.js"
-                    DataBindings['layinfo'] = LayoutBuilder.LayoutBuilder.LoadFromFile(cf)
-                    logger.warn('loaded layout data from file %s', cf)
-                elif pargs[0] == 'social' :
-                    cf = pargs[1] if len(pargs) == 2 else "social.js"
-                    DataBindings['socinfo'] = SocialBuilder.SocialBuilder.LoadFromFile(cf)
-                    logger.warn('loaded layout data from file %s', cf)
-            except :
-                logger.warn('unhandled error processing extension file %s\n%s', cf, traceback.format_exc(10))
-                # sys.exit(-1)
+        try :
+            cf = pargs[0] if len(pargs) == 1 else "world.js"
+            DataBindings['world'] = WorldBuilder.WorldBuilder.LoadFromFile(cf)
+            logger.warn('loaded world data from file %s', cf)
+        except :
+            logger.warn('unhandled error processing extension file %s\n%s', cf, traceback.format_exc(10))
 
     # -----------------------------------------------------------------
     def do_save(self, args) :
         """
         save -- Command to save one of the graphs in a file
-            save layout <filename>
-            save social <filename>
+            save <filename>
         """
+        global DataBindings
         pargs = args.split()
         try :
-            if pargs[0] == 'layout' :
-                cf = pargs[1] if len(pargs) == 2 else "layout.js"
-                logger.info('saving layout in %s', cf)
-                with open(cf, "w") as fp :
-                    json.dump(DataBindings['layinfo'].Dump(), fp, indent=2, ensure_ascii=True)
-                logger.warn('saved layout data in file %s', cf)
-            elif pargs[0] == 'social' :
-                cf = pargs[1] if len(pargs) == 2 else "layout.js"
-                logger.info('saving social data in %s', cf)
-                with open(cf, "w") as fp :
-                    json.dump(DataBindings['socinfo'].Dump(), fp, indent=2, ensure_ascii=True)
-                logger.warn('saved layout data in file %s', cf)
+            cf = pargs[0] if len(pargs) == 1 else "world.js"
+            logger.info('saving world data in %s', cf)
+            with open(cf, "w") as fp :
+                json.dump(DataBindings['world'].Dump(), fp, indent=2, ensure_ascii=True)
+            logger.warn('saved world data in file %s', cf)
         except :
-            logger.warn('unhandled error processing extension file %s\n%s', cf, traceback.format_exc(5))
-            # sys.exit(-1)
+            logger.warn('unhandled error saving world data to file %s\n%s', cf, traceback.format_exc(5))
 
     # -----------------------------------------------------------------
     def do_node(self, args) :
         """
         node -- Subcommand to operate on nodes in the road network database
             node dump [name]*
-            node list [namepattern]*
+            node dumprel [name]*
+            node list [namepattern] [nodetype]
             node near <x> <y> <distance>
         """
         pargs = args.split()
         try :
             if pargs[0] == 'list' :
-                pattern = re.compile(pargs[1] if len(pargs) == 2 else '.*', re.IGNORECASE)
-                for name in DataBindings['layinfo'].Nodes.iterkeys() :
-                    if pattern.match(name) : print name
+                pattern = re.compile(pargs[1] if len(pargs) >= 2 else '.*', re.IGNORECASE)
+                nodetype = pargs[2] if len(pargs) == 3 else None
+                for name, node in DataBindings['world'].IterNodes(pattern = pattern, nodetype = nodetype) :
+                    print name
 
             elif pargs[0] == 'near' :
                 xcoord = int(pargs[1])
                 ycoord = int(pargs[2])
                 dist = int(pargs[3])
-                for node in DataBindings['layinfo'].FindNodesInRange(xcoord, ycoord, dist) :
+                for node in DataBindings['world'].FindNodesInRange(xcoord, ycoord, dist) :
                     print node.Name
 
             elif pargs[0] == 'dump' :
                 for name in pargs[1:] :
-                    if name in DataBindings['layinfo'].Nodes :
-                        print self._DumpDict(DataBindings['layinfo'].Nodes[name].Dump())
+                    if name in DataBindings['world'].Nodes :
+                        node = DataBindings['world'].Nodes[name]
+                        print self._DumpDict(node.Dump())
+
+            elif pargs[0] == 'dumprel' :
+                for name in pargs[1:] :
+                    if name in DataBindings['world'].Nodes :
+                        node = DataBindings['world'].Nodes[name]
+                        for edge in node.IterOutputEdges() :
+                            print "{0}: {1} --> {2}".format(edge.NodeType.Name, name, edge.EndNode.Name)
+                        for edge in node.IterInputEdges() :
+                            print "{0}: {1} <-- {2}".format(edge.NodeType.Name, name, edge.StartNode.Name)
 
         except :
-            print '*** command execution failed'
-            self.help_node()
+            logger.warn('unhandled error\n%s', traceback.format_exc(5))
 
     # -----------------------------------------------------------------
-    def do_collection(self, args) :
+    def do_edge(self, args) :
         """
-        collection -- Subcommand to operation on collections in the road network database
+        edge -- Subcommand to operation on edges in the world database
             collection dump [name]*
             collection list [namepattern]*
         """
@@ -241,16 +226,16 @@ class TestController(cmd.Cmd) :
         try :
             if pargs[0] == 'list' :
                 pattern = re.compile(pargs[1] if len(pargs) == 2 else '.*', re.IGNORECASE)
-                for cname in DataBindings['layinfo'].Collections.iterkeys() :
-                    if pattern.match(cname) : print cname
+                for cname, edge in DataBindings['world'].IterEdges(pattern = pattern) :
+                    print cname
 
             elif pargs[0] == 'dump' :
                 for name in pargs[1:] :
-                    if name in DataBindings['layinfo'].Collections :
-                        print self._DumpDict(DataBindings['layinfo'].Collections[name].Dump())
+                    if name in DataBindings['world'].Edges :
+                        print self._DumpDict(DataBindings['world'].Edges[name].Dump())
 
         except :
-            print '*** command execution failed'
+            logger.warn('unhandled error\n%s', traceback.format_exc(5))
 
     # -----------------------------------------------------------------
     def do_person(self, args) :
@@ -258,67 +243,55 @@ class TestController(cmd.Cmd) :
         person -- Subcommand to operate on people in the perinfo database
             person byemp [bizpattern]*
             person byjob [jobpattern]*
-            person dump [name]*
-            person list [namepattern]*
-            person listjobs [namepattern]*
         """
         pargs = args.split()
         try :
-            if pargs[0] == 'list' :
+            if pargs[0] == 'byemp' :
                 pattern = re.compile(pargs[1] if len(pargs) == 2 else '.*', re.IGNORECASE)
-                for pname in DataBindings['perinfo'].PersonList.iterkeys() :
-                    if pattern.match(pname) : print pname
-
-            elif pargs[0] == 'byemp' :
-                pattern = re.compile(pargs[1] if len(pargs) == 2 else '.*', re.IGNORECASE)
-                for person in DataBindings['perinfo'].PersonList.itervalues() :
-                    if pattern.match(person.Employer.Name) :
-                        print person.Name
+                for pname, person in DataBindings['world'].IterNodes(nodetype = 'Person') :
+                    if pattern.match(person.Deref('EmployedBy').Name) :
+                        print pname
                 
             elif pargs[0] == 'byjob' :
                 pattern = re.compile(pargs[1] if len(pargs) == 2 else '.*', re.IGNORECASE)
-                for person in DataBindings['perinfo'].PersonList.itervalues() :
-                    if pattern.match(person.Job.ProfileName) :
-                        print person.Name
+                for pname, person in DataBindings['world'].IterNodes(nodetype = 'Person') :
+                    if pattern.match(person.JobDescription.Name) :
+                        print pname
                 
-            elif pargs[0] == 'listjobs' :
+            elif pargs[0] == 'jobs' :
                 joblist = {}
                 pattern = re.compile(pargs[1] if len(pargs) == 2 else '.*', re.IGNORECASE)
-                for person in DataBindings['perinfo'].PersonList.itervalues() :
-                    if pattern.match(person.Name) :
-                        joblist[person.Job.ProfileName] = 1
+                for pname, person in DataBindings['world'].IterNodes(pattern = pattern, nodetype = 'Person') :
+                    joblist[person.JobDescription.Name] = 1
                 for jobname in joblist.iterkeys() :
                     print jobname
 
-            elif pargs[0] == 'dump' :
-                for name in pargs[1:] :
-                    if name in DataBindings['perinfo'].PersonList.iterkeys() :
-                        print self._DumpDict(DataBindings['perinfo'].PersonList[name].Dump())
-
         except :
-            print '*** command execution failed'
+            logger.warn('unhandled error\n%s', traceback.format_exc(5))
 
     # -----------------------------------------------------------------
     def do_business(self, args) :
         """
         business -- Subcommand to operate on businesses in the bizinfo database
-            business dump [name]*
-            business list [namepattern]*
+            business jobs [name]*
         """
         pargs = args.split()
         try :
-            if pargs[0] == 'list' :
+            if pargs[0] == 'jobs' :
+                joblist = {}
                 pattern = re.compile(pargs[1] if len(pargs) == 2 else '.*', re.IGNORECASE)
-                for name in DataBindings['bizinfo'].BusinessList.iterkeys() :
-                    if pattern.match(name) : print name
+                for name, business in DataBindings['world'].IterNodes(pattern = pattern, nodetype = 'Business') :
+                    joblist[business.JobDescription.Name] = 1
+                for jobname in joblist.iterkeys() :
+                    print jobname
 
-            elif pargs[0] == 'dump' :
-                for name in pargs[1:] :
-                    if name in DataBindings['bizinfo'].BusinessList :
-                        print self._DumpDict(DataBindings['bizinfo'].BusinessList[name].Dump())
+            elif pargs[0] == 'type' :
+                pattern = re.compile(pargs[1] if len(pargs) == 2 else '.*', re.IGNORECASE)
+                for name, business in DataBindings['world'].IterNodes(pattern = pattern, nodetype = 'Business') :
+                    print "{0} has type {1}".format(name, business.BusinessProfile.BusinessType)
 
         except :
-            print '*** command execution failed'
+            logger.warn('unhandled error\n%s', traceback.format_exc(5))
 
     # -----------------------------------------------------------------
     def do_exit(self, args) :
@@ -336,11 +309,10 @@ class TestController(cmd.Cmd) :
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
 def InitializeDataBindings(settings) :
-    layinfo = LayoutBuilder.LayoutBuilder()
-    socinfo = SocialBuilder.SocialBuilder()
+    world = WorldBuilder.WorldBuilder()
 
     global DataBindings
-    DataBindings = {"layinfo" : layinfo, "socinfo" : socinfo}
+    DataBindings = {"world" : world}
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------

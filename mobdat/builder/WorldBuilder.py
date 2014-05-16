@@ -53,7 +53,7 @@ from mobdat.common import SocialNodes, SocialEdges, SocialDecoration
 from mobdat.common.Utilities import GenName, GenNameFromCoordinates
 from mobdat.common import Graph
 
-import re
+import re, json
 
 logger = logging.getLogger(__name__)
 
@@ -75,6 +75,17 @@ class ResidentialGenerator :
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class WorldBuilder(WorldInfo.WorldInfo) :
+
+    # -----------------------------------------------------------------
+    @staticmethod
+    def LoadFromFile(filename) :
+        with open(filename, 'r') as fp :
+            data = json.load(fp)
+
+        graph = WorldBuilder()
+        graph.Load(data)
+
+        return graph
 
     # -----------------------------------------------------------------
     def __init__(self) :
@@ -307,6 +318,44 @@ class WorldBuilder(WorldInfo.WorldInfo) :
             self.AddRoad(nnode,node1,etype2)
 
         return nnode
+
+    # =================================================================
+    # =================================================================
+
+    # -----------------------------------------------------------------
+    def FindNodesInRange(self, x, y, dist) :
+        result = []
+        sqdist = int(dist) * int(dist)
+        for name, node in self.IterNodes() :
+            if not node.FindDecorationProvider('Coord') :
+                continue
+
+            cdist = (node.Coord.X - x)**2 + (node.Coord.Y - y)**2
+            if cdist < sqdist :
+                result.append(node)
+
+        return result
+
+    # -----------------------------------------------------------------
+    def FindClosestNode(self, target) :
+        cnode = None
+        cdist = 0
+
+        for name, node in self.IterNodes() :
+            if not node.FindDecorationProvider('Coord') :
+                continue
+
+            if cnode == None :
+                cnode = node
+                cdist = (cnode.X - target.X)**2 + (cnode.Y - target.Y)**2
+                continue
+
+            dist = (node.X - target.X)**2 + (node.Y - target.Y)**2
+            if (dist < cdist) :
+                cnode = node
+                cdist = dist
+            
+        return cnode
 
     # =================================================================
     # =================================================================

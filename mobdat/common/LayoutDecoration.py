@@ -245,7 +245,7 @@ class BusinessLocationDecoration(Decoration) :
 
     # -----------------------------------------------------------------
     @staticmethod
-    def Load(info) :
+    def Load(graph, info) :
         return BusinessLocationDecoration()
 
     # -----------------------------------------------------------------
@@ -349,8 +349,8 @@ class ResidentialLocationDecoration(Decoration) :
 
     # -----------------------------------------------------------------
     @staticmethod
-    def Load(info) :
-        return ResidentialLocation()
+    def Load(graph, info) :
+        return ResidentialLocationDecoration()
 
     # -----------------------------------------------------------------
     def __init__(self) :
@@ -416,5 +416,7 @@ class ResidentialLocationDecoration(Decoration) :
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 CommonDecorations = [ CoordDecoration, IntersectionTypeDecoration, RoadTypeDecoration, 
-                      EndPointDecoration, BusinessLocationProfileDecoration, ResidentialLocationProfileDecoration ]
+                      EndPointDecoration,
+                      BusinessLocationProfileDecoration, BusinessLocationDecoration,
+                      ResidentialLocationProfileDecoration, ResidentialLocationDecoration ]
 

@@ -253,7 +253,7 @@ class JobDescriptionDecoration(Decoration) :
     @staticmethod
     def Load(graph, info) :
         job = JobDescription.Load(info['Job'])
-        return JobDecoration(job)
+        return JobDescriptionDecoration(job)
 
     # -----------------------------------------------------------------
     def __init__(self, job) :
@@ -284,7 +284,7 @@ class VehicleTypeDecoration(Decoration) :
     @staticmethod
     def Load(graph, info) :
         decr = VehicleTypeDecoration()
-        for name, rate in info['VehicleTypes'].iteritems() :
+        for name, rate in info['VehicleTypeMap'].iteritems() :
             decr.AddVehicleType(name, rate)
 
         return decr
