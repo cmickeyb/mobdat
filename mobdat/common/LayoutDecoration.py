@@ -165,44 +165,31 @@ class EndPointDecoration(Decoration) :
 
     # -----------------------------------------------------------------
     @staticmethod
-    def GenFromNode(node) :
-        sname = EndPointDecoration.GenSourceName(node)
-        dname = EndPointDecoration.GenDestinationName(node)
-
-        return EndPointDecoration(sname, dname)
-
-    # -----------------------------------------------------------------
-    @staticmethod
-    def GenSourceName(node) :
-        """Generate the name to be used when vehicles leave this node"""
-        return node.InputEdges[0].Name
-
-    # -----------------------------------------------------------------
-    @staticmethod
-    def GenDestinationName(node) :
-        """Generate the name to be used for vehicles headed to this node"""
-        return 'r' + node.Name
-
-    # -----------------------------------------------------------------
-    @staticmethod
     def Load(graph, info) :
-        return EndPointDecoration(info['SourceName'], info['DestinationName'])
+        return EndPointDecoration()
 
     # -----------------------------------------------------------------
-    def __init__(self, sname, dname) :
+    def __init__(self) :
         Decoration.__init__(self)
 
-        self.SourceName = sname
-        self.DestinationName = dname
+        # self.SourceName = sname
+        # self.DestinationName = dname
+
+    # -----------------------------------------------------------------
+    @property
+    def SourceName(self) :
+        """Generate the name to be used when vehicles leave this node"""
+        return self.HostObject.InputEdges[0].Name
+
+    # -----------------------------------------------------------------
+    @property
+    def DestinationName(self) :
+        """Generate the name to be used for vehicles headed to this node"""
+        return 'r' + self.HostObject.Name
 
     # -----------------------------------------------------------------
     def Dump(self) :
-        result = Decoration.Dump(self)
-        
-        result['SourceName'] = self.SourceName
-        result['DestinationName'] = self.DestinationName
-
-        return result
+        return Decoration.Dump(self)
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

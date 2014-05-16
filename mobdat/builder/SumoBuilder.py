@@ -56,10 +56,10 @@ from mobdat.common.LayoutDecoration import *
 class SumoBuilder :
 
     # -----------------------------------------------------------------
-    def __init__(self, settings, layinfo, laysettings) :
+    def __init__(self, settings, world, laysettings) :
         self.Logger = logging.getLogger(__name__)
 
-        self.LayoutInfo = layinfo
+        self.World = world
         self.LayoutSettings = laysettings
 
         self.ScaleValue = 3.0
@@ -83,32 +83,35 @@ class SumoBuilder :
         return self.ScaleValue * value
 
     # -----------------------------------------------------------------
-    def CreateEdges(self) :
+    def CreateRoads(self) :
         fname = os.path.join(self.Path,self.Prefix + '.edg.xml')
 
         with open(fname, 'w') as fp :
             fp.write("<edges>\n")
 
-            for edge in self.LayoutInfo.Edges.itervalues() :
-                e = edge.Name
+            for ename, edge in self.World.IterEdges(edgetype = 'Road') :
                 sn = edge.StartNode.Name
                 en = edge.EndNode.Name
-                etype = edge.EdgeType.Name
-                cn = 'center' if edge.EdgeType.Center else 'right'
-                fp.write("  <edge id=\"%s\" spreadType=\"%s\" from=\"%s\" to=\"%s\" type=\"%s\" />\n" % (e, cn, sn, en, etype))
+                etype = edge.RoadType.Name
+                cn = 'center' if edge.RoadType.Center else 'right'
+                fp.write("  <edge id=\"%s\" spreadType=\"%s\" from=\"%s\" to=\"%s\" type=\"%s\" />\n" % (ename, cn, sn, en, etype))
 
             fp.write("</edges>\n")
         
     # -----------------------------------------------------------------
-    def CreateNodes(self) :
+    def CreateIntersections(self) :
         fname = os.path.join(self.Path,self.Prefix + '.nod.xml')
 
         with open(fname, 'w') as fp :
             fp.write("<nodes>\n")
 
-            for node in self.LayoutInfo.Nodes.itervalues() :
-                itype = node.NodeType.IntersectionType
-                fp.write("  <node id=\"%s\" x=\"%d\" y=\"%d\" z=\"0\"  type=\"%s\" />\n" % (node.Name, self.Scale(node.X), self.Scale(node.Y), itype))
+            for name, node in self.World.IterNodes(nodetype = 'Intersection') :
+                itype = node.IntersectionType.IntersectionType
+                fp.write("  <node id=\"%s\" x=\"%d\" y=\"%d\" z=\"0\"  type=\"%s\" />\n" % (name, self.Scale(node.X), self.Scale(node.Y), itype))
+
+            for name, node in self.World.IterNodes(nodetype = 'EndPoint') :
+                itype = node.IntersectionType.IntersectionType
+                fp.write("  <node id=\"%s\" x=\"%d\" y=\"%d\" z=\"0\"  type=\"%s\" />\n" % (name, self.Scale(node.X), self.Scale(node.Y), itype))
 
             fp.write("</nodes>\n")
 
@@ -120,7 +123,8 @@ class SumoBuilder :
         with open(fname, 'w') as fp :
             fp.write("<connections>\n")
             
-            for node in self.LayoutInfo.Nodes.itervalues() :
+            for name, node in self.World.IterNodes(nodetype = 'Intersection') :
+                
                 if not node.Signature() == ['2L/2L', '2L/2L', '2L/2L', '2L/2L' ] :
                     continue
 
@@ -139,17 +143,16 @@ class SumoBuilder :
             fp.write("</connections>\n")
 
     # -----------------------------------------------------------------
-    def CreateEdgeTypes(self) :
+    def CreateRoadTypes(self) :
         fname = os.path.join(self.Path,self.Prefix + '.typ.xml')
 
         with open(fname, 'w') as fp :
             fp.write("<types>\n")
 
-            for collection in self.LayoutInfo.Collections.itervalues() :
-                if EdgeTypeDecoration.DecorationName in collection.Decorations :
-                    etype = collection.EdgeType
-                    fp.write("  <type id=\"%s\" priority=\"%d\" numLanes=\"%d\" speed=\"%f\" width=\"%f\" />\n" %
-                             (etype.Name, etype.Priority, etype.Lanes, self.Scale(etype.Speed), self.Scale(etype.Width)))
+            for name, rtype in self.World.IterNodes(nodetype = 'RoadType') :
+                etype = rtype.RoadType
+                fp.write("  <type id=\"%s\" priority=\"%d\" numLanes=\"%d\" speed=\"%f\" width=\"%f\" />\n" %
+                         (etype.Name, etype.Priority, etype.Lanes, self.Scale(etype.Speed), self.Scale(etype.Width)))
 
             fp.write("</types>\n")
 
@@ -169,26 +172,25 @@ class SumoBuilder :
 
             fp.write("\n")
 
-            for node in self.LayoutInfo.Nodes.itervalues() :
-                if EndPointDecoration.DecorationName in node.Decorations :
-                    name = None
-                    for edge in node.OutputEdges :
-                        for redge in edge.EndNode.OutputEdges :
-                            if redge.EndNode == node :
-                                name = node.EndPoint.DestinationName
-                                edges = edge.Name + " " + redge.Name
-                                fp.write("  <route id=\"%s\" edges=\"%s\" />\n" % (name, edges))
-                                break
+            for nname, node in self.World.IterNodes(nodetype = 'EndPoint') :
+                name = None
+                for edge in node.OutputEdges :
+                    for redge in edge.EndNode.OutputEdges :
+                        if redge.EndNode == node :
+                            name = node.EndPoint.DestinationName
+                            edges = edge.Name + " " + redge.Name
+                            fp.write("  <route id=\"%s\" edges=\"%s\" />\n" % (name, edges))
+                            break
 
-                    if not name :
-                        self.Logger.warn('cannot find route for %s', node.Name)
+                if not name :
+                    self.Logger.warn('cannot find route for %s', node.Name)
                     
             fp.write("</routes>\n")
 
     # -----------------------------------------------------------------
     def PushNetworkToSumo(self) :
-        self.CreateNodes()
-        self.CreateEdges()
-        self.CreateEdgeTypes()
+        self.CreateIntersections()
+        self.CreateRoads()
+        self.CreateRoadTypes()
         self.CreateRoutes()
         self.CreateConnections()

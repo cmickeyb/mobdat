@@ -78,10 +78,10 @@ def Controller(settings, pushlist) :
 
     for push in pushlist :
         if push == 'opensim' :
-            os = OpenSimBuilder.OpenSimBuilder(settings, layinfo, laysettings)
+            os = OpenSimBuilder.OpenSimBuilder(settings, world, laysettings)
             os.PushNetworkToOpenSim()
         elif push == 'sumo' :
-            sc = SumoBuilder.SumoBuilder(settings, layinfo, laysettings)
+            sc = SumoBuilder.SumoBuilder(settings, world, laysettings)
             sc.PushNetworkToSumo()
 
     # write the network information back out to the layinfo file

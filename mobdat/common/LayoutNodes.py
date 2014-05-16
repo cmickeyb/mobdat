@@ -196,6 +196,7 @@ class EndPoint(Graph.Node) :
         Graph.Node.__init__(self, name = name)
         
         self.AddDecoration(LayoutDecoration.CoordDecoration(x, y))
+        self.AddDecoration(LayoutDecoration.EndPointDecoration())
         itype.AddMember(self)
 
     # -----------------------------------------------------------------
