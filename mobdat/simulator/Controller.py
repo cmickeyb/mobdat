@@ -48,7 +48,7 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "
 
 import platform, time, threading, cmd, readline
 import EventRouter, EventTypes
-from mobdat.common import LayoutSettings, LayoutInfo, BusinessInfo, PersonInfo, LocationInfo
+from mobdat.common import LayoutSettings, WorldInfo
 from multiprocessing import Process
 
 import json

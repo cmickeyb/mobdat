@@ -75,9 +75,10 @@ class SocialConnector(EventHandler.EventHandler, BaseConnector.BaseConnector) :
 
     # -----------------------------------------------------------------
     def CreateTravelers(self) :
-        for person in self.PerInfo.PersonList.itervalues() :
-            traveler = Traveler(person, self)
-            self.Travelers[person.Name] = traveler
+        #for person in self.PerInfo.PersonList.itervalues() :
+        for name, person in self.World.IterNodes(nodetype = 'Person') :
+            traveler = Traveler.Traveler(person, self)
+            self.Travelers[name] = traveler
             
     # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     # EVENT GENERATORS

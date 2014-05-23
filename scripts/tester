@@ -249,7 +249,7 @@ class TestController(cmd.Cmd) :
             if pargs[0] == 'byemp' :
                 pattern = re.compile(pargs[1] if len(pargs) == 2 else '.*', re.IGNORECASE)
                 for pname, person in DataBindings['world'].IterNodes(nodetype = 'Person') :
-                    if pattern.match(person.Deref('EmployedBy').Name) :
+                    if pattern.match(person.EmployedBy.Name) :
                         print pname
                 
             elif pargs[0] == 'byjob' :
@@ -270,10 +270,33 @@ class TestController(cmd.Cmd) :
             logger.warn('unhandled error\n%s', traceback.format_exc(5))
 
     # -----------------------------------------------------------------
+    def do_job(self, args) :
+        """
+        job -- Subcommand to examine a person's job
+            job list [namepattern]*
+            job salary [namepattern]*
+        """
+        pargs = args.split()
+        try :
+            if pargs[0] == 'list' :
+                pattern = re.compile(pargs[1] if len(pargs) == 2 else '.*', re.IGNORECASE)
+                for pname, person in DataBindings['world'].IterNodes(pattern = pattern, nodetype = 'Person') :
+                    print "{0} --> {1} at {2}".format(pname, person.JobDescription.Name, person.EmployedBy.Name)
+            elif pargs[0] == 'salary' :
+                pattern = re.compile(pargs[1] if len(pargs) == 2 else '.*', re.IGNORECASE)
+                for pname, person in DataBindings['world'].IterNodes(pattern = pattern, nodetype = 'Person') :
+                    print "{0} --> {1}".format(pname, person.JobDescription.Salary)
+
+        except :
+            logger.warn('unhandled error\n%s', traceback.format_exc(5))
+
+    # -----------------------------------------------------------------
     def do_business(self, args) :
         """
         business -- Subcommand to operate on businesses in the bizinfo database
             business jobs [name]*
+            business location [name]*
+            business type [name]*
         """
         pargs = args.split()
         try :
@@ -284,6 +307,11 @@ class TestController(cmd.Cmd) :
                     joblist[business.JobDescription.Name] = 1
                 for jobname in joblist.iterkeys() :
                     print jobname
+
+            elif pargs[0] == 'location' :
+                pattern = re.compile(pargs[1] if len(pargs) == 2 else '.*', re.IGNORECASE)
+                for name, business in DataBindings['world'].IterNodes(pattern = pattern, nodetype = 'Business') :
+                    print "{0} has type {1}".format(name, business.ResidesAt.Name)
 
             elif pargs[0] == 'type' :
                 pattern = re.compile(pargs[1] if len(pargs) == 2 else '.*', re.IGNORECASE)

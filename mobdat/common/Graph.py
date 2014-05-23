@@ -82,23 +82,22 @@ class _GraphObject :
 
     # -----------------------------------------------------------------
     def __getattr__(self, attr) :
+        """
+        __getattr__
+        """
+
+        # First look for a decoration with the right name
         provider = self.FindDecorationProvider(attr)
         if provider :
             return provider.Decorations[attr]
 
-        raise AttributeError("%r object has no attribute %r" % (self.__class__, attr))
-
-    # -----------------------------------------------------------------
-    def Deref(self, etype) :
-        """
-        Args:
-            etype -- string name of an edge type
-        """
+        # Next look for an edge with the right name, if there
+        # are multiple then take the first one found
         for edge in self.OutputEdges :
-            if edge.NodeType.Name == etype :
+            if edge.NodeType.Name == attr :
                 return edge.EndNode
 
-        raise AttributeError("%r object has no edge of type %r" % (self.__class__, etype))
+        raise AttributeError("%r object has no attribute %r" % (self.__class__, attr))
 
     # -----------------------------------------------------------------
     def _FindEdges(self, edgelist, edgetype) :
