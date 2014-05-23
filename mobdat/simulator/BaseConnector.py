@@ -53,7 +53,7 @@ import platform, time
 class BaseConnector :
            
     # -----------------------------------------------------------------
-    def __init__(self, settings, dbbindings, netsettings) :
+    def __init__(self, settings, world, netsettings) :
 
         self.__Logger = logging.getLogger(__name__)
 
@@ -72,12 +72,8 @@ class BaseConnector :
             self.Clock = time.clock
 
         # Save network information
-        self.NetInfo = dbbindings['netinfo']
-        self.LocInfo = dbbindings['locinfo']
-        self.BizInfo = dbbindings['bizinfo']
-        self.PerInfo = dbbindings['perinfo']
-
         self.NetSettings = netsettings
+        self.World = world
 
 
     # -----------------------------------------------------------------

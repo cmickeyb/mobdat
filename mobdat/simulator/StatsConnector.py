@@ -53,7 +53,7 @@ import BaseConnector, EventHandler, EventTypes
 class StatsConnector(EventHandler.EventHandler, BaseConnector.BaseConnector) :
 
     # -----------------------------------------------------------------
-    def __init__(self, evrouter, settings, dbbindings, netsettings) :
+    def __init__(self, evrouter, settings, world, netsettings) :
         """Initialize the StatsConnector
 
         Keyword arguments:
@@ -62,7 +62,7 @@ class StatsConnector(EventHandler.EventHandler, BaseConnector.BaseConnector) :
         """
 
         EventHandler.EventHandler.__init__(self, evrouter)
-        BaseConnector.BaseConnector.__init__(self, settings, dbbindings, netsettings)
+        BaseConnector.BaseConnector.__init__(self, settings, world, netsettings)
 
         self.Logger = logging.getLogger(__name__)
 

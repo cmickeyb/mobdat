@@ -183,30 +183,6 @@ class MobdatController(cmd.Cmd) :
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
-def InitializeDataBindings(settings) :
-    layinfofile = settings["General"].get("LayoutInfoFile","layinfo.js")
-    logger.info('loading network data from %s',layinfofile)
-    layinfo = LayoutInfo.LayoutInfo.LoadFromFile(layinfofile)
-
-    # load location information
-    locinfofile = settings["General"].get("LocationInfoFile","locinfo.js")
-    logger.info('loading location data from %s',locinfofile)
-    locinfo = LocationInfo.LocationInfo.LoadFromFile(locinfofile, layinfo)
-
-    # write the business information out to the file
-    bizinfofile = settings["General"].get("BusinessInfoFile","bizinfo.js")
-    logger.info('loading business data from %s',bizinfofile)
-    bizinfo = BusinessInfo.BusinessInfo.LoadFromFile(bizinfofile, locinfo)
-
-    # write the person information out to the file
-    perinfofile = settings["General"].get("PersonInfoFile","perinfo.js")
-    logger.info('loading person data from %s',perinfofile)
-    perinfo = PersonInfo.PersonInfo.LoadFromFile(perinfofile, locinfo, bizinfo)
-
-    return {"layinfo" : layinfo, "locinfo" : locinfo, "bizinfo" : bizinfo, "perinfo" : perinfo}
-
-# -----------------------------------------------------------------
-# -----------------------------------------------------------------
 def Controller(settings) :
     """
     Controller is the main entry point for driving the simulation.
@@ -216,7 +192,11 @@ def Controller(settings) :
     """
 
     laysettings = LayoutSettings.LayoutSettings(settings)
-    dbbindings = InitializeDataBindings(settings)
+
+    # load the world
+    infofile = settings["General"].get("WorldInfoFile","info.js")
+    logger.info('loading world data from %s',infofile)
+    world = WorldInfo.WorldInfo.LoadFromFile(infofile)
 
     cnames = settings["General"].get("Connectors",['sumo', 'opensim', 'social', 'stats'])
 
@@ -229,7 +209,7 @@ def Controller(settings) :
             logger.warn('skipping unknown simulation connector; %s' % (cname))
             continue
 
-        connector = _SimulationControllers[cname](evrouter, settings, dbbindings, laysettings)
+        connector = _SimulationControllers[cname](evrouter, settings, world, laysettings)
         connproc = Process(target=connector.SimulationStart, args=())
         connproc.start()
         connectors.append(connproc)

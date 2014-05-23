@@ -215,7 +215,7 @@ class OpenSimVehicle :
 class OpenSimConnector(EventHandler.EventHandler, BaseConnector.BaseConnector) :
 
     # -----------------------------------------------------------------
-    def __init__(self, evrouter, settings, dbbindings, netsettings) :
+    def __init__(self, evrouter, settings, world, netsettings) :
         """Initialize the OpenSimConnector by creating the opensim remote control handlers.
 
         Keyword arguments:
@@ -224,7 +224,7 @@ class OpenSimConnector(EventHandler.EventHandler, BaseConnector.BaseConnector) :
         """
 
         EventHandler.EventHandler.__init__(self, evrouter)
-        BaseConnector.BaseConnector.__init__(self, settings, dbbindings, netsettings)
+        BaseConnector.BaseConnector.__init__(self, settings, world, netsettings)
 
         self.__Logger = logging.getLogger(__name__)
 
