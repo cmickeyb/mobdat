@@ -58,6 +58,7 @@ class Traveler :
         self.Person = person
         self.Residence = self.Person.ResidesAt
         self.Employer = self.Person.EmployedBy
+        self.EmployerLocation = self.Employer.ResidesAt
         self.Job = self.Person.JobDescription
 
         self.EstimatedTimeToWork = random.uniform(0.25, 0.75)
@@ -76,19 +77,19 @@ class Traveler :
                 stime = random.gauss(stime, 0.5)
             stime = max(worldtime, stime)
 
-            return Trip.Trip(self, stime, self.Residence, self.Employer.Location)
+            return Trip.Trip(self, stime, self.Residence.ResidentialLocation, self.EmployerLocation.BusinessLocation)
         else:
             etime = self.CurrentEvent.WorldEndTime
             if self.Job.FlexibleHours :
                 etime = random.gauss(etime, 0.5)
             etime = max(worldtime, etime)
 
-            return Trip.Trip(self, etime, self.Employer.Location, self.Residence)
+            return Trip.Trip(self, etime, self.EmployerLocation.BusinessLocation, self.Residence.ResidentialLocation)
 
     # -----------------------------------------------------------------
     def TripCompleted(self, trip, connector) :
         # if this is a trip to work, update the estimated start time, dont want to be late to work
-        if trip.Destination == self.Employer.Location :
+        if trip.Destination == self.EmployerLocation :
             offset = connector.WorldTime - self.CurrentEvent.WorldStartTime # positive means traveler is late for work
             self.EstimatedTimeToWork = (4.0 * self.EstimatedTimeToWork - offset) / 5.0
 
