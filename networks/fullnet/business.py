@@ -213,12 +213,12 @@ def PlaceBusinesses() :
 
         name = GenName(pname)
         business = world.AddBusiness(name, profile)
-
         location = PlaceBusiness(business)
 
         # if we could not place the business, then all locations
         # have fitness of 0... so don't try again
         if not location :
+            world.DropNode(business)
             del profiles[pname]
 
 PlaceBusinesses()
