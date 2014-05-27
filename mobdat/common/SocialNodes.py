@@ -133,7 +133,8 @@ class Business(Graph.Node) :
     def __init__(self, name, profile) :
         """
         Args:
-            business -- object of type Business.Business
+            name -- string name of the business
+            profile -- object of type SocialNodes.BusinessProfile
         """
         Graph.Node.__init__(self, name = name)
 

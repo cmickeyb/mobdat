@@ -1,11 +1,234 @@
-Some design notes.
+* General Design Notes
 
-Builder classes should focus on simplified, contextual interfaces.  Info
-classes handle graph nodes, edges, and collections.  The node and edge
-classes should initialize themselves only. Relationships to other
-objects should happen in the Info classes.
+Builder classes should focus on simplified, contextual interfaces.
+Info classes handle graph nodes, edges, and collections.
+
+Node and edge classes should initialize themselves only. Relationships
+to other objects should happen in the Info classes.
 
 Graph collection represents an "is-a" relationship which is why node
 decorations are inherited through collections. 
 
 Graph edge represents, among other things, a "has-a" relationship. 
+
+* Node Types
+
+** SocialNodes.PersonProfile
+
+*** Decorations
+
+**** SocialDecoration.VehicleTypeDecoration
+
+*** Edges
+
+None
+
+*** ContainedBy
+
+None
+
+*** Contains
+
+**** SocialNodes.Person
+
+** SocialNodes.Person
+
+*** Decorations
+
+**** Optional: SocialDecoration.JobDescriptionDecoration
+**** Optional: SocialDecoration.VehicleDecoration
+
+*** Edges
+
+**** Out: EmployedBy 
+**** Out: ResidesAt
+
+*** ContainedBy
+
+**** SocialNodes.PersonProfile
+
+*** Contains
+
+** SocialNodes.BusinessProfile
+
+*** Decorations
+
+**** SocialDecoration.BusinessProfileDecoration
+**** SocialDecoration.EmploymentProfileDecoration
+**** Optional: SocialDecoration.ServiceProfileDecoration
+
+*** Edges
+
+None
+
+*** ContainedBy
+
+None
+
+*** Contains
+
+**** SocialNodes.Business
+
+** SocialNodes.Business
+
+*** Decorations
+
+None
+
+*** Edges
+
+**** In: EmployedBy 
+**** Out: ResidesAt
+
+*** ContainedBy
+
+**** SocialNodes.BusinessProfile
+
+*** Contains
+
+None
+
+
+* Edge Types
+
+** SocialEdges.EmployedBy
+
+*** Source Nodes
+SocialInfo.Person
+
+*** Destination Nodes
+SocialInfo.Business
+
+** SocialEdges.ResidesAt
+
+*** Source Nodes
+SocialInfo.Person
+SocialInfo.Business
+
+*** Destination Nodes
+LayoutNodes.BusinessLocation
+LayoutNodes.ResidentialLocation
+LayoutNodes.EndPoint
+
+
+* Decorations
+
+** SocialDecoration.BusinessProfileDecoration
+
+Wraps the business type constant. 
+
+*** Accessor: "BusinessProfile"
+*** Fields
+
+**** BusinessType
+
+This is an element of the BusinessType enum
+
+*** Methods
+
+** SocialDecoration.EmploymentProfileDecoration
+
+*** Accessor: "EmploymentProfile"
+
+*** Fields
+
+**** JobList 
+
+Dictionary that maps SocialDecoration.JobDescription --> Demand
+
+*** Methods
+
+**** PeakEmployeeCount
+
+Computes the peak hourly employee count over the course of a day
+
+** SocialDecoration.ServiceProfileDecoration
+
+*** Accessor: "ServiceProfile"
+
+*** Fields
+
+**** Schedule
+
+An object of type WeeklySchedule that reflects the business's hours of
+operation
+
+**** CustomerCapacity
+
+An integer, maximum customer capacity
+
+**** ServiceTime
+
+A float that represents the mean service time for each customer
+
+*** Methods
+
+**** PeakServiceCount
+
+Compute the peak number of customers expected during the day. For now
+this is simply implemented as the CustomerCapacity if the business is
+open during the specified interval.
+
+** SocialDecoration.JobDescriptionDecoration
+
+This decoration wraps a SocialDecoration.JobDescription object.
+
+*** Accessor: "JobDescription"
+*** Fields
+
+**** Name
+
+A string name
+
+**** Salary
+
+An integer that is the salary associated with the job
+
+**** FlexibleHours
+
+A boolean that signifies whether the schedule is fixed or flexible
+
+**** Schedule
+
+An object of type WeeklySchedule
+
+*** Methods
+
+** SocialDecoration.VehicleTypeDecoration
+
+*** Accessor: "VehicleType
+*** Fields
+
+**** VehicleTypeMap
+
+Dictionary that maps a vehicle type (string) to the relative rate that
+the type occurs.
+
+*** Methods
+
+**** AddVehicleType
+
+Add a vehicle type to the profile with a relative rate.
+
+**** PickVehicleType
+
+Pick on of the vehicle types that have been registered.
+
+** SocialDecoration.VehicleDecoration
+
+*** Accessor: "Vehicle"
+*** Fields
+
+**** VehicleName
+
+String name of the vehicle.
+
+**** VehicleType
+
+String name of the vehicle type.
+
+*** Methods
+
+;; Local Variables:
+;; mode: outline
+;; End:
