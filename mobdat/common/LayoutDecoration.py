@@ -180,7 +180,8 @@ class EndPointDecoration(Decoration) :
     def SourceName(self) :
         """Generate the name to be used when vehicles leave this node"""
         edges = self.HostObject.FindInputEdges('Road')
-        return edges[0]
+
+        return edges[0].Name
 
     # -----------------------------------------------------------------
     @property
@@ -268,13 +269,13 @@ class BusinessLocationDecoration(Decoration) :
     # -----------------------------------------------------------------
     @property
     def SourceName(self) :
-        node = random.choice(self.Capsule.Members)
+        node = random.choice(self.HostObject.Members)
         return node.EndPoint.SourceName
 
     # -----------------------------------------------------------------
     @property
     def DestinationName(self) :
-        node = random.choice(self.Capsule.Members)
+        node = random.choice(self.HostObject.Members)
         return node.EndPoint.DestinationName
 
     # -----------------------------------------------------------------
@@ -363,6 +364,18 @@ class ResidentialLocationDecoration(Decoration) :
     @property
     def ResidentCapacity(self) :
         return len(self.HostObject.Members) * self.HostObject.ResidentialLocationProfile.ResidentsPerNode
+
+    # -----------------------------------------------------------------
+    @property
+    def SourceName(self) :
+        node = self.HostObject.Members[0]
+        return node.EndPoint.SourceName
+
+    # -----------------------------------------------------------------
+    @property
+    def DestinationName(self) :
+        node = self.HostObject.Members[0]
+        return node.EndPoint.DestinationName
 
     # -----------------------------------------------------------------
     def Fitness(self, person) :
