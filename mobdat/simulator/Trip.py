@@ -60,7 +60,8 @@ class Trip :
         self.Destination = destination
 
         self.VehicleType = self.Traveler.Person.Vehicle.VehicleType
-        self.VehicleName = self.Traveler.Person.Vehicle.VehicleName
+        self.VehicleName = GenName('trip')
+        #self.VehicleName = self.Traveler.Person.Vehicle.VehicleName
 
     # -----------------------------------------------------------------
     def TripCompleted(self, connector) :

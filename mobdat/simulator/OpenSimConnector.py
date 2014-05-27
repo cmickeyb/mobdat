@@ -337,6 +337,11 @@ class OpenSimConnector(EventHandler.EventHandler, BaseConnector.BaseConnector) :
         the simulation.
         """
         
+        vname = event.ObjectIdentity
+        if vname not in self.Vehicles :
+            self.__Logger.warn("attempt to delete unknown vehicle %s" % (vname))
+            return True
+
         vehicle = self.Vehicles[event.ObjectIdentity]
         self.VehicleReuseList[vehicle.VehicleType].append(vehicle)
 
