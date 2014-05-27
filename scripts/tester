@@ -220,7 +220,7 @@ class TestController(cmd.Cmd) :
                     if isinstance(node, Graph._GraphObject) :
                         node = node.__getattr__(field)
                     else :
-                        node = node.__dict__[field]
+                        node = getattr(node, field)
 
                 if isinstance(node, Graph._GraphObject) or isinstance(node, Decoration.Decoration) :
                     print self._DumpDict(node.Dump())
