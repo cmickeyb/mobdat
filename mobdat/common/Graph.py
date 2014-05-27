@@ -97,7 +97,7 @@ class _GraphObject :
             if edge.NodeType.Name == attr :
                 return edge.EndNode
 
-        raise AttributeError("%r object has no attribute %r" % (self.__class__, attr))
+        raise AttributeError("object %r of type %r has no attribute %r" % (self.Name, self.__class__.__name__, attr))
 
     # -----------------------------------------------------------------
     def _FindEdges(self, edgelist, edgetype) :
