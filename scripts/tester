@@ -97,9 +97,10 @@ class TestController(cmd.Cmd) :
     pformat = 'tester> '
 
     # -----------------------------------------------------------------
-    def __init__(self, logger) :
+    def __init__(self, logger, settings) :
         cmd.Cmd.__init__(self)
 
+        self.Settings = settings
         self.prompt = 'tester> '
         self.__Logger = logger
 
@@ -151,7 +152,7 @@ class TestController(cmd.Cmd) :
         global DataBindings
         pargs = args.split()
         try :
-            cf = pargs[0] if len(pargs) == 1 else "world.js"
+            cf = pargs[0] if len(pargs) == 1 else self.Settings["General"].get("WorldInfoFile","world.js")
             DataBindings['world'] = WorldBuilder.WorldBuilder.LoadFromFile(cf)
             logger.warn('loaded world data from file %s', cf)
         except :
@@ -166,7 +167,7 @@ class TestController(cmd.Cmd) :
         global DataBindings
         pargs = args.split()
         try :
-            cf = pargs[0] if len(pargs) == 1 else "world.js"
+            cf = pargs[0] if len(pargs) == 1 else self.Settings["General"].get("WorldInfoFile","world.js")
             logger.info('saving world data in %s', cf)
             with open(cf, "w") as fp :
                 json.dump(DataBindings['world'].Dump(), fp, indent=2, ensure_ascii=True)
@@ -217,12 +218,12 @@ class TestController(cmd.Cmd) :
             elif pargs[0] == 'eval' :
                 node = DataBindings['world'].FindNodeByName(pargs[1])
                 for field in pargs[2:] :
-                    if isinstance(node, Graph._GraphObject) :
+                    if isinstance(node, Graph.GraphObject) :
                         node = node.__getattr__(field)
                     else :
                         node = getattr(node, field)
 
-                if isinstance(node, Graph._GraphObject) or isinstance(node, Decoration.Decoration) :
+                if isinstance(node, Graph.GraphObject) or isinstance(node, Decoration.Decoration) :
                     print self._DumpDict(node.Dump())
                 else :
                     print node
@@ -371,7 +372,7 @@ def Main() :
     settings = ParseConfigurationFile(options.config)
     InitializeDataBindings(settings)
 
-    controller = TestController(logger)
+    controller = TestController(logger, settings)
     controller.cmdloop()
 
 if __name__ == '__main__':

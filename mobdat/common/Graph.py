@@ -67,7 +67,7 @@ def GenNodeName(prefix = 'node') :
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class _GraphObject :
+class GraphObject :
 
     # -----------------------------------------------------------------
     def __init__(self, name) :
@@ -84,6 +84,9 @@ class _GraphObject :
     def __getattr__(self, attr) :
         """
         __getattr__
+
+        Look for a reference to the attribute among the collection of decorations
+        associated with the object and in the output edges. 
         """
 
         # First look for a decoration with the right name
@@ -97,10 +100,22 @@ class _GraphObject :
             if edge.NodeType.Name == attr :
                 return edge.EndNode
 
-        raise AttributeError("object %r of type %r has no attribute %r" % (self.Name, self.__class__.__name__, attr))
+        nodetype = self.__class__.__name__
+        if 'NodeType' in self.Decorations :
+            nodetype = self.Decorations['NodeType'].Name
+
+        raise AttributeError("graph object %r of type %r has no attribute %r" % (self.Name, nodetype, attr))
 
     # -----------------------------------------------------------------
     def _FindEdges(self, edgelist, edgetype) :
+        """
+        _FindEdges -- Build and return a list of edges that match the
+        specified type.
+
+        Args: 
+            edgelist -- list of objects of type Graph.Edge
+            edgetype -- string name of edge type
+        """
         edges = []
         for edge in edgelist :
             if edgetype and edge.NodeType.Name != edgetype :
@@ -116,6 +131,14 @@ class _GraphObject :
 
     # -----------------------------------------------------------------
     def _IterEdges(self, edgelist, edgetype) :
+        """
+        _IterEdges -- Build and return an iterator over the edges of a
+        specified type.
+
+        Args: 
+            edgelist -- list of objects of type Graph.Edge
+            edgetype -- string name of edge type
+        """
         for edge in edgelist :
             if edgetype and edge.NodeType.Name != edgetype :
                 continue
@@ -150,6 +173,14 @@ class _GraphObject :
 
     # -----------------------------------------------------------------
     def FindDecorationProvider(self, attr) :
+        """
+        FindDecorationProvider -- check this object and any object in
+        which this object is a member for an attribute that matches
+        the specified attribute.
+
+        Args:
+            attr -- string, attribute name
+        """
         if attr in self.Decorations :
             return self
 
@@ -181,7 +212,7 @@ class _GraphObject :
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class Edge(_GraphObject) :
+class Edge(GraphObject) :
 
     # -----------------------------------------------------------------
     @staticmethod
@@ -199,7 +230,7 @@ class Edge(_GraphObject) :
     # -----------------------------------------------------------------
     def __init__(self, snode, enode, name = None) :
         if not name : name = GenEdgeName(snode, enode)
-        _GraphObject.__init__(self, name)
+        GraphObject.__init__(self, name)
 
         self.StartNode = snode
         self.EndNode = enode
@@ -209,7 +240,7 @@ class Edge(_GraphObject) :
 
     # -----------------------------------------------------------------
     def Dump(self) : 
-        result = _GraphObject.Dump(self)
+        result = GraphObject.Dump(self)
 
         result['StartNode'] = self.StartNode.Name
         result['EndNode'] = self.EndNode.Name
@@ -218,7 +249,7 @@ class Edge(_GraphObject) :
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class Node(_GraphObject) :
+class Node(GraphObject) :
 
     # -----------------------------------------------------------------
     @staticmethod
@@ -238,7 +269,7 @@ class Node(_GraphObject) :
     # -----------------------------------------------------------------
     def __init__(self, members = [], name = None, prefix = 'node') :
         if not name : name = GenNodeName(prefix)
-        _GraphObject.__init__(self, name)
+        GraphObject.__init__(self, name)
 
         self.Members = []
         for member in members :
@@ -262,7 +293,7 @@ class Node(_GraphObject) :
 
     # -----------------------------------------------------------------
     def Dump(self) :
-        result = _GraphObject.Dump(self)
+        result = GraphObject.Dump(self)
 
         result['Members'] = []
         for member in self.Members :
@@ -393,7 +424,7 @@ class Graph :
         if name in self.Nodes :
             return self.Nodes[name]
         else :
-            raise NameError("graph contains no object named %s" % mname)
+            raise NameError("graph contains no node named %s" % mname)
 
     # -----------------------------------------------------------------
     def DropNodeByName(self, name) :
@@ -543,7 +574,7 @@ class Graph :
         if name in self.Edges :
             return self.Edges[name]
         else :
-            raise NameError("graph contains no object named %s" % mname)
+            raise NameError("graph contains no edge named %s" % mname)
             
     # -----------------------------------------------------------------
     def FindEdgeBetweenNodes(self, node1, node2) :

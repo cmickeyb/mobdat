@@ -65,7 +65,7 @@ class Decoration :
     def SetHostObject(self, obj) :
         """
         Args:
-            obj -- object of type Graph._GraphObject
+            obj -- object of type Graph.GraphObject
         """
         self.HostObject = obj
 
