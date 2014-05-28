@@ -100,7 +100,8 @@ class StatsConnector(EventHandler.EventHandler, BaseConnector.BaseConnector) :
         # self.SubscribeEvent(EventTypes.StatsEvent, self.HandleStatsEvent)
         self.SubscribeEvent(EventTypes.SumoConnectorStatsEvent, self.HandleStatsEvent)
         self.SubscribeEvent(EventTypes.OpenSimConnectorStatsEvent, self.HandleStatsEvent)
-        self.SubscribeEvent(EventTypes.TripLengthStatsEvent, self.HandleStatsEvent)
+        self.SubscribeEvent(EventTypes.TripBegStatsEvent, self.HandleStatsEvent)
+        self.SubscribeEvent(EventTypes.TripEndStatsEvent, self.HandleStatsEvent)
 
         self.SubscribeEvent(EventTypes.TimerEvent, self.HandleTimerEvent)
         self.SubscribeEvent(EventTypes.ShutdownEvent, self.HandleShutdownEvent)

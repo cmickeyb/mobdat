@@ -56,13 +56,15 @@ class Traveler :
     # -----------------------------------------------------------------
     def __init__(self, person, connector) :
         self.Person = person
-        self.Residence = self.Person.ResidesAt
+        self.PersonResidence = self.Person.ResidesAt
+
         self.Employer = self.Person.EmployedBy
-        self.EmployerLocation = self.Employer.ResidesAt
+        self.EmployerResidence = self.Employer.ResidesAt
+
         self.Job = self.Person.JobDescription
 
         self.EstimatedTimeToWork = random.uniform(0.25, 0.75)
-        self.CurrentLocation = self.Residence
+        self.CurrentLocation = self.PersonResidence
         self.CurrentEvent = None
 
         nexttrip = self.NextTrip(connector.WorldTime)
@@ -70,26 +72,26 @@ class Traveler :
 
     # -----------------------------------------------------------------
     def NextTrip(self, worldtime) :
-        if self.CurrentLocation == self.Residence :
+        if self.CurrentLocation == self.PersonResidence :
             self.CurrentEvent = self.Job.Schedule.NextScheduledEvent(worldtime + self.EstimatedTimeToWork)
             stime = self.CurrentEvent.WorldStartTime - self.EstimatedTimeToWork
             if self.Job.FlexibleHours :
                 stime = random.gauss(stime, 0.5)
             stime = max(worldtime, stime)
 
-            return Trip.Trip(self, stime, self.Residence.ResidentialLocation, self.EmployerLocation.BusinessLocation)
+            return Trip.Trip(self, stime, self.PersonResidence.EndPoint, self.EmployerResidence.BusinessLocation)
         else:
             etime = self.CurrentEvent.WorldEndTime
             if self.Job.FlexibleHours :
                 etime = random.gauss(etime, 0.5)
             etime = max(worldtime, etime)
 
-            return Trip.Trip(self, etime, self.EmployerLocation.BusinessLocation, self.Residence.ResidentialLocation)
+            return Trip.Trip(self, etime, self.EmployerResidence.BusinessLocation, self.PersonResidence.EndPoint)
 
     # -----------------------------------------------------------------
     def TripCompleted(self, trip, connector) :
         # if this is a trip to work, update the estimated start time, dont want to be late to work
-        if trip.Destination == self.EmployerLocation :
+        if trip.Destination == self.EmployerResidence :
             offset = connector.WorldTime - self.CurrentEvent.WorldStartTime # positive means traveler is late for work
             self.EstimatedTimeToWork = (4.0 * self.EstimatedTimeToWork - offset) / 5.0
 

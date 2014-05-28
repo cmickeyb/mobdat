@@ -85,19 +85,36 @@ class SocialConnector(EventHandler.EventHandler, BaseConnector.BaseConnector) :
     # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
     # -----------------------------------------------------------------
-    def GenerateTripStatsEvent(self, trip) :
+    def GenerateTripBegEvent(self, trip) :
         """
-        GenerateTripStatsEvent -- create and publish an event to capture
+        GenerateTripBegEvent -- create and publish a 'tripstart' event
+        at the beginning of a trip
+        
+        trip -- object of type Trip
+        """
+        pname = trip.Traveler.Person.Name
+        tripid = trip.TripID
+        sname = trip.Source.HostObject.Name
+        dname = trip.Destination.HostObject.Name
+
+        event = EventTypes.TripBegStatsEvent(self.CurrentStep, pname, tripid, sname, dname)
+        self.PublishEvent(event)
+
+
+    # -----------------------------------------------------------------
+    def GenerateTripEndEvent(self, trip) :
+        """
+        GenerateTripEndEvent -- create and publish an event to capture
         statistics about a completed trip
         
         trip -- a Trip object for a recently completed trip
         """
         pname = trip.Traveler.Person.Name
-        sname = trip.Source.SourceName
-        dname = trip.Destination.DestinationName
-        duration = self.GetWorldTime(self.CurrentStep) - trip.StartTime
+        tripid = trip.TripID
+        sname = trip.Source.HostObject.Name
+        dname = trip.Destination.HostObject.Name
 
-        event = EventTypes.TripLengthStatsEvent(self.CurrentStep, duration, pname, sname, dname)
+        event = EventTypes.TripEndStatsEvent(self.CurrentStep, pname, tripid, sname, dname)
         self.PublishEvent(event)
 
     # -----------------------------------------------------------------

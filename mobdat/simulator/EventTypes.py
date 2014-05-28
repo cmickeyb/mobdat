@@ -78,20 +78,34 @@ class StatsEvent :
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class TripLengthStatsEvent(StatsEvent) :
+class TripStatsEvent(StatsEvent) :
     # -----------------------------------------------------------------
-    def __init__(self, timestep, duration, person, snode, dnode) :
-        StatsEvent.__init__(self, timestep, 'tripdata')
+    def __init__(self, timestep, statkey, person, tripid, snode, dnode) :
+        StatsEvent.__init__(self, timestep, statkey)
 
-        self.Duration = duration
         self.Person = person
+        self.TripID = tripid
         self.SourceNode = snode
         self.DestinationNode = dnode
 
     # -----------------------------------------------------------------
     def __str__(self) :
-        fstring = "{0},{1},{2:.3f},{3},{4},{5}"
-        return fstring.format(self.StatKey, self.CurrentStep, self.Duration, self.Person, self.SourceNode, self.DestinationNode)
+        fstring = "{0},{1},{2},{3},{4},{5}"
+        return fstring.format(self.StatKey, self.CurrentStep, self.Person, self.TripID, self.SourceNode, self.DestinationNode)
+
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+class TripBegStatsEvent(TripStatsEvent) :
+    # -----------------------------------------------------------------
+    def __init__(self, timestep, person, tripid, snode, dnode) :
+        TripStatsEvent.__init__(self, timestep, 'tripbeg', person, tripid, snode, dnode)
+
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+class TripEndStatsEvent(TripStatsEvent) :
+    # -----------------------------------------------------------------
+    def __init__(self, timestep, person, tripid, snode, dnode) :
+        TripStatsEvent.__init__(self, timestep, 'tripend', person, tripid, snode, dnode)
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

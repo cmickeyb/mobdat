@@ -59,18 +59,21 @@ class Trip :
         self.Source = source
         self.Destination = destination
 
+        # the vehicle name should come from the person, however Sumo
+        # does not generate create events when a vehicle name is reused
+        self.TripID = GenName(self.Traveler.Person.Name + '_trip')
+        self.VehicleName = self.TripID
         self.VehicleType = self.Traveler.Person.Vehicle.VehicleType
-        self.VehicleName = GenName('trip')
-        #self.VehicleName = self.Traveler.Person.Vehicle.VehicleName
 
     # -----------------------------------------------------------------
     def TripCompleted(self, connector) :
-        connector.GenerateTripStatsEvent(self)
+        connector.GenerateTripEndEvent(self)
         self.Traveler.TripCompleted(self, connector)
 
     # -----------------------------------------------------------------
     def TripStarted(self, connector) :
         self.Traveler.TripStarted(self, connector)
+        connector.GenerateTripBegEvent(self)
         connector.GenerateAddVehicleEvent(self)
 
     # -----------------------------------------------------------------
