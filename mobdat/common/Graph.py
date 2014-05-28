@@ -424,7 +424,7 @@ class Graph :
         if name in self.Nodes :
             return self.Nodes[name]
         else :
-            raise NameError("graph contains no node named %s" % mname)
+            raise NameError("graph contains no node named %s" % name)
 
     # -----------------------------------------------------------------
     def DropNodeByName(self, name) :
