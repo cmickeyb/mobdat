@@ -218,10 +218,12 @@ class TestController(cmd.Cmd) :
             elif pargs[0] == 'eval' :
                 node = DataBindings['world'].FindNodeByName(pargs[1])
                 for field in pargs[2:] :
-                    if isinstance(node, Graph.GraphObject) :
-                        node = node.__getattr__(field)
-                    else :
-                        node = getattr(node, field)
+                    node = getattr(node, field)
+
+                    # if isinstance(node, Graph.GraphObject) :
+                    #     node = node.Name if field == 'Name' else node.__getattr__(field)
+                    # else :
+                    #     node = getattr(node, field)
 
                 if isinstance(node, Graph.GraphObject) or isinstance(node, Decoration.Decoration) :
                     print self._DumpDict(node.Dump())
