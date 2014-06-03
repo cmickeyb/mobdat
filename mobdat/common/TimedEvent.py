@@ -53,6 +53,17 @@ from mobdat.common.TravelTimeEstimator import TravelTimeEstimator
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+class TripEvent :
+    def __init__(self, stime, splace, dplace) :
+        self.StartTime = stime
+        self.SrcName = splace.Details
+        self.DstName = dplace.Details
+
+    def __str__(self) :
+        return 'travel from {0} to {1} starting at {2}'.format(self.SrcName, self.DstName, self.StartTime)
+
+# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class PlaceEvent :
     # -----------------------------------------------------------------
     def __init__(self, details, stimevar, etimevar, duration = 0.01, id = None) :
@@ -110,7 +121,7 @@ class TravelEvent :
 
     # -----------------------------------------------------------------
     def Dump(self) :
-        # print "[{0:8s}]: travel from {1} to {2}".format(self.EventID, self.SrcPlace.Details, self.DstPlace.Details)
+        print "[{0:8s}]: travel from {1} to {2}".format(self.EventID, self.SrcPlace.Details, self.DstPlace.Details)
         if self.DstPlace :
             self.DstPlace.Dump()
 
@@ -265,6 +276,23 @@ class TimedEventList :
     def NextPlaceID(self, eventid) :
         ev = self.Events[eventid].NextPlace()
         return ev.EventID if ev else None
+
+    
+    # -----------------------------------------------------------------
+    def MoreTripEvents(self) :
+        return self.BaseEvent.NextPlace()
+
+    # -----------------------------------------------------------------
+    def PopTripEvent(self) :
+        stime = self.BaseEvent.ETime
+        splace = self.BaseEvent
+        dplace = self.BaseEvent.NextPlace()
+
+        if not dplace :
+            return None
+
+        self.BaseEvent = dplace
+        return TripEvent(stime, splace, dplace)
 
     # -----------------------------------------------------------------
     def AddPlaceEvent(self, details, svar, evar, duration = 0.01, id = None) :
@@ -438,10 +466,9 @@ if __name__ == '__main__' :
             evlist.InsertAfterPlaceEvent(ids, idnew)
             ids = idnew
 
-    # -----------------------------------------------------------------
-    evlist = TimedEventList('home', 7 * 24.0)
-
-    for day in range(0, 6) :
+    ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    def BuildOneDay(evlist) :
         lastev = evlist.LastEvent.EventID
 
         workev = AddWorkEvent(evlist, lastev, day)
@@ -458,9 +485,20 @@ if __name__ == '__main__' :
         if random.uniform(0.0, 1.0) > 0.8 :
             AddShoppingTrip(evlist, day)
 
-    if not evlist.SolveConstraints() :
-        print 'resolution failed'
-        sys.exit(1)
+        if not evlist.SolveConstraints() :
+            print 'resolution failed'
+            sys.exit(1)
 
-    evlist.Dump()
+    # -----------------------------------------------------------------
+    evlist = TimedEventList('home', 1000 * 24.0)
+
+    for day in range(0, 1000) :
+        BuildOneDay(evlist)
+
+        print 'day = {0}'.format(day)
+        while evlist.MoreTripEvents() :
+            trip = evlist.PopTripEvent()
+            print str(trip)
+
+    # evlist.Dump()
 
