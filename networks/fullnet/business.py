@@ -89,6 +89,7 @@ def AddFactoryProfile(name, joblist) :
 
     jobs = ExpandJobList(joblist)
     profile = world.AddBusinessProfile(name, SocialDecoration.BusinessType.Factory, jobs)
+    profile.BusinessProfile.AddAnnotation(name)
 
     return profile
 
@@ -99,6 +100,7 @@ def AddRetailProfile(name, joblist, bizhours, customers, stime = 0.5) :
     jobs = ExpandJobList(joblist)
     profile = world.AddBusinessProfile(name, SocialDecoration.BusinessType.Service, jobs)
     profile.AddServiceProfile(WeeklySchedule.WorkWeekSchedule(bizhours[0], bizhours[1]), customers, stime)
+    profile.BusinessProfile.AddAnnotation(name)
 
     return profile
 
@@ -109,6 +111,7 @@ def AddRestaurantProfile(name, joblist, bizhours, customers, stime = 1.5) :
     jobs = ExpandJobList(joblist)
     profile = world.AddBusinessProfile(name, SocialDecoration.BusinessType.Food, jobs)
     profile.AddServiceProfile(WeeklySchedule.WorkWeekSchedule(bizhours[0], bizhours[1]), customers, stime)
+    profile.BusinessProfile.AddAnnotation(name)
 
     return profile
 
@@ -119,6 +122,7 @@ def AddSchoolProfile(name, joblist, students) :
     jobs = ExpandJobList(joblist)
     profile = world.AddBusinessProfile(name, SocialDecoration.BusinessType.School, jobs)
     profile.AddServiceProfile(WeeklySchedule.WorkWeekSchedule(8.0, 15.0), students, 7.0)
+    profile.BusinessProfile.AddAnnotation(name)
 
     return profile
 

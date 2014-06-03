@@ -223,23 +223,42 @@ class BusinessProfileDecoration(Decoration) :
     # -------------------------------------------------------
     @staticmethod
     def Load(graph, pinfo) :
-        return BusinessProfileDecoration(pinfo['BusinessType'])
+        return BusinessProfileDecoration(pinfo['BusinessType'], pinfo['Annotations'])
 
     # -------------------------------------------------------
-    def __init__(self, biztype) :
+    def __init__(self, biztype, annotations = []) :
         """
         The business profile class captures the structure of a 
         generic business pattern. The profile can be used to
         create specific businesses that match the pattern.
         
         biztype -- BusinessType enum
+        annotations -- List of string annotations for the profile
         """
 
         self.BusinessType = biztype
+        self.Annotations = {}
+
+        for word in annotations :
+            self.Annotations[word] = True
+
+    # -------------------------------------------------------
+    def AddAnnotation(self, word) :
+        self.Annotations[word] = True
+
+    # -------------------------------------------------------
+    def RemAnnotation(self, word) :
+        if word in self.Annotations :
+            del self.Annotations[word]
+
+    # -------------------------------------------------------
+    def TestAnnotation(self, word) :
+        return word in self.Annotations
 
     # -------------------------------------------------------
     def Dump(self) :
         result = Decoration.Dump(self)
+        result['Annotations'] = self.Annotations.keys()
         result['BusinessType'] = self.BusinessType
 
         return result
