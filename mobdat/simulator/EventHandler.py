@@ -103,12 +103,16 @@ class EventHandler :
             except TypeError as detail :
                 self._Logger.warn('handler for event %s failed with type error; %s', evtype.__name__, str(detail))
             except :
-                exctype, value, tracebk =  sys.exc_info()
-                frames = traceback.extract_tb(tracebk)[-1]
-                self._Logger.warn('handler failed with exception type %s; %s in %s at line %s',
-                                  exctype, str(value), frames[0], frames[1])
+                self._Logger.warn('handler for event %s failed with exception\n%s', evtype.__name__, traceback.format_exc(10))
                 self.Shutdown()
                 return
+
+                # exctype, value, tracebk =  sys.exc_info()
+                # frames = traceback.extract_tb(tracebk)[-1]
+                # self._Logger.warn('handler failed with exception type %s; %s in %s at line %s',
+                #                   exctype, str(value), frames[0], frames[1])
+                # self.Shutdown()
+                # return
 
     # -----------------------------------------------------------------
     def HandleEvent(self, evtype, event) :
@@ -119,5 +123,5 @@ class EventHandler :
     # -----------------------------------------------------------------
     def Shutdown(self) :
         self._Logger.warn('shutting down handler %s', self.__class__.__name__)
-        self.PublishEvent(EventTypes.ShutdownEvent(False))
+        # self.PublishEvent(EventTypes.ShutdownEvent(False))
 

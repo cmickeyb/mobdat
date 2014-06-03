@@ -68,6 +68,7 @@ logger = logging.getLogger(__name__)
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
+SimulatorStartup = False
 SimulatorShutdown = False
 CurrentIteration = 0
 FinalIteration = 0
@@ -102,7 +103,16 @@ class TimerThread(threading.Thread) :
 
     # -----------------------------------------------------------------
     def run(self) :
-        global SimulatorShutdown, FinalIteration, CurrentIteration
+        global SimulatorStartup, SimulatorShutdown
+        global FinalIteration, CurrentIteration
+
+        # Wait for the signal to start the simulation, this allows all of the
+        # connectors to initialize
+        while not SimulatorStartup :
+            time.sleep(5.0)
+            
+        # Start the main simulation loop
+        self.__Logger.debug("start main simulation loop")
         starttime = self.Clock()
 
         CurrentIteration = 0
@@ -164,12 +174,22 @@ class MobdatController(cmd.Cmd) :
             print 'Unable to parse input parameter %s' % args
         
     # -----------------------------------------------------------------
+    def do_start(self, args) :
+        """start
+        Start the simulation after all connectors are initialized
+        """
+        self.__Logger.warn("starting the timer loop")
+
+        global SimulatorStartup
+        SimulatorStartup = True
+
+    # -----------------------------------------------------------------
     def do_exit(self, args) :
         """exit
         Shutdown the simulator and exit the command loop
         """
 
-        self.__Logger.warn("shutting down")
+        self.__Logger.warn("stopping the timer loop")
 
         # kill the timer if it hasn't already shutdown
         global SimulatorShutdown
