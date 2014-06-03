@@ -75,6 +75,13 @@ class TimeVariable :
         return "<{0}:{1}>".format(self.STime, self.ETime)
 
     # -----------------------------------------------------------------
+    def __float__(self) :
+        if self.IsFixed() :
+            return self.STime
+
+        raise ValueError("Attempt to convert indeterminant time variable to float {0}".format(self.ID))
+
+    # -----------------------------------------------------------------
     def Copy(self, id = None) :
         """ Create a copy of the time variable """
         return self.__class__(self.STime, self.ETime, id or self.ID)
