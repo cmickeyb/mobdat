@@ -222,6 +222,11 @@ class BusinessProfileDecoration(Decoration) :
     
     # -------------------------------------------------------
     @staticmethod
+    def BusinessTypePred(biztype, bizclass) :
+        return lambda node : node.BusinessProfile.BusinessType == biztype and node.BusinessProfile.TestAnnotation(bizclass)
+
+    # -------------------------------------------------------
+    @staticmethod
     def Load(graph, pinfo) :
         return BusinessProfileDecoration(pinfo['BusinessType'], pinfo['Annotations'])
 

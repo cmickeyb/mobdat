@@ -447,26 +447,20 @@ class Graph :
         return True
 
     # -----------------------------------------------------------------
-    def FindNodes(self, pattern = None, nodetype = None) :
+    def FindNodes(self, pattern = None, nodetype = None, predicate = None) :
         """
         Args:
             pattern -- string representing a regular expression
             nodetype -- string name of a node type
         """
         nodes = []
-        for name, node in self.Nodes.iteritems() :
-            if nodetype and node.NodeType.Name != nodetype :
-                continue
-
-            if pattern and not re.match(pattern, name) :
-                continue
-
+        for name, node in self.IterNodes(pattern, nodetype, predicate) :
             nodes.append(node)
 
         return nodes
 
     # -----------------------------------------------------------------
-    def IterNodes(self, pattern = None, nodetype = None) :
+    def IterNodes(self, pattern = None, nodetype = None, predicate = None) :
         """
         Args:
             pattern -- string representing a regular expression
@@ -477,6 +471,9 @@ class Graph :
                 continue
 
             if pattern and not re.match(pattern, name) :
+                continue
+
+            if predicate and not predicate(node) :
                 continue
 
             yield name, node
