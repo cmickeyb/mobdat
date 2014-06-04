@@ -95,10 +95,10 @@ class PlaceEvent :
             self.Departure.AddConstraints(cstore)
 
     # -----------------------------------------------------------------
-    def Dump(self) :
+    def DumpToLog(self) :
         logger.warn("[{0:8s}]: {1:8s} from {2} to {3}".format(self.EventID, self.Details, str(self.STime), str(self.ETime)))
         if self.Departure :
-            self.Departure.Dump()
+            self.Departure.DumpToLog()
 
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -122,10 +122,10 @@ class TravelEvent :
             cstore.append(constraint)
 
     # -----------------------------------------------------------------
-    def Dump(self) :
+    def DumpToLog(self) :
         logger.warn("[{0:8s}]: travel from {1} to {2}".format(self.EventID, self.SrcPlace.Details, self.DstPlace.Details))
         if self.DstPlace :
-            self.DstPlace.Dump()
+            self.DstPlace.DumpToLog()
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -184,7 +184,7 @@ class TimeVariableStore(dict) :
         return sorted(variables, key= lambda var : var.Priority, reverse=True)
         
     # -----------------------------------------------------------------
-    def Dump(self) :
+    def DumpToLog(self) :
         for tvar in sorted(self.values(), key= lambda tvar : tvar.STime) :
             logger.warn("{0:5s} {1}".format(tvar.ID, str(tvar)))
     
@@ -198,9 +198,9 @@ class ConstraintStore(list) :
         list.__init__(self, args)
 
     # -----------------------------------------------------------------
-    def Dump(self, varstore) :
+    def DumpToLog(self, varstore) :
         for constraint in self :
-            constraint.Dump(varstore)
+            constraint.DumpToLog(varstore)
 
     # -----------------------------------------------------------------
     def ApplyConstraints(self, varstore) :
@@ -390,12 +390,12 @@ class TimedEventList :
         return cstore.SolveConstraints(self.TimeVariableStore)
 
     # -----------------------------------------------------------------
-    def DumpTimeVariables(self) :
-        self.TimeVariableStore.Dump()
+    def DumpToLogTimeVariables(self) :
+        self.TimeVariableStore.DumpToLog()
 
     # -----------------------------------------------------------------
-    def Dump(self) :
-        self.BaseEvent.Dump()
+    def DumpToLog(self) :
+        self.BaseEvent.DumpToLog()
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -502,5 +502,5 @@ if __name__ == '__main__' :
             trip = evlist.PopTripEvent()
             print str(trip)
 
-    # evlist.Dump()
+    # evlist.DumpToLog()
 

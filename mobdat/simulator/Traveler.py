@@ -137,7 +137,7 @@ class Traveler :
                 AddLunchToPlaceEvent(self.EventList, workev, worldtime)
 
         if not self.EventList.SolveConstraints() :
-            logger.warn('Schedule constraints failed to resolve for %s', self.Person.Name)
+            logger.warn('Failed to resolve schedule constraints for traveler %s', self.Person.Name)
             self.EventList.Dump()
             return
 
@@ -156,10 +156,10 @@ class Traveler :
                 destination = self.ResolveLocationName(tripev.DstName)
                 self.Connector.AddTripToEventQueue(Trip.Trip(self, starttime, source, destination))
 
-                logger.warn('Scheduled trip from %s to %s', source.Name, destination.Name)
+                logger.info('Scheduled trip from %s to %s', source.Name, destination.Name)
                 return
 
-        logger.warn('No trip events for %s', self.Person.Name)
+        logger.info('No trip events for %s', self.Person.Name)
 
     # -----------------------------------------------------------------
     def TripCompleted(self, trip) :
