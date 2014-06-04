@@ -49,58 +49,199 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "
 import random
 import Trip
 
+from mobdat.common import TravelTimeEstimator, TimedEvent, TimeVariable
+from mobdat.common import SocialDecoration
+
+logger = logging.getLogger(__name__)
+
+# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+class EventController :
+
+    # -----------------------------------------------------------------
+    def __init__(self) :
+        self.CoffeeBeforeWork = 0.6
+        self.LunchDuringWork = 0.5
+        self.RestaurantAfterWork = 0.8
+        self.ShoppingTrip = 0.8
+
+    # -----------------------------------------------------------------
+    def FireCoffeeBeforeWork(self, schedule) :
+        return schedule.StartTime > 3.0 and schedule.StartTime < 10.0 and random.uniform(0.0, 1.0) > self.CoffeeBeforeWork
+
+    # -----------------------------------------------------------------
+    def FireLunchAtWork(self, schedule) :
+        return schedule.StartTime < 11.0 and 14.5 < schedule.EndTime and random.uniform(0.0, 1.0) > self.LunchDuringWork
+
+
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class Traveler :
-
     # -----------------------------------------------------------------
     def __init__(self, person, connector) :
+        """
+        Args:
+            person -- Graph.Node (NodeType == Person) or SocialNodes.Person
+            connector -- SocialConnector
+        """
+        self.Connector = connector
+        self.World = self.Connector.World
+
         self.Person = person
-        self.PersonResidence = self.Person.ResidesAt
-
         self.Employer = self.Person.EmployedBy
-        self.EmployerResidence = self.Employer.ResidesAt
-
         self.Job = self.Person.JobDescription
 
-        self.EstimatedTimeToWork = random.uniform(0.25, 0.75)
-        self.CurrentLocation = self.PersonResidence
-        self.CurrentEvent = None
+        self.InitializeLocationNameMap()
+        self.TravelEstimator = TravelTimeEstimator.TravelTimeEstimator()
 
-        nexttrip = self.NextTrip(connector.WorldTime)
-        connector.AddTripToEventQueue(nexttrip)
+        self.Controller = EventController()
+        self.EventList = TimedEvent.TimedEventList('home', 7 * 24.0, estimator = self.TravelEstimator)
 
-    # -----------------------------------------------------------------
-    def NextTrip(self, worldtime) :
-        if self.CurrentLocation == self.PersonResidence :
-            self.CurrentEvent = self.Job.Schedule.NextScheduledEvent(worldtime + self.EstimatedTimeToWork)
-            stime = self.CurrentEvent.WorldStartTime - self.EstimatedTimeToWork
-            if self.Job.FlexibleHours :
-                stime = random.gauss(stime, 0.5)
-            stime = max(worldtime, stime)
-
-            return Trip.Trip(self, stime, self.PersonResidence.EndPoint, self.EmployerResidence.BusinessLocation)
-        else:
-            etime = self.CurrentEvent.WorldEndTime
-            if self.Job.FlexibleHours :
-                etime = random.gauss(etime, 0.5)
-            etime = max(worldtime, etime)
-
-            return Trip.Trip(self, etime, self.EmployerResidence.BusinessLocation, self.PersonResidence.EndPoint)
+        self.BuildDailyEvents()
 
     # -----------------------------------------------------------------
-    def TripCompleted(self, trip, connector) :
-        # if this is a trip to work, update the estimated start time, dont want to be late to work
-        if trip.Destination == self.EmployerResidence :
-            offset = connector.WorldTime - self.CurrentEvent.WorldStartTime # positive means traveler is late for work
-            self.EstimatedTimeToWork = (4.0 * self.EstimatedTimeToWork - offset) / 5.0
-
-        self.CurrentLocation = trip.Destination
-
-        nexttrip = self.NextTrip(connector.WorldTime)
-        connector.AddTripToEventQueue(nexttrip)
+    def FindBusinessByType(self, biztype, bizclass) :
+        predicate = SocialDecoration.BusinessProfileDecoration.BusinessTypePred(biztype, bizclass)
+        nodes = self.World.FindNodes(nodetype = 'Business', predicate = predicate)
+        return random.choice(nodes)
+    
+    # -----------------------------------------------------------------
+    def InitializeLocationNameMap(self) :
+        self.LocationNameMap = {}
+        self.LocationNameMap['home'] = self.Person
+        self.LocationNameMap['work'] = self.Employer
+        self.LocationNameMap['coffee'] = self.FindBusinessByType(SocialDecoration.BusinessType.Food, 'coffee')
+        self.LocationNameMap['lunch'] = self.FindBusinessByType(SocialDecoration.BusinessType.Food, 'fastfood')
 
     # -----------------------------------------------------------------
-    def TripStarted(self, trip, connector) :
+    def ResolveLocationName(self, name) :
+        return self.LocationNameMap[name].ResidesAt
+
+    # -----------------------------------------------------------------
+    def BuildDailyEvents(self) :
+        worldday = int(self.Connector.WorldTime / 24.0)
+        worldtime = worldday * 24.0
+
+        jobdeviation = 2.0 if self.Job.FlexibleHours else 0.2
+
+        lastev = self.EventList.LastEvent.EventID
+
+        schedule = self.Job.Schedule.NextScheduledEvent(worldtime)
+        if schedule.Day == worldday :
+            workev = AddWorkEvent(self.EventList, lastev, schedule, deviation = jobdeviation)
+
+            if self.Controller.FireCoffeeBeforeWork(schedule) :
+                AddCoffeeBeforeWorkEvent(self.EventList, workev, worldtime)
+
+            if self.Controller.FireLunchAtWork(schedule) :
+                AddLunchToPlaceEvent(self.EventList, workev, worldtime)
+
+        if not self.EventList.SolveConstraints() :
+            logger.warn('Schedule constraints failed to resolve for %s', self.Person.Name)
+            self.EventList.Dump()
+            return
+
+        self.ScheduleNextTrip()
+
+    # -----------------------------------------------------------------
+    def ScheduleNextTrip(self) :
+        while self.EventList.MoreTripEvents() :
+            tripev = self.EventList.PopTripEvent()
+            starttime = float(tripev.StartTime)
+
+            # this just allows us to start in the middle of the day, traveler at work
+            # will start at work rather than starting at home
+            if starttime > self.Connector.WorldTime :
+                source = self.ResolveLocationName(tripev.SrcName)
+                destination = self.ResolveLocationName(tripev.DstName)
+                self.Connector.AddTripToEventQueue(Trip.Trip(self, starttime, source, destination))
+
+                logger.warn('Scheduled trip from %s to %s', source.Name, destination.Name)
+                return
+
+        logger.warn('No trip events for %s', self.Person.Name)
+
+    # -----------------------------------------------------------------
+    def TripCompleted(self, trip) :
+        """
+        TripCompleted -- event handler called by the connector when the trip is completed
+
+        Args:
+            trip -- initialized Trip object
+        """
+        self.TravelEstimator.SaveTravelTime(trip.Source, trip.Destination, self.Connector.WorldTime - trip.ActualStartTime)
+        self.ScheduleNextTrip()
+
+    # -----------------------------------------------------------------
+    def TripStarted(self, trip) :
         pass
+
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+def AddWorkEvent(evlist, event, schedule, deviation = 2.0) :
+    swork = TimeVariable.GaussianTimeVariable(schedule.WorldStartTime - deviation, schedule.WorldStartTime + deviation)
+    ework = TimeVariable.GaussianTimeVariable(schedule.WorldEndTime - deviation, schedule.WorldEndTime + deviation)
+
+    duration = schedule.EndTime - schedule.StartTime
+    idw = evlist.AddPlaceEvent('work', swork, ework, duration)
+    evlist.InsertWithinPlaceEvent(event, idw)
+
+    return idw
+
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+def AddLunchToPlaceEvent(evlist, pevent, start, duration = 0.75) :
+    slunch = TimeVariable.GaussianTimeVariable(start + 11.5, start + 13.0)
+    elunch = TimeVariable.GaussianTimeVariable(start + 12.5, start + 14.0)
+    idl = evlist.AddPlaceEvent('lunch', slunch, elunch, duration)
+
+    evlist.InsertWithinPlaceEvent(pevent, idl)
+
+    return idl
+
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+def AddCoffeeBeforeWorkEvent(evlist, workevent, start, duration = 0.2) :
+    """Add a PlaceEvent for coffee before a work event. This moves the
+    coffee event as close as possible to the work event.
+    """
+
+    scoffee = TimeVariable.MaximumTimeVariable(start + 0.0, start + 24.0)
+    ecoffee = TimeVariable.MaximumTimeVariable(start + 0.0, start + 24.0)
+    idc = evlist.AddPlaceEvent('coffee', scoffee, ecoffee, duration)
+
+    evlist.InsertAfterPlaceEvent(evlist.PrevPlaceID(workevent), idc)
+
+    return idc
+
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+def AddRestaurantAfterWorkEvent(evlist, workevent, start) :
+    sdinner = TimeVariable.MinimumTimeVariable(start + 0.0, start + 24.0)
+    edinner = TimeVariable.MinimumTimeVariable(start + 0.0, start + 24.0)
+    idr = evlist.AddPlaceEvent('dinner', sdinner, edinner, 1.5)
+
+    evlist.InsertAfterPlaceEvent(workevent, idr)
+
+    return idr
+
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+def AddShoppingTrip(evlist, start) :
+    # happens between 7am and 10pm
+    svar = TimeVariable.GaussianTimeVariable(start + 7.0, start + 22.0)
+    evar = TimeVariable.GaussianTimeVariable(start + 7.0, start + 22.0)
+
+    ids = evlist.AddPlaceEvent('shopping', svar, evar, 0.75)
+    evlist.InsertWithinPlaceEvent(evlist.LastEvent.EventID, ids)
+
+    stops = int(random.triangular(0, 4, 1))
+    while stops > 0 :
+        stops = stops - 1
+
+        svar = TimeVariable.MinimumTimeVariable(start + 7.0, start + 22.0)
+        evar = TimeVariable.MinimumTimeVariable(start + 7.0, start + 22.0)
+        idnew = evlist.AddPlaceEvent('shopping', svar, evar, 0.5)
+        evlist.InsertAfterPlaceEvent(ids, idnew)
+        ids = idnew
 

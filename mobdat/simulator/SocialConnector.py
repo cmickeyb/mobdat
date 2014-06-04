@@ -60,6 +60,7 @@ class SocialConnector(EventHandler.EventHandler, BaseConnector.BaseConnector) :
 
         self.__Logger = logging.getLogger(__name__)
 
+        self.MaximumTravelers = int(settings["General"].get("MaximumTravelers", 0))
         self.TripCallbackMap = {}
         self.TripTimerEventQ = []
 
@@ -69,6 +70,8 @@ class SocialConnector(EventHandler.EventHandler, BaseConnector.BaseConnector) :
         self.Travelers = {}
         self.CreateTravelers()
 
+        self.__Logger.warn('SocialConnector initialization complete')
+
     # -----------------------------------------------------------------
     def AddTripToEventQueue(self, trip) :
         heapq.heappush(self.TripTimerEventQ, trip)
@@ -76,9 +79,15 @@ class SocialConnector(EventHandler.EventHandler, BaseConnector.BaseConnector) :
     # -----------------------------------------------------------------
     def CreateTravelers(self) :
         #for person in self.PerInfo.PersonList.itervalues() :
+        count = 0
         for name, person in self.World.IterNodes(nodetype = 'Person') :
             traveler = Traveler.Traveler(person, self)
             self.Travelers[name] = traveler
+
+            count += 1
+            if self.MaximumTravelers > 0 and self.MaximumTravelers < count :
+                break
+
             
     # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     # EVENT GENERATORS
@@ -94,8 +103,8 @@ class SocialConnector(EventHandler.EventHandler, BaseConnector.BaseConnector) :
         """
         pname = trip.Traveler.Person.Name
         tripid = trip.TripID
-        sname = trip.Source.HostObject.Name
-        dname = trip.Destination.HostObject.Name
+        sname = trip.Source.Name
+        dname = trip.Destination.Name
 
         event = EventTypes.TripBegStatsEvent(self.CurrentStep, pname, tripid, sname, dname)
         self.PublishEvent(event)
@@ -111,8 +120,8 @@ class SocialConnector(EventHandler.EventHandler, BaseConnector.BaseConnector) :
         """
         pname = trip.Traveler.Person.Name
         tripid = trip.TripID
-        sname = trip.Source.HostObject.Name
-        dname = trip.Destination.HostObject.Name
+        sname = trip.Source.Name
+        dname = trip.Destination.Name
 
         event = EventTypes.TripEndStatsEvent(self.CurrentStep, pname, tripid, sname, dname)
         self.PublishEvent(event)
@@ -128,8 +137,8 @@ class SocialConnector(EventHandler.EventHandler, BaseConnector.BaseConnector) :
 
         vname = str(trip.VehicleName)
         vtype = str(trip.VehicleType)
-        rname = str(trip.Source.DestinationName)
-        tname = str(trip.Destination.SourceName)
+        rname = str(trip.Source.Capsule.DestinationName)
+        tname = str(trip.Destination.Capsule.SourceName)
 
         self.__Logger.debug('add vehicle %s from %s to %s',vname, rname, tname)
 
@@ -172,11 +181,11 @@ class SocialConnector(EventHandler.EventHandler, BaseConnector.BaseConnector) :
         if self.CurrentStep % 100 == 0 :
             wtime = self.WorldTime
             qlen = len(self.TripTimerEventQ)
-            stime = self.TripTimerEventQ[0].StartTime if self.TripTimerEventQ else 0.0
+            stime = self.TripTimerEventQ[0].ScheduledStartTime if self.TripTimerEventQ else 0.0
             self.__Logger.info('at time %0.3f, timer queue contains %s elements, next event scheduled for %0.3f', wtime, qlen, stime)
 
         while self.TripTimerEventQ :
-            if self.TripTimerEventQ[0].StartTime > self.WorldTime :
+            if self.TripTimerEventQ[0].ScheduledStartTime > self.WorldTime :
                 break
 
             trip = heapq.heappop(self.TripTimerEventQ)
