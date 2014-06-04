@@ -106,6 +106,8 @@ def ParseCommandLine(config, args) :
 
     parser.add_argument("--steps", help="number of steps to execute", type=int)
 
+    parser.add_argument("--travelers", help="maximum number of travelers to generate", type=int)
+
     options = parser.parse_args(args)
 
     if options.starttime :
@@ -128,6 +130,9 @@ def ParseCommandLine(config, args) :
 
     if options.steps :
         config['General']['TimeSteps'] = options.steps
+
+    if options.travelers :
+        config['General']['MaximumTravelers'] = options.travelers
 
     if options.interval :
         config["General"]["Interval"] = options.interval

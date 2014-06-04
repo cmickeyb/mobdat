@@ -4,7 +4,8 @@
         "TimeSteps" : 0,
         "Interval" : 0.200,
         "SecondsPerStep" : 2.0,
-        "StartTimeOfDay" : 6.0,
+        "StartTimeOfDay" : 7.0,
+        "MaximumTravelers" : 0, 
 	"WorldInfoFile" : "networks/fullnet/data/worldinfo.js",
         "Connectors" : ["opensim", "sumo", "social", "stats"]
     },
