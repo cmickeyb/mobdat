@@ -51,6 +51,8 @@ from mobdat.common.TimeVariable import *
 from mobdat.common.Constraint import *
 from mobdat.common.TravelTimeEstimator import TravelTimeEstimator
 
+logger = logging.getLogger(__name__)
+
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class TripEvent :
@@ -94,7 +96,7 @@ class PlaceEvent :
 
     # -----------------------------------------------------------------
     def Dump(self) :
-        print "[{0:8s}]: {1:8s} from {2} to {3}".format(self.EventID, self.Details, str(self.STime), str(self.ETime))
+        logger.warn("[{0:8s}]: {1:8s} from {2} to {3}".format(self.EventID, self.Details, str(self.STime), str(self.ETime)))
         if self.Departure :
             self.Departure.Dump()
 
@@ -121,7 +123,7 @@ class TravelEvent :
 
     # -----------------------------------------------------------------
     def Dump(self) :
-        print "[{0:8s}]: travel from {1} to {2}".format(self.EventID, self.SrcPlace.Details, self.DstPlace.Details)
+        logger.warn("[{0:8s}]: travel from {1} to {2}".format(self.EventID, self.SrcPlace.Details, self.DstPlace.Details))
         if self.DstPlace :
             self.DstPlace.Dump()
 
@@ -150,7 +152,7 @@ class TimeVariableStore(dict) :
         """
         for var in self.itervalues() :
             if not var.IsValid() :
-                print 'variable {0} is inconsistent; {1}'.format(var.ID, str(var))
+                logger.warn('variable {0} is inconsistent; {1}'.format(var.ID, str(var)))
                 return False
 
         return True
@@ -184,7 +186,7 @@ class TimeVariableStore(dict) :
     # -----------------------------------------------------------------
     def Dump(self) :
         for tvar in sorted(self.values(), key= lambda tvar : tvar.STime) :
-            print "{0:5s} {1}".format(tvar.ID, str(tvar))
+            logger.warn("{0:5s} {1}".format(tvar.ID, str(tvar)))
     
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
