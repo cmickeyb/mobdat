@@ -155,6 +155,14 @@ class WorldInfo(Graph.Graph) :
         self.AddNode(endpoint)
         
     # -----------------------------------------------------------------
+    def AddLocationCapsule(self, capsule) :
+        """
+        Args:
+            capsule -- object of type LayoutNodes.LocationCapsule
+        """
+        self.AddNode(capsule)
+        
+    # -----------------------------------------------------------------
     def AddBusinessLocationProfile(self, profile) :
         """
         Args:

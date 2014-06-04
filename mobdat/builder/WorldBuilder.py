@@ -179,11 +179,16 @@ class WorldBuilder(WorldInfo.WorldInfo) :
             endpoints -- list of endpoint objects of type LayoutNodes.Endpoint
         """
         location = LayoutNodes.BusinessLocation(GenName('bizloc'), self.Nodes[profname])
-        for endpoint in endpoints :
-            location.AddEndpointToLocation(endpoint)
-
         WorldInfo.WorldInfo.AddBusinessLocation(self, location)
 
+        # business locations have one capsule containing all endpoints
+        capsule = LayoutNodes.LocationCapsule(GenName('bizcap'))
+        WorldInfo.WorldInfo.AddLocationCapsule(self, capsule)
+
+        for endpoint in endpoints :
+            capsule.AddEndPointToCapsule(endpoint)
+
+        location.AddCapsuleToLocation(capsule)
         return location
 
     # =================================================================
@@ -203,11 +208,16 @@ class WorldBuilder(WorldInfo.WorldInfo) :
             profname -- string name of the business location profile collection
             endpoints -- list of endpoint objects of type LayoutNodes.Endpoint
         """
-        location = LayoutNodes.ResidentialLocation(GenName('resloc'), self.Nodes[profname])
-        for endpoint in endpoints :
-            location.AddEndpointToLocation(endpoint)
-
+        location = LayoutNodes.ResidentialLocation(GenName('rezloc'), self.Nodes[profname])
         WorldInfo.WorldInfo.AddResidentialLocation(self, location)
+
+        # residential locations have one endpoint per capsule
+        for endpoint in endpoints :
+            capsule = LayoutNodes.LocationCapsule(GenName('rezcap'))
+            WorldInfo.WorldInfo.AddLocationCapsule(self, capsule)
+
+            capsule.AddEndPointToCapsule(endpoint)
+            location.AddCapsuleToLocation(capsule)
 
         return location
 

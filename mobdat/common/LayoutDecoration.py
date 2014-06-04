@@ -195,6 +195,39 @@ class EndPointDecoration(Decoration) :
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+class CapsuleDecoration(Decoration) :
+    DecorationName = 'Capsule'
+
+    # -----------------------------------------------------------------
+    @staticmethod
+    def Load(graph, info) :
+        return CapsuleDecoration()
+
+    # -----------------------------------------------------------------
+    def __init__(self) :
+        Decoration.__init__(self)
+
+        
+    # -----------------------------------------------------------------
+    @property
+    def EndPointCount(self) :
+        return len(self.HostObject.Members)
+
+    # -----------------------------------------------------------------
+    @property
+    def SourceName(self) :
+        node = random.choice(self.HostObject.Members)
+        return node.EndPoint.SourceName
+
+    # -----------------------------------------------------------------
+    @property
+    def DestinationName(self) :
+        node = random.choice(self.HostObject.Members)
+        return node.EndPoint.DestinationName
+
+
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class BusinessLocationProfileDecoration(Decoration) :
     DecorationName = 'BusinessLocationProfile'
     
@@ -242,6 +275,12 @@ class BusinessLocationProfileDecoration(Decoration) :
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class BusinessLocationDecoration(Decoration) :
+    """
+    BusinessLocationDecoration
+    
+    This class decorates BusinessLocation objects 
+    """
+
     DecorationName = 'BusinessLocation'
 
     # -----------------------------------------------------------------
@@ -258,25 +297,26 @@ class BusinessLocationDecoration(Decoration) :
         
     # -----------------------------------------------------------------
     @property
+    def EndPointCount(self) :
+        """
+        EndPointCount -- return the total number of EndPoint nodes inside
+        Capsule nodes assigned to the BusinessLocation
+        """
+        count = 0
+        for capsule in self.HostObject.Members :
+            count += capsule.Capsule.EndPointCount
+
+        return count
+
+    # -----------------------------------------------------------------
+    @property
     def EmployeeCapacity(self) :
-        return len(self.HostObject.Members) * self.HostObject.BusinessLocationProfile.EmployeesPerNode
+        return self.EndPointCount * self.HostObject.BusinessLocationProfile.EmployeesPerNode
 
     # -----------------------------------------------------------------
     @property
     def CustomerCapacity(self) :
-        return len(self.HostObject.Members) * self.HostObject.BusinessLocationProfile.CustomersPerNode
-
-    # -----------------------------------------------------------------
-    @property
-    def SourceName(self) :
-        node = random.choice(self.HostObject.Members)
-        return node.EndPoint.SourceName
-
-    # -----------------------------------------------------------------
-    @property
-    def DestinationName(self) :
-        node = random.choice(self.HostObject.Members)
-        return node.EndPoint.DestinationName
+        return self.EndPointCount * self.HostObject.BusinessLocationProfile.CustomersPerNode
 
     # -----------------------------------------------------------------
     def Fitness(self, business) :
@@ -294,15 +334,26 @@ class BusinessLocationDecoration(Decoration) :
         invweight = (ecount / self.EmployeeCapacity + ccount / self.CustomerCapacity) / 2.0
         pfitness = self.HostObject.BusinessLocationProfile.Fitness(business)
         fitness = restrict(random.gauss(1.0 - invweight, 0.1), 0, 1.0) * pfitness
+
         return fitness
 
     # -----------------------------------------------------------------
     def AddBusiness(self, business) :
+        """
+        AddBusiness -- assign a business to this location
+        
+        Args:
+            business -- SocialNodes.Business
+        """
         if business.FindDecorationProvider('EmploymentProfile') :
             self.PeakEmployeeCount += business.EmploymentProfile.PeakEmployeeCount()
 
         if business.FindDecorationProvider('ServiceProfile') :
             self.PeakCustomerCount += business.ServiceProfile.PeakServiceCount()
+
+        # Return the capsule where the business is assigned, with BusinessLocation nodes
+        # there should really only be one capsule
+        return random.choice(self.HostObject.Members)
 
     # -----------------------------------------------------------------
     def Dump(self) :
@@ -362,20 +413,21 @@ class ResidentialLocationDecoration(Decoration) :
 
     # -----------------------------------------------------------------
     @property
+    def EndPointCount(self) :
+        """
+        EndPointCount -- return the total number of EndPoint nodes inside
+        Capsule nodes assigned to the ResidentialLocation
+        """
+        count = 0
+        for capsule in self.HostObject.Members :
+            count += capsule.Capsule.EndPointCount
+
+        return count
+
+    # -----------------------------------------------------------------
+    @property
     def ResidentCapacity(self) :
-        return len(self.HostObject.Members) * self.HostObject.ResidentialLocationProfile.ResidentsPerNode
-
-    # -----------------------------------------------------------------
-    @property
-    def SourceName(self) :
-        node = self.HostObject.Members[0]
-        return node.EndPoint.SourceName
-
-    # -----------------------------------------------------------------
-    @property
-    def DestinationName(self) :
-        node = self.HostObject.Members[0]
-        return node.EndPoint.DestinationName
+        return self.EndPointCount * self.HostObject.ResidentialLocationProfile.ResidentsPerNode
 
     # -----------------------------------------------------------------
     def Fitness(self, person) :
@@ -387,22 +439,33 @@ class ResidentialLocationDecoration(Decoration) :
 
     # -----------------------------------------------------------------
     def AddResident(self, person) :
+        """
+        AddResident -- find an available EndPoint among the Capsules and
+        assign the person to the EndPoint
+
+        Args:
+            person -- SocialNodes.Person
+        """
         bestcnt = self.HostObject.ResidentialLocationProfile.ResidentsPerNode + 1
         bestfit = None
 
-        for residence in self.HostObject.Members :
-            if residence.Name not in self.ResidenceList :
-                self.ResidenceList[residence.Name] = []
-                bestfit = residence
+        # this just goes through the entire list of capsules in the residential
+        # location and finds the one with the least number of people assigned to
+        # it, really just a way of balancing load across residential units
+        for capsule in self.HostObject.Members :
+            if capsule.Name not in self.ResidenceList :
+                self.ResidenceList[capsule.Name] = []
+                bestfit = capsule
                 break
-            elif len(self.ResidenceList[residence.Name]) < bestcnt :
-                bestcnt = len(self.ResidenceList[residence.Name])
-                bestfit = residence
+            elif len(self.ResidenceList[capsule.Name]) < bestcnt :
+                bestcnt = len(self.ResidenceList[capsule.Name])
+                bestfit = capsule
 
         if bestfit :
             self.ResidentCount += 1
             self.ResidenceList[bestfit.Name].append(person)
 
+        # this returns a Capsle
         return bestfit
 
     # -----------------------------------------------------------------
@@ -411,7 +474,7 @@ class ResidentialLocationDecoration(Decoration) :
         AddPersonToNode -- add a person to a specific node
 
         person -- an object of type Person
-        nodename -- the string name of a node in the capsule
+        nodename -- the string name of a capsule
         """
 
         if nodename not in self.ResidenceList :
@@ -429,7 +492,7 @@ class ResidentialLocationDecoration(Decoration) :
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 CommonDecorations = [ CoordDecoration, IntersectionTypeDecoration, RoadTypeDecoration, 
-                      EndPointDecoration,
+                      EndPointDecoration, CapsuleDecoration,
                       BusinessLocationProfileDecoration, BusinessLocationDecoration,
                       ResidentialLocationProfileDecoration, ResidentialLocationDecoration ]
 

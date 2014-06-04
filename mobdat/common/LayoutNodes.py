@@ -185,6 +185,19 @@ class Intersection(Graph.Node) :
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ##class EndPoint(Graph.Node) :
 class EndPoint(Intersection) :
+    """
+    EndPoint
+
+    This graph node class (a subset of intersections) is the destination
+    for a trip. 
+
+    Members: None
+
+    Decorations:
+        EndPointDecoration
+
+    Edges: None
+    """
 
     # -----------------------------------------------------------------
     def __init__(self, name, itype, x, y) :
@@ -199,7 +212,60 @@ class EndPoint(Intersection) :
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+class LocationCapsule(Graph.Node) :
+    """
+    LocationCapsule
+
+    This graph node class manages a collection of EndPoint nodes.
+
+    Members: EndPoints, typically one endpoint for a residential
+    location and multiple endpoints for a business location
+
+    Decorations:
+        CapsuleDecoration
+
+    Edges: None
+    """
+
+    # -----------------------------------------------------------------
+    def __init__(self, name) :
+        """
+        Args:
+            name -- string
+            itype -- object of type Layout.IntersectionType
+            x, y -- integer coordinates
+        """
+        Graph.Node.__init__(self, name = name)
+        self.AddDecoration(LayoutDecoration.CapsuleDecoration())
+
+    # -----------------------------------------------------------------
+    def AddEndPointToCapsule(self, endpoint) :
+        """
+        Args:
+            endpoint -- object of type LayoutNodes.EndPoint
+        """
+        self.AddMember(endpoint)
+
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class BusinessLocation(Graph.Node) :
+    """
+    BusinessLocation
+
+    This graph node class manages a business neighborhood consisting of
+    a collection of LocationCapsule objects
+
+    Members:- Typically one LocationCapsule nodes that contains multiple
+    EndPoint nodes
+    
+    MemberOf:
+        BusinessLocationProfile
+
+    Decorations:
+        BusinessLocationDecoration
+
+    Edges: None
+    """
 
     # -----------------------------------------------------------------
     def __init__(self, name, profile) :
@@ -214,16 +280,33 @@ class BusinessLocation(Graph.Node) :
         profile.AddMember(self)
 
     # -----------------------------------------------------------------
-    def AddEndpointToLocation(self, endpoint) :
+    def AddCapsuleToLocation(self, capsule) :
         """
         Args:
-            endpoint -- object of type LayoutNodes.EndPoint
+            capsule -- object of type LayoutNodes.LocationCapsule
         """
-        self.AddMember(endpoint)
+        self.AddMember(capsule)
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class ResidentialLocation(Graph.Node) :
+    """
+    ResidentialLocation
+
+    This graph node class manages a residential neighborhood consisting of
+    a collection of LocationCapsule objects
+
+    Members: Typically several LocationCapsule nodes that each contain
+    a single EndPoint node
+    
+    MemberOf:
+        ResidentialLocationProfile
+
+    Decorations:
+        ResidentialLocationDecoration
+
+    Edges: None
+    """
 
     # -----------------------------------------------------------------
     def __init__(self, name, profile) :
@@ -238,13 +321,12 @@ class ResidentialLocation(Graph.Node) :
         profile.AddMember(self)
 
     # -----------------------------------------------------------------
-    def AddEndpointToLocation(self, endpoint) :
+    def AddCapsuleToLocation(self, capsule) :
         """
         Args:
-            endpoint -- object of type LayoutNodes.EndPoint
+            capsule -- object of type LayoutNodes.LocationCapsule
         """
-        self.AddMember(endpoint)
-
+        self.AddMember(capsule)
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

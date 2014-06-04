@@ -197,8 +197,8 @@ def PlaceBusiness(business) :
             bestloc = location
 
     if bestloc :
-        bestloc.BusinessLocation.AddBusiness(business)
-        world.SetResidence(business, bestloc)
+        capsule = bestloc.BusinessLocation.AddBusiness(business)
+        world.SetResidence(business, capsule)
 
     return bestloc
 
