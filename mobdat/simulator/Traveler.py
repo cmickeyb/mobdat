@@ -138,7 +138,7 @@ class Traveler :
 
         if not self.EventList.SolveConstraints() :
             logger.warn('Failed to resolve schedule constraints for traveler %s', self.Person.Name)
-            self.EventList.Dump()
+            self.EventList.DumpToLog()
             return
 
         self.ScheduleNextTrip()
