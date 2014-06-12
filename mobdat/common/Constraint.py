@@ -47,7 +47,7 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "
 
 import math
 from mobdat.common.Utilities import GenName
-from mobdat.common.TimeVariable import TimeVariable
+from mobdat.common.IntervalVariable import IntervalVariable
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -95,12 +95,12 @@ class OrderConstraint(Constraint) :
 
         changed = False
         
-        if self.fpcompare(ev2.STime, ev1.STime + self.Delta) < 0 :
-            ev2.STime = ev1.STime + self.Delta
+        if self.fpcompare(ev2.IntervalStart, ev1.IntervalStart + self.Delta) < 0 :
+            ev2.IntervalStart = ev1.IntervalStart + self.Delta
             changed = True
 
-        if self.fpcompare(ev2.ETime, ev1.ETime + self.Delta) < 0 :
-            ev1.ETime = ev2.ETime - self.Delta
+        if self.fpcompare(ev2.IntervalEnd, ev1.IntervalEnd + self.Delta) < 0 :
+            ev1.IntervalEnd = ev2.IntervalEnd - self.Delta
             changed = True
 
         return changed
@@ -114,12 +114,12 @@ class OrderConstraint(Constraint) :
         ev1 = varstore[self.ID1]
         ev2 = varstore[self.ID2]
 
-        if ev2.STime < ev1.STime + self.Delta :
-            print "ev2.STime < ev1.STime + self.Delta"
-            print "{2} < {0} + {1}".format(ev1.ETime, self.Delta, ev2.STime)
+        if ev2.IntervalStart < ev1.IntervalStart + self.Delta :
+            print "ev2.IntervalStart < ev1.IntervalStart + self.Delta"
+            print "{2} < {0} + {1}".format(ev1.IntervalEnd, self.Delta, ev2.IntervalStart)
 
-        if ev1.ETime + self.Delta > ev2.ETime :
-            print "ev1.ETime + self.Delta > ev2.ETime"
-            print "{0} + {1} > {2}".format(ev1.ETime, self.Delta, ev2.STime)
+        if ev1.IntervalEnd + self.Delta > ev2.IntervalEnd :
+            print "ev1.IntervalEnd + self.Delta > ev2.IntervalEnd"
+            print "{0} + {1} > {2}".format(ev1.IntervalEnd, self.Delta, ev2.IntervalStart)
 
         print

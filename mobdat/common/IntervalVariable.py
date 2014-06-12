@@ -29,7 +29,7 @@ LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
 
-@file    TimeVariable.py
+@file    IntervalVariable.py
 @author  Mic Bowman
 @date    2014-03-31
 
@@ -48,9 +48,11 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "
 import random, math
 from mobdat.common.Utilities import GenName
 
+logger = logging.getLogger(__name__)
+
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class TimeVariable :
+class IntervalVariable :
     Priority = 5
     MinimalVariance = 0.00001
 
@@ -64,32 +66,33 @@ class TimeVariable :
             id -- unique identifier for the time variable
         """
 
-        self.STime = min(stime, etime or stime)
-        self.ETime = max(stime, etime or stime)
+        self.IntervalStart = float(min(stime, etime or stime))
+        self.IntervalEnd = float(max(stime, etime or stime))
         self.ID = id or GenName('TV')
 
     # -----------------------------------------------------------------
     def __str__(self) :
         if self.IsFixed() :
-            return "{0:02d}:{1:5.3f}".format(int(self.STime / 24.0), self.STime % 24.0)
-        return "<{0}:{1}>".format(self.STime, self.ETime)
+            return "[{0:5.3f}]".format(self.GetValue())
+
+        return "<{0:5.3f}:{1:5.3f}>".format(self.IntervalStart, self.IntervalEnd)
 
     # -----------------------------------------------------------------
     def __float__(self) :
         if self.IsFixed() :
-            return self.STime
+            return self.IntervalStart
 
         raise ValueError("Attempt to convert indeterminant time variable to float {0}".format(self.ID))
 
     # -----------------------------------------------------------------
     def Copy(self, id = None) :
         """ Create a copy of the time variable """
-        return self.__class__(self.STime, self.ETime, id or self.ID)
+        return self.__class__(self.IntervalStart, self.IntervalEnd, id)
 
     # -----------------------------------------------------------------
     def IsFixed(self) :
         """ Predicate to determine if the interval has set a single value """
-        return math.fabs(self.ETime - self.STime) < TimeVariable.MinimalVariance
+        return math.fabs(self.IntervalEnd - self.IntervalStart) < IntervalVariable.MinimalVariance
 
     # -----------------------------------------------------------------
     def IsValid(self) :
@@ -97,14 +100,14 @@ class TimeVariable :
         if self.IsFixed() :
             return True
 
-        if not self.STime <= self.ETime :
-            print "INVALID: {0}".format(self.STime - self.ETime)
+        # if not self.IntervalStart <= self.IntervalEnd :
+        #     logger.warn("Variable %s is invalid: %s", self.ID, str(self))
 
-        return self.STime <= self.ETime
+        return self.IntervalStart <= self.IntervalEnd
     
     # -----------------------------------------------------------------
     def PickValue(self) :
-        return self.SetValue(random.uniform(self.STime, self.ETime))
+        return self.SetValue(random.uniform(self.IntervalStart, self.IntervalEnd))
 
     # -----------------------------------------------------------------
     def SetValue(self, value) :
@@ -116,55 +119,65 @@ class TimeVariable :
             the fixed value of the variable
         """
 
-        self.STime = value
-        self.ETime = value
+        # value < self.IntervalStart
+        if self.IntervalStart - value > IntervalVariable.MinimalVariance :
+            logger.warn("Invalid value: %s, too small, expecting range %s", value, str(self))
+            raise ValueError("Invalid value")
+
+        # self.IntervalEnd < value :
+        if value - self.IntervalEnd > IntervalVariable.MinimalVariance :
+            logger.warn("Invalid value: %s, too large, expecting range %s", value, str(self))
+            raise ValueError("Invalid value")
+
+        self.IntervalStart = value
+        self.IntervalEnd = value
         return value
 
     # -----------------------------------------------------------------
     def GetValue(self) :
-        return self.STime if self.IsFixed() else None
+        return self.IntervalStart if self.IsFixed() else None
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class GaussianTimeVariable(TimeVariable) :
+class GaussianIntervalVariable(IntervalVariable) :
     Priority = 5
 
     # -----------------------------------------------------------------
     def __init__(self, stime, etime = None, id = None) :
-        TimeVariable.__init__(self, stime, etime, id)
+        IntervalVariable.__init__(self, stime, etime, id)
 
     # -----------------------------------------------------------------
     def PickValue(self) :
-        mean = (self.STime + self.ETime) / 2.0
-        stdev = (self.ETime - self.STime) / 4.0
-        value = max(self.STime, min(self.ETime, random.gauss(mean, stdev)))
+        mean = (self.IntervalStart + self.IntervalEnd) / 2.0
+        stdev = (self.IntervalEnd - self.IntervalStart) / 4.0
+        value = max(self.IntervalStart, min(self.IntervalEnd, random.gauss(mean, stdev)))
 
         return self.SetValue(value)
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class MinimumTimeVariable(TimeVariable) :
+class MinimumIntervalVariable(IntervalVariable) :
     Priority = 0
 
     # -----------------------------------------------------------------
     def __init__(self, stime, etime = None, id = None) :
-        TimeVariable.__init__(self, stime, etime, id)
+        IntervalVariable.__init__(self, stime, etime, id)
 
     # -----------------------------------------------------------------
     def PickValue(self) :
-        return self.SetValue(self.STime)
+        return self.SetValue(self.IntervalStart)
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class MaximumTimeVariable(TimeVariable) :
+class MaximumIntervalVariable(IntervalVariable) :
     Priority = 0
 
     # -----------------------------------------------------------------
     def __init__(self, stime, etime = None, id = None) :
-        TimeVariable.__init__(self, stime, etime, id)
+        IntervalVariable.__init__(self, stime, etime, id)
 
     # -----------------------------------------------------------------
     def PickValue(self) :
-        return self.SetValue(self.ETime)
+        return self.SetValue(self.IntervalEnd)
 
 
