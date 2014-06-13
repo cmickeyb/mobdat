@@ -37,7 +37,7 @@ This package defines modules for the mobdat simulation environment
 
 """
 
-import os, sys
+import os, sys, traceback
 import logging
 
 # we need to import python modules from the $SUMO_HOME/tools directory
@@ -79,19 +79,16 @@ class PlaceEvent :
         self.Departure = None
 
     # -----------------------------------------------------------------
+    def Split(self) :
+        raise AttributeError("Event {0} of type {1} is not splittable".format(self.EventID, self.__class__.__name__))
+
+    # -----------------------------------------------------------------
     def NextPlace(self) :
         return self.Departure.DstPlace if self.Departure else None
 
     # -----------------------------------------------------------------
     def PrevPlace(self) :
         return self.Arrival.SrcPlace if self.Arrival else None
-
-    # -----------------------------------------------------------------
-    def Copy(self) :
-        svar = self.EventStart.Copy()
-        evar = self.EventEnd.Copy()
-
-        return self.__class__(self.Details, svar, evar, self.Duration)
 
     # -----------------------------------------------------------------
     def AddVariables(self, vstore) :
@@ -117,20 +114,104 @@ class PlaceEvent :
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+class HomeEvent(PlaceEvent) :
+
+    # -----------------------------------------------------------------
+    @staticmethod
+    def Create(details, base, sinterval, einterval, minduration = 0.01) :
+        svar = MinimumIntervalVariable(base + sinterval[0], base + sinterval[1])
+        evar = MaximumIntervalVariable(base + einterval[0], base + einterval[1])
+
+        return HomeEvent(details, svar, evar, minduration)
+
+    # -----------------------------------------------------------------
+    def __init__(self, details, stimevar, etimevar, duration = 0.01, id = None) :
+        PlaceEvent.__init__(self, details, stimevar, etimevar, duration, id)
+
+    # -----------------------------------------------------------------
+    def Split(self) :
+        svar = self.EventStart.Copy()
+        evar = self.EventEnd.Copy()
+
+        return self.__class__(self.Details, svar, evar, self.Duration)
+    
+# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class WorkEvent(PlaceEvent) :
 
     # -----------------------------------------------------------------
     @staticmethod
-    def CreateWorkEvent(details, base, sinterval, einterval, minduration = 8.0) :
-        swork = GaussianIntervalVariable(base + sinterval[0], base + sinterval[1])
-        ework = GaussianIntervalVariable(base + einterval[0], base + einterval[1])
+    def Create(details, base, sinterval, einterval, minduration = 8.0, minsplit = 1.0) :
+        svar = GaussianIntervalVariable(base + sinterval[0], base + sinterval[1])
+        evar = GaussianIntervalVariable(base + einterval[0], base + einterval[1])
 
-        return WorkEvent(details, swork, ework, minduration)
+        work = WorkEvent(details, svar, evar, minduration)
+        work.MinimumSplitDuration = minsplit
+
+        return work
     
     # -----------------------------------------------------------------
     def __init__(self, details, stimevar, etimevar, duration = 0.01, id = None) :
         PlaceEvent.__init__(self, details, stimevar, etimevar, duration, id)
 
+        self.MinimumSplitDuration = duration
+        self.AggregateID = GenName('AGGREGATE')
+        self.AggregateHead = True
+
+    # -----------------------------------------------------------------
+    def Split(self) :
+        svar = self.EventStart.Copy()
+        evar = self.EventEnd.Copy()
+
+        event = self.__class__(self.Details, svar, evar, self.Duration)
+
+        # propogate aggregate information
+        event.MinimumSplitDuration = self.MinimumSplitDuration
+        event.AggregateID = self.AggregateID
+        event.AggregateHead = False
+
+        return event
+
+    # -----------------------------------------------------------------
+    def AddVariables(self, vstore) :
+        vstore[self.EventStart.ID] = self.EventStart
+        vstore[self.EventEnd.ID] = self.EventEnd
+
+        if self.Departure :
+            self.Departure.AddVariables(vstore)
+
+    # -----------------------------------------------------------------
+    def _FindAggregateDuration(self) :
+        evar = self.EventEnd
+        total = self.Duration
+
+        accum = 0
+        travel = self.Departure
+        while travel :
+            accum += travel.Duration
+            if travel.DstPlace.__class__ == self.__class__  and travel.DstPlace.AggregateID == self.AggregateID :
+                evar = travel.DstPlace.EventEnd
+                total += accum
+                accum = 0
+            else :
+                accum += travel.DstPlace.Duration
+
+            travel = travel.DstPlace.Departure
+            
+        return (evar, total)
+
+    # -----------------------------------------------------------------
+    def AddConstraints(self, cstore) :
+        constraint = OrderConstraint(self.EventStart.ID, self.EventEnd.ID, self.MinimumSplitDuration)
+        cstore.append(constraint)
+
+        if self.AggregateHead :
+            (evar, total) = self._FindAggregateDuration()
+            constraint = OrderConstraint(self.EventStart.ID, evar.ID, total)
+            cstore.append(constraint)
+
+        if self.Departure :
+            self.Departure.AddConstraints(cstore)
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -409,11 +490,11 @@ class TimedEventList :
 
         # this is really wrong, there should be a constraint across the two intervals
         # that ensures that the duration is consistent...
-        oldduration = evprev.Duration
-        if oldduration > 0.01 :
-            evprev.Duration = oldduration / 2.0
+        # oldduration = evprev.Duration
+        # if oldduration > 0.01 :
+        #     evprev.Duration = oldduration / 2.0
 
-        evnext = evprev.Copy()
+        evnext = evprev.Split()
         idnext = self.AddPlaceEvent(evnext)
 
         # connect the next events destination to the previous events destination
@@ -464,7 +545,7 @@ if __name__ == '__main__' :
     ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     def AddWorkEvent(evlist, event, days) :
-        workEV = WorkEvent.CreateWorkEvent('work', days * 24.0, (6.0, 9.0), (14.0, 17.0), 8.0)
+        workEV = WorkEvent.Create('work', days * 24.0, (6.0, 9.0), (14.0, 17.0), 9.0)
         workID = evlist.AddPlaceEvent(workEV)
         evlist.InsertWithinPlaceEvent(event, workID)
 
@@ -540,17 +621,17 @@ if __name__ == '__main__' :
             workev = evlist.FindEvents(lambda ev : ev.Details == 'work')[-1].EventID
             AddCoffeeBeforeWorkEvent(evlist, workev, day)
 
-        if random.uniform(0.0, 1.0) > 0.5 :
+        if random.uniform(0.0, 1.0) > 0.8 :
             workev = evlist.FindEvents(lambda ev : ev.Details == 'work')[-1].EventID
             AddLunchToWorkEvent(evlist, workev, day)
         
-        if random.uniform(0.0, 1.0) > 0.5 :
+        if random.uniform(0.0, 1.0) > 0.8 :
             workev = evlist.FindEvents(lambda ev : ev.Details == 'work')[-1].EventID
             dinnerev = AddRestaurantAfterWorkEvent(evlist, workev, day)
-            if random.uniform(0.0, 1.0) > 0.5 :
+            if random.uniform(0.0, 1.0) > 0.7 :
                 AddShoppingTrip(evlist, day, maxcount = 2, prevevent = dinnerev)
         else :
-            if random.uniform(0.0, 1.0) > 0.5 :
+            if random.uniform(0.0, 1.0) > 0.9 :
                 AddShoppingTrip(evlist, day)
 
     # -----------------------------------------------------------------
@@ -559,18 +640,20 @@ if __name__ == '__main__' :
     clog.setLevel(logging.DEBUG)
     logging.getLogger().addHandler(clog)
 
-    homeev = PlaceEvent('home', MinimumIntervalVariable(0.0), MaximumIntervalVariable(24.0 * 1000.0))
-    evlist = TimedEventList(homeev)
 
     for day in range(0, 1000) :
+        homeev = HomeEvent.Create('home', 0.0, (0.0, 0.0), (24.0 * 1000.0, 24.0 * 1000.0))
+        evlist = TimedEventList(homeev)
 
-        BuildOneDay(evlist, day)
+        print '---------- day = {0:4} ----------'.format(day)
+        BuildOneDay(evlist, 0.0)
+        # BuildOneDay(evlist, day)
 
         resolved = False
         try :
             resolved = evlist.SolveConstraints()
         except :
-            logger.error('internal inconsistency detected')
+            logger.error('internal inconsistency detected; %s', traceback.format_exc(10))
             evlist.DumpToLog()
             sys.exit(1)
 
@@ -579,7 +662,6 @@ if __name__ == '__main__' :
             evlist.DumpToLog()
             sys.exit(1)
 
-        print 'day = {0}'.format(day)
         while evlist.MoreTripEvents() :
             trip = evlist.PopTripEvent()
             print str(trip)
