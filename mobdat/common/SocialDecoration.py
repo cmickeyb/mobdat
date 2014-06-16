@@ -258,7 +258,7 @@ class BusinessProfileDecoration(Decoration) :
 
     # -------------------------------------------------------
     def TestAnnotation(self, word) :
-        return word in self.Annotations
+        return not word or word in self.Annotations
 
     # -------------------------------------------------------
     def Dump(self) :

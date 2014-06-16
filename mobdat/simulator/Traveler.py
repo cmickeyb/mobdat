@@ -74,6 +74,14 @@ class EventController :
     def FireLunchAtWork(self, schedule) :
         return schedule.StartTime < 11.0 and 14.5 < schedule.EndTime and random.uniform(0.0, 1.0) > self.LunchDuringWork
 
+    # -----------------------------------------------------------------
+    def FireDinnerAfterWork(self, schedule) :
+        return 15.0 < schedule.EndTime and schedule.EndTime < 20.0  and random.uniform(0.0, 1.0) > self.RestaurantAfterWork
+
+    # -----------------------------------------------------------------
+    def FireShopping(self, schedule) :
+        return random.uniform(0.0, 1.0) > self.ShoppingTrip
+
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -107,23 +115,27 @@ class Traveler :
             predicate = SocialDecoration.BusinessProfileDecoration.BusinessTypePred(biztype, bizclass)
             self.BusinessCache[(biztype, bizclass)] = self.World.FindNodes(nodetype = 'Business', predicate = predicate)
 
-        return random.choice(self.BusinessCache[(biztype, bizclass)])
+        return self.BusinessCache[(biztype, bizclass)]
     
     # -----------------------------------------------------------------
     def InitializeLocationNameMap(self) :
         self.LocationNameMap = {}
-        self.LocationNameMap['home'] = self.Person
-        self.LocationNameMap['work'] = self.Employer
+        self.LocationNameMap['home'] = [ self.Person ]
+        self.LocationNameMap['work'] = [ self.Employer ]
+
         self.LocationNameMap['coffee'] = self.FindBusinessByType(SocialDecoration.BusinessType.Food, 'coffee')
         self.LocationNameMap['lunch'] = self.FindBusinessByType(SocialDecoration.BusinessType.Food, 'fastfood')
+        self.LocationNameMap['dinner'] = self.FindBusinessByType(SocialDecoration.BusinessType.Food, 'small-restaurant')
+        self.LocationNameMap['shopping'] = self.FindBusinessByType(SocialDecoration.BusinessType.Service, None)
 
     # -----------------------------------------------------------------
     def ResolveLocationName(self, name) :
-        return self.LocationNameMap[name].ResidesAt
+        location = random.choice(self.LocationNameMap[name])
+        return location.ResidesAt
 
     # -----------------------------------------------------------------
     def BuildDailyEvents(self, addextras = True) :
-        homeev = TimedEvent.HomeEvent.Create('home', 0.0, (0.0, 0.0), (24.0 * 1000.0, 24.0 * 1000.0))
+        homeev = TimedEvent.BackgroundEvent.Create('home', 0.0, (0.0, 0.0), (24.0 * 1000.0, 24.0 * 1000.0))
         evlist = TimedEventList.TimedEventList(homeev, estimator = self.TravelEstimator)
 
         worldday = int(self.Connector.WorldTime / 24.0)
@@ -143,6 +155,15 @@ class Traveler :
 
                 if self.Controller.FireLunchAtWork(schedule) :
                     AddLunchToWorkEvent(evlist, workev, worldtime)
+
+                if self.Controller.FireDinnerAfterWork(schedule) :
+                    # in case work was split, find the last work event today
+                    workev = evlist.FindEvents(lambda ev : ev.Details == 'work')[-1].EventID
+                    dinnerev = AddRestaurantAfterWorkEvent(evlist, workev, worldtime)
+                    if self.Controller.FireShopping(schedule) :
+                        AddShoppingTrip(evlist, worldtime, maxcount = 2, prevevent = dinnerev)
+                elif self.Controller.FireShopping(schedule) :
+                    AddShoppingTrip(evlist, worldtime)
 
         # attempt to solve the constraints, if it doesn't work, then try
         # again with just work
@@ -200,7 +221,7 @@ def AddWorkEvent(evlist, event, schedule, deviation = 2.0) :
     sinterval = (schedule.WorldStartTime - deviation, schedule.WorldStartTime + deviation)
     einterval = (schedule.WorldEndTime - deviation, schedule.WorldEndTime + deviation)
 
-    workEV = TimedEvent.WorkEvent.Create('work', 0.0, sinterval, einterval, duration)
+    workEV = TimedEvent.AggregateDurationEvent.Create('work', 0.0, sinterval, einterval, duration)
     workID = evlist.AddPlaceEvent(workEV)
     evlist.InsertWithinPlaceEvent(event, workID)
 
@@ -208,14 +229,13 @@ def AddWorkEvent(evlist, event, schedule, deviation = 2.0) :
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-def AddCoffeeBeforeWorkEvent(evlist, workevent, days) :
+def AddCoffeeBeforeWorkEvent(evlist, workevent, worldtime) :
     """Add a PlaceEvent for coffee before a work event. This moves the
     coffee event as close as possible to the work event.
     """
 
-    scoffee = IntervalVariable.MaximumIntervalVariable(days * 24.0 + 0.0, days * 24.0 + 24.0)
-    ecoffee = IntervalVariable.MaximumIntervalVariable(days * 24.0 + 0.0, days * 24.0 + 24.0)
-    idc = evlist.AddPlaceEvent(TimedEvent.PlaceEvent('coffee', scoffee, ecoffee, 0.2))
+    event = TimedEvent.PreEventEvent.Create('coffee', worldtime, (0.0, 24.0), (0.0, 24.0), 0.2)
+    idc = evlist.AddPlaceEvent(event)
 
     evlist.InsertAfterPlaceEvent(evlist.PrevPlaceID(workevent), idc)
 
@@ -223,10 +243,9 @@ def AddCoffeeBeforeWorkEvent(evlist, workevent, days) :
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-def AddLunchToWorkEvent(evlist, workevent, days) :
-    slunch = IntervalVariable.GaussianIntervalVariable(days * 24.0 + 11.5, days * 24.0 + 13.0)
-    elunch = IntervalVariable.GaussianIntervalVariable(days * 24.0 + 12.5, days * 24.0 + 14.0)
-    idl = evlist.AddPlaceEvent(TimedEvent.PlaceEvent('lunch', slunch, elunch, 0.75))
+def AddLunchToWorkEvent(evlist, workevent, worldtime) :
+    event = TimedEvent.VariableMiddleEvent.Create('lunch', worldtime, (11.5, 13.0), (12.5, 14.0), 0.75)
+    idl = evlist.AddPlaceEvent(event)
 
     evlist.InsertWithinPlaceEvent(workevent, idl)
 
@@ -234,10 +253,9 @@ def AddLunchToWorkEvent(evlist, workevent, days) :
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-def AddRestaurantAfterWorkEvent(evlist, workevent, day) :
-    sdinner = IntervalVariable.MinimumIntervalVariable(day * 24.0 + 0.0, day * 24.0 + 24.0)
-    edinner = IntervalVariable.MinimumIntervalVariable(day * 24.0 + 0.0, day * 24.0 + 24.0)
-    idr = evlist.AddPlaceEvent(TimedEvent.PlaceEvent('dinner', sdinner, edinner, 1.5))
+def AddRestaurantAfterWorkEvent(evlist, workevent, worldtime) :
+    event = TimedEvent.PostEventEvent.Create('dinner', worldtime, (0.0, 24.0), (0.0, 24.0), 1.5)
+    idr = evlist.AddPlaceEvent(event)
 
     evlist.InsertAfterPlaceEvent(workevent, idr)
 
@@ -245,23 +263,22 @@ def AddRestaurantAfterWorkEvent(evlist, workevent, day) :
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-def AddShoppingTrip(evlist, day, maxcount = 4, prevevent = None) :
+def AddShoppingTrip(evlist, worldtime, maxcount = 4, prevevent = None) :
     # happens between 7am and 10pm
-    svar = IntervalVariable.GaussianIntervalVariable(day * 24.0 + 7.0, day * 24.0 + 22.0)
-    evar = IntervalVariable.GaussianIntervalVariable(day * 24.0 + 7.0, day * 24.0 + 22.0)
 
-    ids = evlist.AddPlaceEvent(TimedEvent.PlaceEvent('shopping', svar, evar, 0.75))
     if prevevent :
-        evlist.InsertAfterPlaceEvent(prevevent, ids)
+        ids = prevevent
     else :
+        event = TimedEvent.VariableMiddleEvent.Create('shopping', worldtime, (7.0, 22.0), (7.0, 22.0), 0.75)
+        ids = evlist.AddPlaceEvent(event)
         evlist.InsertWithinPlaceEvent(evlist.LastEvent.EventID, ids)
 
     stops = int(random.triangular(0, 4, 1))
     while stops > 0 :
         stops = stops - 1
 
-        svar = IntervalVariable.MinimumIntervalVariable(day * 24.0 + 7.0, day * 24.0 + 22.0)
-        evar = IntervalVariable.MinimumIntervalVariable(day * 24.0 + 7.0, day * 24.0 + 22.0)
-        idnew = evlist.AddPlaceEvent(TimedEvent.PlaceEvent('shopping', svar, evar, 0.5))
+        postev = TimedEvent.PostEventEvent.Create('shopping', worldtime, (7.0, 22.0), (7.0, 22.0), 0.5)
+        idnew = evlist.AddPlaceEvent(postev)
         evlist.InsertAfterPlaceEvent(ids, idnew)
         ids = idnew
+

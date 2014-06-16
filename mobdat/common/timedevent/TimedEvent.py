@@ -114,7 +114,7 @@ class PlaceEvent :
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class HomeEvent(PlaceEvent) :
+class BackgroundEvent(PlaceEvent) :
 
     # -----------------------------------------------------------------
     @staticmethod
@@ -122,7 +122,7 @@ class HomeEvent(PlaceEvent) :
         svar = MinimumIntervalVariable(base + sinterval[0], base + sinterval[1])
         evar = MaximumIntervalVariable(base + einterval[0], base + einterval[1])
 
-        return HomeEvent(details, svar, evar, minduration)
+        return BackgroundEvent(details, svar, evar, minduration)
 
     # -----------------------------------------------------------------
     def __init__(self, details, stimevar, etimevar, duration = 0.01, id = None) :
@@ -137,7 +137,67 @@ class HomeEvent(PlaceEvent) :
     
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class WorkEvent(PlaceEvent) :
+class PreEventEvent(PlaceEvent) :
+    """
+    PreEventEvent -- a PlaceEvent that occurs immediately before another
+    event so start and stop intervals happen as late as possible.
+    """
+
+    # -----------------------------------------------------------------
+    @staticmethod
+    def Create(details, base, sinterval, einterval, minduration = 0.01) :
+        svar = MaximumIntervalVariable(base + sinterval[0], base + sinterval[1])
+        evar = MaximumIntervalVariable(base + einterval[0], base + einterval[1])
+
+        return PreEventEvent(details, svar, evar, minduration)
+
+    # -----------------------------------------------------------------
+    def __init__(self, details, stimevar, etimevar, duration = 0.01, id = None) :
+        PlaceEvent.__init__(self, details, stimevar, etimevar, duration, id)
+    
+# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+class PostEventEvent(PlaceEvent) :
+    """
+    PostEventEvent -- a PlaceEvent that occurs immediately after another
+    event so start and stop intervals happen as early as possible.
+    """
+
+    # -----------------------------------------------------------------
+    @staticmethod
+    def Create(details, base, sinterval, einterval, minduration = 0.01) :
+        svar = MinimumIntervalVariable(base + sinterval[0], base + sinterval[1])
+        evar = MinimumIntervalVariable(base + einterval[0], base + einterval[1])
+
+        return PostEventEvent(details, svar, evar, minduration)
+
+    # -----------------------------------------------------------------
+    def __init__(self, details, stimevar, etimevar, duration = 0.01, id = None) :
+        PlaceEvent.__init__(self, details, stimevar, etimevar, duration, id)
+    
+# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+class VariableMiddleEvent(PlaceEvent) :
+    """
+    VariableEvent -- a PlaceEvent with a variable start time that
+    generally occurs around the middle of its duration
+    """
+
+    # -----------------------------------------------------------------
+    @staticmethod
+    def Create(details, base, sinterval, einterval, minduration = 0.01) :
+        svar = GaussianIntervalVariable(base + sinterval[0], base + sinterval[1])
+        evar = GaussianIntervalVariable(base + einterval[0], base + einterval[1])
+
+        return VariableMiddleEvent(details, svar, evar, minduration)
+
+    # -----------------------------------------------------------------
+    def __init__(self, details, stimevar, etimevar, duration = 0.01, id = None) :
+        PlaceEvent.__init__(self, details, stimevar, etimevar, duration, id)
+    
+# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+class AggregateDurationEvent(PlaceEvent) :
 
     # -----------------------------------------------------------------
     @staticmethod
@@ -145,7 +205,7 @@ class WorkEvent(PlaceEvent) :
         svar = GaussianIntervalVariable(base + sinterval[0], base + sinterval[1])
         evar = GaussianIntervalVariable(base + einterval[0], base + einterval[1])
 
-        work = WorkEvent(details, svar, evar, minduration)
+        work = AggregateDurationEvent(details, svar, evar, minduration)
         work.MinimumSplitDuration = minsplit
 
         return work

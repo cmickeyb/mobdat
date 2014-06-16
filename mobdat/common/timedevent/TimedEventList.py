@@ -352,12 +352,12 @@ class TimedEventList :
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 if __name__ == '__main__' :
 
-    from mobdat.common.timedevent.TimedEvent import WorkEvent, HomeEvent
+    from mobdat.common.timedevent.TimedEvent import BackgroundEvent
 
     ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     def AddWorkEvent(evlist, event, days) :
-        workEV = WorkEvent.Create('work', days * 24.0, (6.0, 9.0), (14.0, 17.0), 9.0)
+        workEV = TimedEvent.AggregateDurationEvent.Create('work', days * 24.0, (6.0, 9.0), (14.0, 17.0), 9.0)
         workID = evlist.AddPlaceEvent(workEV)
         evlist.InsertWithinPlaceEvent(event, workID)
 
@@ -370,9 +370,8 @@ if __name__ == '__main__' :
         coffee event as close as possible to the work event.
         """
 
-        scoffee = IntervalVariable.MaximumIntervalVariable(days * 24.0 + 0.0, days * 24.0 + 24.0)
-        ecoffee = IntervalVariable.MaximumIntervalVariable(days * 24.0 + 0.0, days * 24.0 + 24.0)
-        idc = evlist.AddPlaceEvent(TimedEvent.PlaceEvent('coffee', scoffee, ecoffee, 0.2))
+        event = TimedEvent.PreEventEvent.Create('coffee', days * 24.0, (0.0, 24.0), (0.0, 24.0), 0.2)
+        idc = evlist.AddPlaceEvent(event)
 
         evlist.InsertAfterPlaceEvent(evlist.PrevPlaceID(workevent), idc)
 
@@ -381,9 +380,8 @@ if __name__ == '__main__' :
     ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     def AddLunchToWorkEvent(evlist, workevent, days) :
-        slunch = IntervalVariable.GaussianIntervalVariable(days * 24.0 + 11.5, days * 24.0 + 13.0)
-        elunch = IntervalVariable.GaussianIntervalVariable(days * 24.0 + 12.5, days * 24.0 + 14.0)
-        idl = evlist.AddPlaceEvent(TimedEvent.PlaceEvent('lunch', slunch, elunch, 0.75))
+        event = TimedEvent.VariableMiddleEvent.Create('lunch', days * 24.0, (11.5, 13.0), (12.5, 14.0), 0.75)
+        idl = evlist.AddPlaceEvent(event)
 
         evlist.InsertWithinPlaceEvent(workevent, idl)
 
@@ -392,9 +390,8 @@ if __name__ == '__main__' :
     ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     def AddRestaurantAfterWorkEvent(evlist, workevent, day) :
-        sdinner = IntervalVariable.MinimumIntervalVariable(day * 24.0 + 0.0, day * 24.0 + 24.0)
-        edinner = IntervalVariable.MinimumIntervalVariable(day * 24.0 + 0.0, day * 24.0 + 24.0)
-        idr = evlist.AddPlaceEvent(TimedEvent.PlaceEvent('dinner', sdinner, edinner, 1.5))
+        event = TimedEvent.PostEventEvent.Create('dinner', day * 24.0, (0.0, 24.0), (0.0, 24.0), 1.5)
+        idr = evlist.AddPlaceEvent(event)
 
         evlist.InsertAfterPlaceEvent(workevent, idr)
 
@@ -404,22 +401,20 @@ if __name__ == '__main__' :
     ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     def AddShoppingTrip(evlist, day, maxcount = 4, prevevent = None) :
         # happens between 7am and 10pm
-        svar = IntervalVariable.GaussianIntervalVariable(day * 24.0 + 7.0, day * 24.0 + 22.0)
-        evar = IntervalVariable.GaussianIntervalVariable(day * 24.0 + 7.0, day * 24.0 + 22.0)
 
-        ids = evlist.AddPlaceEvent(TimedEvent.PlaceEvent('shopping', svar, evar, 0.75))
         if prevevent :
-            evlist.InsertAfterPlaceEvent(prevevent, ids)
+            ids = prevevent
         else :
+            event = TimedEvent.VariableMiddleEvent.Create('shopping', day * 24.0, (7.0, 22.0), (7.0, 22.0), 0.75)
+            ids = evlist.AddPlaceEvent(event)
             evlist.InsertWithinPlaceEvent(evlist.LastEvent.EventID, ids)
-        
+
         stops = int(random.triangular(0, 4, 1))
         while stops > 0 :
             stops = stops - 1
 
-            svar = IntervalVariable.MinimumIntervalVariable(day * 24.0 + 7.0, day * 24.0 + 22.0)
-            evar = IntervalVariable.MinimumIntervalVariable(day * 24.0 + 7.0, day * 24.0 + 22.0)
-            idnew = evlist.AddPlaceEvent(TimedEvent.PlaceEvent('shopping', svar, evar, 0.5))
+            postev = TimedEvent.PostEventEvent.Create('shopping', day * 24.0, (7.0, 22.0), (7.0, 22.0), 0.5)
+            idnew = evlist.AddPlaceEvent(postev)
             evlist.InsertAfterPlaceEvent(ids, idnew)
             ids = idnew
 
@@ -454,7 +449,7 @@ if __name__ == '__main__' :
 
 
     for day in range(0, 1000) :
-        homeev = HomeEvent.Create('home', 0.0, (0.0, 0.0), (24.0 * 1000.0, 24.0 * 1000.0))
+        homeev = BackgroundEvent.Create('home', 0.0, (0.0, 0.0), (24.0 * 1000.0, 24.0 * 1000.0))
         evlist = TimedEventList(homeev)
 
         print '---------- day = {0:4} ----------'.format(day)
