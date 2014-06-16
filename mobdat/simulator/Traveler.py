@@ -77,6 +77,8 @@ class EventController :
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class Traveler :
+    BusinessCache = {}
+
     # -----------------------------------------------------------------
     def __init__(self, person, connector) :
         """
@@ -95,17 +97,16 @@ class Traveler :
         self.TravelEstimator = TravelTimeEstimator.TravelTimeEstimator()
 
         self.Controller = EventController()
-
-        homeev = TimedEvent.HomeEvent.Create('home', 0.0, (0.0, 0.0), (24.0 * 1000.0, 24.0 * 1000.0))
-        self.EventList = TimedEvent.TimedEventList(homeev, estimator = self.TravelEstimator)
-
         self.BuildDailyEvents()
+        self.ScheduleNextTrip()
 
     # -----------------------------------------------------------------
     def FindBusinessByType(self, biztype, bizclass) :
-        predicate = SocialDecoration.BusinessProfileDecoration.BusinessTypePred(biztype, bizclass)
-        nodes = self.World.FindNodes(nodetype = 'Business', predicate = predicate)
-        return random.choice(nodes)
+        if (biztype, bizclass) not in self.BusinessCache :
+            predicate = SocialDecoration.BusinessProfileDecoration.BusinessTypePred(biztype, bizclass)
+            self.BusinessCache[(biztype, bizclass)] = self.World.FindNodes(nodetype = 'Business', predicate = predicate)
+
+        return random.choice(self.BusinessCache[(biztype, bizclass)])
     
     # -----------------------------------------------------------------
     def InitializeLocationNameMap(self) :
@@ -120,33 +121,46 @@ class Traveler :
         return self.LocationNameMap[name].ResidesAt
 
     # -----------------------------------------------------------------
-    def BuildDailyEvents(self) :
+    def BuildDailyEvents(self, addextras = True) :
+        homeev = TimedEvent.HomeEvent.Create('home', 0.0, (0.0, 0.0), (24.0 * 1000.0, 24.0 * 1000.0))
+        evlist = TimedEvent.TimedEventList(homeev, estimator = self.TravelEstimator)
+
         worldday = int(self.Connector.WorldTime / 24.0)
         worldtime = worldday * 24.0
 
         jobdeviation = 2.0 if self.Job.FlexibleHours else 0.2
 
-        lastev = self.EventList.LastEvent.EventID
+        lastev = evlist.LastEvent.EventID
 
         schedule = self.Job.Schedule.NextScheduledEvent(worldtime)
         if schedule.Day == worldday :
-            workev = AddWorkEvent(self.EventList, lastev, schedule, deviation = jobdeviation)
+            workev = AddWorkEvent(evlist, lastev, schedule, deviation = jobdeviation)
 
-            if self.Controller.FireCoffeeBeforeWork(schedule) :
-                AddCoffeeBeforeWorkEvent(self.EventList, workev, worldtime)
+            if addextras :
+                if self.Controller.FireCoffeeBeforeWork(schedule) :
+                    AddCoffeeBeforeWorkEvent(evlist, workev, worldtime)
 
-            if self.Controller.FireLunchAtWork(schedule) :
-                AddLunchToWorkEvent(self.EventList, workev, worldtime)
+                if self.Controller.FireLunchAtWork(schedule) :
+                    AddLunchToWorkEvent(evlist, workev, worldtime)
 
-        if not self.EventList.SolveConstraints() :
-            logger.warn('Failed to resolve schedule constraints for traveler %s', self.Person.Name)
-            self.EventList.DumpToLog()
-            return
+        # attempt to solve the constraints, if it doesn't work, then try
+        # again with just work
+        if not evlist.SolveConstraints() :
+            if addextras :
+                self.BuildDailyEvents(False)
+                return
+            else :
+                logger.warn('Failed to resolve schedule constraints for traveler %s', self.Person.Name)
+                evlist.DumpToLog()
+                return
 
-        self.ScheduleNextTrip()
+        self.EventList = evlist
 
     # -----------------------------------------------------------------
     def ScheduleNextTrip(self) :
+        if not self.EventList.MoreTripEvents() :
+            self.BuildDailyEvents()
+
         while self.EventList.MoreTripEvents() :
             tripev = self.EventList.PopTripEvent()
             starttime = float(tripev.StartTime)

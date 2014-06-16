@@ -81,6 +81,9 @@ class SocialConnector(EventHandler.EventHandler, BaseConnector.BaseConnector) :
         #for person in self.PerInfo.PersonList.itervalues() :
         count = 0
         for name, person in self.World.IterNodes(nodetype = 'Person') :
+            if count % 100 == 0 :
+                self.__Logger.warn('%d travelers created', count)
+
             traveler = Traveler.Traveler(person, self)
             self.Travelers[name] = traveler
 
