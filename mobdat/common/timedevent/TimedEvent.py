@@ -47,8 +47,8 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
 from mobdat.common.Utilities import GenName
-from mobdat.common.IntervalVariable import *
-from mobdat.common.Constraint import *
+from mobdat.common.timedevent.IntervalVariable import *
+from mobdat.common.timedevent.Constraint import *
 from mobdat.common.TravelTimeEstimator import TravelTimeEstimator
 
 logger = logging.getLogger(__name__)

@@ -49,7 +49,8 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "
 import random
 import Trip
 
-from mobdat.common import TravelTimeEstimator, TimedEvent, TimedEventList, IntervalVariable
+from mobdat.common import TravelTimeEstimator
+from mobdat.common.timedevent import TimedEvent, TimedEventList, IntervalVariable
 from mobdat.common import SocialDecoration
 
 logger = logging.getLogger(__name__)

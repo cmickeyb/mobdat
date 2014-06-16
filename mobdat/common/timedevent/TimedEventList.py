@@ -44,13 +44,13 @@ import logging
 sys.path.append(os.path.join(os.environ.get("OPENSIM","/share/opensim"),"lib","python"))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "..")))
+sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "..", "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
+import random
 from mobdat.common.Utilities import GenName
-from mobdat.common.IntervalVariable import *
-from mobdat.common.Constraint import *
-from mobdat.common.TimedEvent import TravelEvent, TripEvent, PlaceEvent
 from mobdat.common.TravelTimeEstimator import TravelTimeEstimator
+from mobdat.common.timedevent import TimedEvent, IntervalVariable
 
 logger = logging.getLogger(__name__)
 
@@ -243,7 +243,7 @@ class TimedEventList :
             return None
 
         self.BaseEvent = dplace
-        return TripEvent(stime, splace, dplace)
+        return TimedEvent.TripEvent(stime, splace, dplace)
 
     # -----------------------------------------------------------------
     def AddPlaceEvent(self, event) :
@@ -272,15 +272,15 @@ class TimedEventList :
         ev2 = self.Events[id2]
 
         if ev1.Departure :
-            ev2.Departure = TravelEvent(ev2, ev1.Departure.DstPlace, estimator = self.TravelTimeEstimator)
+            ev2.Departure = TimedEvent.TravelEvent(ev2, ev1.Departure.DstPlace, estimator = self.TravelTimeEstimator)
 
-        ev1.Departure = TravelEvent(ev1, ev2, estimator = self.TravelTimeEstimator)
+        ev1.Departure = TimedEvent.TravelEvent(ev1, ev2, estimator = self.TravelTimeEstimator)
         ev2.Arrival = ev1.Departure
 
         t1 = max(ev1.EventStart.IntervalStart, ev2.EventStart.IntervalStart)
         t2 = max(ev1.EventStart.IntervalEnd, ev2.EventStart.IntervalEnd)
 
-        ev1.EventEnd = MaximumIntervalVariable(t1, t2, ev1.EventEnd.ID)
+        ev1.EventEnd = IntervalVariable.MaximumIntervalVariable(t1, t2, ev1.EventEnd.ID)
 
         return (id1, id2)
 
@@ -309,19 +309,19 @@ class TimedEventList :
 
         # connect the next events destination to the previous events destination
         if evprev.Departure :
-            evnext.Departure = TravelEvent(evnext, evprev.Departure.DstPlace, estimator = self.TravelTimeEstimator)
+            evnext.Departure = TimedEvent.TravelEvent(evnext, evprev.Departure.DstPlace, estimator = self.TravelTimeEstimator)
 
         # connect the previous event to the new event
-        evnew.Arrival = evprev.Departure = TravelEvent(evprev, evnew, estimator = self.TravelTimeEstimator)
+        evnew.Arrival = evprev.Departure = TimedEvent.TravelEvent(evprev, evnew, estimator = self.TravelTimeEstimator)
 
         # connect the new event to the next event
-        evnext.Arrival = evnew.Departure = TravelEvent(evnew, evnext, estimator = self.TravelTimeEstimator)
+        evnext.Arrival = evnew.Departure = TimedEvent.TravelEvent(evnew, evnext, estimator = self.TravelTimeEstimator)
 
         # abut the start of the next event to the new event
-        evnext.EventStart = MinimumIntervalVariable(evnew.EventEnd.IntervalStart, evprev.EventEnd.IntervalEnd)
+        evnext.EventStart = IntervalVariable.MinimumIntervalVariable(evnew.EventEnd.IntervalStart, evprev.EventEnd.IntervalEnd)
 
         # abut the end of the previous event to the new event
-        evprev.EventEnd = MaximumIntervalVariable(evprev.EventStart.IntervalStart, evnew.EventStart.IntervalEnd)
+        evprev.EventEnd = IntervalVariable.MaximumIntervalVariable(evprev.EventStart.IntervalStart, evnew.EventStart.IntervalEnd)
 
         return (idprev, idnew, idnext)
 
@@ -352,7 +352,7 @@ class TimedEventList :
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 if __name__ == '__main__' :
 
-    from mobdat.common.TimedEvent import WorkEvent, HomeEvent
+    from mobdat.common.timedevent.TimedEvent import WorkEvent, HomeEvent
 
     ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -370,9 +370,9 @@ if __name__ == '__main__' :
         coffee event as close as possible to the work event.
         """
 
-        scoffee = MaximumIntervalVariable(days * 24.0 + 0.0, days * 24.0 + 24.0)
-        ecoffee = MaximumIntervalVariable(days * 24.0 + 0.0, days * 24.0 + 24.0)
-        idc = evlist.AddPlaceEvent(PlaceEvent('coffee', scoffee, ecoffee, 0.2))
+        scoffee = IntervalVariable.MaximumIntervalVariable(days * 24.0 + 0.0, days * 24.0 + 24.0)
+        ecoffee = IntervalVariable.MaximumIntervalVariable(days * 24.0 + 0.0, days * 24.0 + 24.0)
+        idc = evlist.AddPlaceEvent(TimedEvent.PlaceEvent('coffee', scoffee, ecoffee, 0.2))
 
         evlist.InsertAfterPlaceEvent(evlist.PrevPlaceID(workevent), idc)
 
@@ -381,9 +381,9 @@ if __name__ == '__main__' :
     ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     def AddLunchToWorkEvent(evlist, workevent, days) :
-        slunch = GaussianIntervalVariable(days * 24.0 + 11.5, days * 24.0 + 13.0)
-        elunch = GaussianIntervalVariable(days * 24.0 + 12.5, days * 24.0 + 14.0)
-        idl = evlist.AddPlaceEvent(PlaceEvent('lunch', slunch, elunch, 0.75))
+        slunch = IntervalVariable.GaussianIntervalVariable(days * 24.0 + 11.5, days * 24.0 + 13.0)
+        elunch = IntervalVariable.GaussianIntervalVariable(days * 24.0 + 12.5, days * 24.0 + 14.0)
+        idl = evlist.AddPlaceEvent(TimedEvent.PlaceEvent('lunch', slunch, elunch, 0.75))
 
         evlist.InsertWithinPlaceEvent(workevent, idl)
 
@@ -392,9 +392,9 @@ if __name__ == '__main__' :
     ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     def AddRestaurantAfterWorkEvent(evlist, workevent, day) :
-        sdinner = MinimumIntervalVariable(day * 24.0 + 0.0, day * 24.0 + 24.0)
-        edinner = MinimumIntervalVariable(day * 24.0 + 0.0, day * 24.0 + 24.0)
-        idr = evlist.AddPlaceEvent(PlaceEvent('dinner', sdinner, edinner, 1.5))
+        sdinner = IntervalVariable.MinimumIntervalVariable(day * 24.0 + 0.0, day * 24.0 + 24.0)
+        edinner = IntervalVariable.MinimumIntervalVariable(day * 24.0 + 0.0, day * 24.0 + 24.0)
+        idr = evlist.AddPlaceEvent(TimedEvent.PlaceEvent('dinner', sdinner, edinner, 1.5))
 
         evlist.InsertAfterPlaceEvent(workevent, idr)
 
@@ -404,10 +404,10 @@ if __name__ == '__main__' :
     ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     def AddShoppingTrip(evlist, day, maxcount = 4, prevevent = None) :
         # happens between 7am and 10pm
-        svar = GaussianIntervalVariable(day * 24.0 + 7.0, day * 24.0 + 22.0)
-        evar = GaussianIntervalVariable(day * 24.0 + 7.0, day * 24.0 + 22.0)
+        svar = IntervalVariable.GaussianIntervalVariable(day * 24.0 + 7.0, day * 24.0 + 22.0)
+        evar = IntervalVariable.GaussianIntervalVariable(day * 24.0 + 7.0, day * 24.0 + 22.0)
 
-        ids = evlist.AddPlaceEvent(PlaceEvent('shopping', svar, evar, 0.75))
+        ids = evlist.AddPlaceEvent(TimedEvent.PlaceEvent('shopping', svar, evar, 0.75))
         if prevevent :
             evlist.InsertAfterPlaceEvent(prevevent, ids)
         else :
@@ -417,9 +417,9 @@ if __name__ == '__main__' :
         while stops > 0 :
             stops = stops - 1
 
-            svar = MinimumIntervalVariable(day * 24.0 + 7.0, day * 24.0 + 22.0)
-            evar = MinimumIntervalVariable(day * 24.0 + 7.0, day * 24.0 + 22.0)
-            idnew = evlist.AddPlaceEvent(PlaceEvent('shopping', svar, evar, 0.5))
+            svar = IntervalVariable.MinimumIntervalVariable(day * 24.0 + 7.0, day * 24.0 + 22.0)
+            evar = IntervalVariable.MinimumIntervalVariable(day * 24.0 + 7.0, day * 24.0 + 22.0)
+            idnew = evlist.AddPlaceEvent(TimedEvent.PlaceEvent('shopping', svar, evar, 0.5))
             evlist.InsertAfterPlaceEvent(ids, idnew)
             ids = idnew
 
