@@ -269,7 +269,7 @@ class IntervalVariableStore(dict) :
         """
         for var in self.itervalues() :
             if not var.IsValid() :
-                logger.warn('variable {0} is inconsistent; {1}'.format(var.ID, str(var)))
+                logger.debug('variable {0} is inconsistent; {1}'.format(var.ID, str(var)))
                 return False
 
         return True
@@ -353,7 +353,7 @@ class ConstraintStore(list) :
             True if the variable store is valid after all variables have been given a value
         """
         if not self.ApplyConstraints(varstore) :
-            logger.warn("resolution failed, no variable picked")
+            logger.debug("resolution failed, no variable picked")
             return False
 
         variables = varstore.FindFreeVariables()
@@ -366,7 +366,7 @@ class ConstraintStore(list) :
             # print "================================================================="
 
             if not self.ApplyConstraints(varstore) :
-                logger.warn("resolution failed, last picked variable is %s",self.LastPickedVariable)
+                logger.debug("resolution failed, last picked variable is %s",self.LastPickedVariable)
                 return False
 
         return True
