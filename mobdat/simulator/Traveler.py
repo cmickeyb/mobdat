@@ -49,7 +49,7 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "
 import random
 import Trip
 
-from mobdat.common import TravelTimeEstimator, TimedEvent, IntervalVariable
+from mobdat.common import TravelTimeEstimator, TimedEvent, TimedEventList, IntervalVariable
 from mobdat.common import SocialDecoration
 
 logger = logging.getLogger(__name__)
@@ -123,7 +123,7 @@ class Traveler :
     # -----------------------------------------------------------------
     def BuildDailyEvents(self, addextras = True) :
         homeev = TimedEvent.HomeEvent.Create('home', 0.0, (0.0, 0.0), (24.0 * 1000.0, 24.0 * 1000.0))
-        evlist = TimedEvent.TimedEventList(homeev, estimator = self.TravelEstimator)
+        evlist = TimedEventList.TimedEventList(homeev, estimator = self.TravelEstimator)
 
         worldday = int(self.Connector.WorldTime / 24.0)
         worldtime = worldday * 24.0
