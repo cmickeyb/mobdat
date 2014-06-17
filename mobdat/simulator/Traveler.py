@@ -62,7 +62,7 @@ class EventController :
     # -----------------------------------------------------------------
     def __init__(self) :
         self.CoffeeBeforeWork = 0.6
-        self.LunchDuringWork = 0.5
+        self.LunchDuringWork = 0.75
         self.RestaurantAfterWork = 0.8
         self.ShoppingTrip = 0.8
 
@@ -106,7 +106,8 @@ class Traveler :
         self.TravelEstimator = TravelTimeEstimator.TravelTimeEstimator()
 
         self.Controller = EventController()
-        self.BuildDailyEvents()
+
+        self.BuildDailyEvents(self.Connector.WorldDay)
         self.ScheduleNextTrip()
 
     # -----------------------------------------------------------------
@@ -134,19 +135,17 @@ class Traveler :
         return location.ResidesAt
 
     # -----------------------------------------------------------------
-    def BuildDailyEvents(self, addextras = True) :
+    def BuildDailyEvents(self, worldday, addextras = True) :
+        logger.debug('Compute day %d schedule for %s', worldday, self.Person.Name)
+
         homeev = TimedEvent.BackgroundEvent.Create('home', 0.0, (0.0, 0.0), (24.0 * 1000.0, 24.0 * 1000.0))
         evlist = TimedEventList.TimedEventList(homeev, estimator = self.TravelEstimator)
-
-        worldday = int(self.Connector.WorldTime / 24.0)
-        worldtime = worldday * 24.0
-
-        jobdeviation = 2.0 if self.Job.FlexibleHours else 0.2
-
         lastev = evlist.LastEvent.EventID
 
+        worldtime = worldday * 24.0
         schedule = self.Job.Schedule.NextScheduledEvent(worldtime)
         if schedule.Day == worldday :
+            jobdeviation = 2.0 if self.Job.FlexibleHours else 0.2
             workev = AddWorkEvent(evlist, lastev, schedule, deviation = jobdeviation)
 
             if addextras :
@@ -169,11 +168,11 @@ class Traveler :
         # again with just work
         if not evlist.SolveConstraints() :
             if addextras :
-                self.BuildDailyEvents(False)
+                self.BuildDailyEvents(worldday, False)
                 return
             else :
-                logger.warn('Failed to resolve schedule constraints for traveler %s', self.Person.Name)
-                evlist.DumpToLog()
+                logger.info('Failed to resolve schedule constraints for traveler %s', self.Person.Name)
+                # evlist.DumpToLog()
                 return
 
         self.EventList = evlist
@@ -181,7 +180,7 @@ class Traveler :
     # -----------------------------------------------------------------
     def ScheduleNextTrip(self) :
         if not self.EventList.MoreTripEvents() :
-            self.BuildDailyEvents()
+            self.BuildDailyEvents(self.Connector.WorldDay + 1)
 
         while self.EventList.MoreTripEvents() :
             tripev = self.EventList.PopTripEvent()
