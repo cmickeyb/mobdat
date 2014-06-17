@@ -57,11 +57,12 @@ class BaseConnector :
 
         self.__Logger = logging.getLogger(__name__)
 
+        self.CurrentStep = 0
+
         # Get world time
         self.Interval =  float(settings["General"].get("Interval", 0.150))
         self.SecondsPerStep = float(settings["General"].get("SecondsPerStep", 2.0))
         self.StartTimeOfDay = float(settings["General"].get("StartTimeOfDay", 8.0))
-
         self.RealDayLength = 24.0 * self.Interval / self.SecondsPerStep
 
         self.Clock = time.time
@@ -91,3 +92,14 @@ class BaseConnector :
     def GetWorldDay(self, currentstep) :
         return int(self.GetWorldTime(currentstep) / 24.0)
 
+    # -----------------------------------------------------------------
+    @property
+    def WorldTime(self) : return self.GetWorldTime(self.CurrentStep)
+
+    # -----------------------------------------------------------------
+    @property
+    def WorldTimeOfDay(self) : return self.GetWorldTimeOfDay(self.CurrentStep)
+
+    # -----------------------------------------------------------------
+    @property
+    def WorldDay(self) : return self.GetWorldDay(self.CurrentStep)

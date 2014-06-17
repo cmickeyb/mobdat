@@ -64,9 +64,6 @@ class SocialConnector(EventHandler.EventHandler, BaseConnector.BaseConnector) :
         self.TripCallbackMap = {}
         self.TripTimerEventQ = []
 
-        self.CurrentStep = 0
-        self.WorldTime = self.GetWorldTime(self.CurrentStep)
-
         self.Travelers = {}
         self.CreateTravelers()
 
@@ -179,7 +176,6 @@ class SocialConnector(EventHandler.EventHandler, BaseConnector.BaseConnector) :
         event -- Timer event object
         """
         self.CurrentStep = event.CurrentStep
-        self.WorldTime = self.GetWorldTime(self.CurrentStep)
 
         if self.CurrentStep % 100 == 0 :
             wtime = self.WorldTime
