@@ -277,10 +277,10 @@ class TimedEventList :
         ev1.Departure = TimedEvent.TravelEvent(ev1, ev2, estimator = self.TravelTimeEstimator)
         ev2.Arrival = ev1.Departure
 
-        t1 = max(ev1.EventStart.IntervalStart, ev2.EventStart.IntervalStart)
-        t2 = max(ev1.EventStart.IntervalEnd, ev2.EventStart.IntervalEnd)
+        t1 = max(ev1.BaseEventStart.IntervalStart, ev2.BaseEventStart.IntervalStart)
+        t2 = max(ev1.BaseEventStart.IntervalEnd, ev2.BaseEventStart.IntervalEnd)
 
-        ev1.EventEnd = IntervalVariable.MaximumIntervalVariable(t1, t2, ev1.EventEnd.ID)
+        ev1.EventEnd = IntervalVariable.MaximumIntervalVariable(t1, t2, ev1.BaseEventEnd.ID)
 
         return (id1, id2)
 
@@ -288,7 +288,7 @@ class TimedEventList :
     def InsertWithinPlaceEvent(self, idprev, idnew) :
         """Split event idprev and insert idnew into the middle. Create travel events to
         move from the current location to the new location and then back to the current location.
-        The assumption is that self.EventStart.IntervalStart < place.EventStart.IntervalStart and
+        The assumption is that self.BaseEventStart.IntervalStart < place.BaseEventStart.IntervalStart and
         place.EventEnd.IntervalEnd < self.EventEnd.IntervalEnd
 
         Args:
@@ -318,10 +318,10 @@ class TimedEventList :
         evnext.Arrival = evnew.Departure = TimedEvent.TravelEvent(evnew, evnext, estimator = self.TravelTimeEstimator)
 
         # abut the start of the next event to the new event
-        evnext.EventStart = IntervalVariable.MinimumIntervalVariable(evnew.EventEnd.IntervalStart, evprev.EventEnd.IntervalEnd)
+        evnext.BaseEventStart = IntervalVariable.MinimumIntervalVariable(evnew.BaseEventEnd.IntervalStart, evprev.BaseEventEnd.IntervalEnd)
 
         # abut the end of the previous event to the new event
-        evprev.EventEnd = IntervalVariable.MaximumIntervalVariable(evprev.EventStart.IntervalStart, evnew.EventStart.IntervalEnd)
+        evprev.BaseEventEnd = IntervalVariable.MaximumIntervalVariable(evprev.BaseEventStart.IntervalStart, evnew.BaseEventStart.IntervalEnd)
 
         return (idprev, idnew, idnext)
 

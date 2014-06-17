@@ -143,10 +143,6 @@ class GaussianIntervalVariable(IntervalVariable) :
     Priority = 5
 
     # -----------------------------------------------------------------
-    def __init__(self, stime, etime = None, id = None) :
-        IntervalVariable.__init__(self, stime, etime, id)
-
-    # -----------------------------------------------------------------
     def PickValue(self) :
         mean = (self.IntervalStart + self.IntervalEnd) / 2.0
         stdev = (self.IntervalEnd - self.IntervalStart) / 4.0
@@ -160,10 +156,6 @@ class MinimumIntervalVariable(IntervalVariable) :
     Priority = 0
 
     # -----------------------------------------------------------------
-    def __init__(self, stime, etime = None, id = None) :
-        IntervalVariable.__init__(self, stime, etime, id)
-
-    # -----------------------------------------------------------------
     def PickValue(self) :
         return self.SetValue(self.IntervalStart)
 
@@ -171,10 +163,6 @@ class MinimumIntervalVariable(IntervalVariable) :
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class MaximumIntervalVariable(IntervalVariable) :
     Priority = 0
-
-    # -----------------------------------------------------------------
-    def __init__(self, stime, etime = None, id = None) :
-        IntervalVariable.__init__(self, stime, etime, id)
 
     # -----------------------------------------------------------------
     def PickValue(self) :

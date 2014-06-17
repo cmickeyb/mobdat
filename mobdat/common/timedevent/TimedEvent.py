@@ -67,14 +67,24 @@ class TripEvent :
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class PlaceEvent :
+
     # -----------------------------------------------------------------
     def __init__(self, details, stimevar, etimevar, duration = 0.01, id = None) :
         self.Details = details
-        self.EventStart = stimevar
-        self.EventEnd = etimevar
-        self.Duration = max(duration, 0.01)
         self.EventID = id or GenName('PLACE')
+        
+        # EventStart and EventEnd properties contain the original interval definitions, all
+        # constraint resolution will happen on copies of these variables stored
+        # EventStart and EventEnd properties.
+        self.BaseEventStart = stimevar
+        self.BaseEventEnd = etimevar
+        self.Reset()
 
+        # Duration is the minimum duration of the event
+        self.Duration = max(duration, 0.01)
+
+        # Arrival and Departure properties connect this event into an
+        # ordered chain of events
         self.Arrival = None
         self.Departure = None
 
@@ -91,7 +101,25 @@ class PlaceEvent :
         return self.Arrival.SrcPlace if self.Arrival else None
 
     # -----------------------------------------------------------------
+    def Reset(self) :
+        """
+        Copy the initial start and end interval variables into the EventStart
+        and EventEnd properties
+        """
+        self.EventStart = self.BaseEventStart.Copy(self.BaseEventStart.ID)
+        self.EventEnd = self.BaseEventEnd.Copy(self.BaseEventEnd.ID)
+
+    # -----------------------------------------------------------------
     def AddVariables(self, vstore) :
+        """
+        Place interval variables into a variable store object so that the event structure
+        itself remains "clean" and a reset can take place if resolution fails.
+
+        Args: 
+            vstore -- TimedEventList.VariableStore object
+        """
+        self.Reset()
+
         vstore[self.EventStart.ID] = self.EventStart
         vstore[self.EventEnd.ID] = self.EventEnd
 
@@ -100,6 +128,12 @@ class PlaceEvent :
 
     # -----------------------------------------------------------------
     def AddConstraints(self, cstore) :
+        """
+        Add constraints for this event to the constraint store. 
+
+        Args:
+            cstore -- TimedEventList.ConstraintStore object 
+        """
         constraint = OrderConstraint(self.EventStart.ID, self.EventEnd.ID, self.Duration)
         cstore.append(constraint)
 
@@ -125,13 +159,13 @@ class BackgroundEvent(PlaceEvent) :
         return BackgroundEvent(details, svar, evar, minduration)
 
     # -----------------------------------------------------------------
-    def __init__(self, details, stimevar, etimevar, duration = 0.01, id = None) :
-        PlaceEvent.__init__(self, details, stimevar, etimevar, duration, id)
-
-    # -----------------------------------------------------------------
     def Split(self) :
-        svar = self.EventStart.Copy()
-        evar = self.EventEnd.Copy()
+        """
+        For a background event Split() is really just make a copy
+        of the current event
+        """
+        svar = self.BaseEventStart.Copy()
+        evar = self.BaseEventEnd.Copy()
 
         return self.__class__(self.Details, svar, evar, self.Duration)
     
@@ -151,10 +185,6 @@ class PreEventEvent(PlaceEvent) :
 
         return PreEventEvent(details, svar, evar, minduration)
 
-    # -----------------------------------------------------------------
-    def __init__(self, details, stimevar, etimevar, duration = 0.01, id = None) :
-        PlaceEvent.__init__(self, details, stimevar, etimevar, duration, id)
-    
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class PostEventEvent(PlaceEvent) :
@@ -171,10 +201,6 @@ class PostEventEvent(PlaceEvent) :
 
         return PostEventEvent(details, svar, evar, minduration)
 
-    # -----------------------------------------------------------------
-    def __init__(self, details, stimevar, etimevar, duration = 0.01, id = None) :
-        PlaceEvent.__init__(self, details, stimevar, etimevar, duration, id)
-    
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class VariableMiddleEvent(PlaceEvent) :
@@ -191,10 +217,6 @@ class VariableMiddleEvent(PlaceEvent) :
 
         return VariableMiddleEvent(details, svar, evar, minduration)
 
-    # -----------------------------------------------------------------
-    def __init__(self, details, stimevar, etimevar, duration = 0.01, id = None) :
-        PlaceEvent.__init__(self, details, stimevar, etimevar, duration, id)
-    
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class AggregateDurationEvent(PlaceEvent) :
@@ -220,8 +242,8 @@ class AggregateDurationEvent(PlaceEvent) :
 
     # -----------------------------------------------------------------
     def Split(self) :
-        svar = self.EventStart.Copy()
-        evar = self.EventEnd.Copy()
+        svar = self.BaseEventStart.Copy()
+        evar = self.BaseEventEnd.Copy()
 
         event = self.__class__(self.Details, svar, evar, self.Duration)
 
@@ -231,14 +253,6 @@ class AggregateDurationEvent(PlaceEvent) :
         event.AggregateHead = False
 
         return event
-
-    # -----------------------------------------------------------------
-    def AddVariables(self, vstore) :
-        vstore[self.EventStart.ID] = self.EventStart
-        vstore[self.EventEnd.ID] = self.EventEnd
-
-        if self.Departure :
-            self.Departure.AddVariables(vstore)
 
     # -----------------------------------------------------------------
     def _FindAggregateDuration(self) :
