@@ -80,4 +80,19 @@ class ResidesAt(Graph.Edge) :
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+class ConnectedTo(Graph.Edge) :
+
+    # -----------------------------------------------------------------
+    def __init__(self, person1, person2) :
+        """
+        Args:
+            person1 -- object of type SocialNodes.Person
+            person2 -- object of type SocialNodes.Person
+        """
+        Graph.Edge.__init__(self, person1, person2)
+
+
+
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 Edges = [ EmployedBy, ResidesAt ]

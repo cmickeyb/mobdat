@@ -47,8 +47,10 @@ sys.path.append(os.path.join(os.environ.get("OPENSIM","/share/opensim"),"lib","p
 #sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
 from mobdat.common.Utilities import GenName
+from mobdat.common.ValueTypes import WeightedChoice
+from mobdat.common.graph import SocialEdges
 
-import random
+import random, math
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -122,6 +124,43 @@ def PlacePeople() :
     print 'created %s people' % people
 
 PlacePeople()
+
+# -----------------------------------------------------------------
+def ConnectPeople(people, quadrants) :
+    """
+    Args:
+        people -- list of SocialNodes.People objects
+        edgefactor -- relative 
+    """
+
+    global world
+
+    scale = int(math.log(len(people), 2) + 1)
+
+    quadpicker = WeightedChoice({0 : quadrants[0], 1 : quadrants[1], 2 : quadrants[2], 3 : quadrants[3]})
+    quadmap = {}
+
+    while people and edgecount > 0:
+        n1 = 0
+        n2 = 0
+
+        for j in range(scale) :
+            quadrant = quadpicker.Choose()
+            n1 = (n1 << 1) | (quadrant >> 1)
+            n2 = (n2 << 1) | (quadrant & 1)
+
+        if n1 not in quadmap :
+            quadmap[n1] = people.pop()
+
+        if n2 not in quadmap :
+            quadmap[n2] = people.pop() if people else random.choice(quadmap.values())
+
+        if not quadmap[n1].EdgeExists(quadmap[n2], edgetype = 'ConnectedTo') :
+            edgecount = edgecount - 1
+            world.AddEdge(SocialEdges.ConnectedTo(quadmap[n1], quadmap[n2]))
+            world.AddEdge(SocialEdges.ConnectedTo(quadmap[n2], quadmap[n1]))
+
+ConnectPeople(world.FindNodes(nodetype = 'Person'), (4, 5, 6, 7))
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
