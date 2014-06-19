@@ -47,9 +47,7 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
-from mobdat.common import Graph, Decoration
-from mobdat.common import LayoutNodes, LayoutEdges, LayoutDecoration
-from mobdat.common import SocialNodes, SocialEdges, SocialDecoration
+from mobdat.common.graph import *
 
 import json
 
@@ -78,7 +76,7 @@ class WorldInfo(Graph.Graph) :
         for dtype in LayoutDecoration.CommonDecorations :
             self.AddDecorationHandler(dtype)
 
-        for dtype in SocialDecoration.Decorations :
+        for dtype in SocialDecoration.CommonDecorations :
             self.AddDecorationHandler(dtype)
 
     # =================================================================

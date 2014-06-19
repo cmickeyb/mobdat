@@ -51,7 +51,7 @@ import Trip
 
 from mobdat.common import TravelTimeEstimator
 from mobdat.common.timedevent import TimedEvent, TimedEventList, IntervalVariable
-from mobdat.common import SocialDecoration
+from mobdat.common.graph import SocialDecoration
 
 logger = logging.getLogger(__name__)
 

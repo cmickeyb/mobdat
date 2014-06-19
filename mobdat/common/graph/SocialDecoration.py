@@ -45,11 +45,9 @@ sys.path.append(os.path.join(os.environ.get("OPENSIM","/share/opensim"),"lib","p
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
-from mobdat.common.Decoration import Decoration
-
 from mobdat.common.ValueTypes import MakeEnum, DaysOfTheWeek
 from mobdat.common.Schedule import WeeklySchedule
-from mobdat.common.Decoration import Decoration
+from Decoration import Decoration
 
 import random
 
@@ -381,7 +379,7 @@ class VehicleDecoration(Decoration) :
     
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-Decorations = [ EmploymentProfileDecoration, ServiceProfileDecoration, BusinessProfileDecoration,
-                JobDescriptionDecoration,
-                VehicleTypeDecoration, VehicleDecoration ]
+CommonDecorations = [ EmploymentProfileDecoration, ServiceProfileDecoration, BusinessProfileDecoration,
+                      JobDescriptionDecoration,
+                      VehicleTypeDecoration, VehicleDecoration ]
 

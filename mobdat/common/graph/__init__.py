@@ -37,4 +37,7 @@ This package defines modules for the mobdat simulation environment
 
 """
 
-__all__ = [ 'LayoutSettings', 'Schedule', 'TravelTimeEstimator', 'Utilities', 'ValueTypes', 'WorldInfo' ]
+__all__ = [ 'Decoration', 'Graph',
+            'LayoutDecoration', 'LayoutEdges', 'LayoutNodes',
+            'SocialDecoration', 'SocialEdges', 'SocialNodes'
+            ]

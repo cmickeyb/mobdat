@@ -48,7 +48,7 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
 from Decoration import *
-from Utilities import GenName
+from mobdat.common.Utilities import GenName
 
 import uuid, re
 import json

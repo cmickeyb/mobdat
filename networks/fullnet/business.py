@@ -42,8 +42,8 @@ import os, sys
 
 from mobdat.common.Schedule import WeeklySchedule
 from mobdat.common.Utilities import GenName
-from mobdat.common.Decoration import *
-from mobdat.common import SocialNodes, SocialEdges, SocialDecoration
+from mobdat.common.graph.Decoration import *
+from mobdat.common.graph import SocialNodes, SocialEdges, SocialDecoration
 
 import random
 

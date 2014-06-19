@@ -47,8 +47,8 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
-from mobdat.common import Graph, Decoration
-from mobdat.common import LayoutDecoration
+import Graph, Decoration
+import LayoutDecoration
 
 logger = logging.getLogger(__name__)
 

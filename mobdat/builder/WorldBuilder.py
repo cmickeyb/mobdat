@@ -47,11 +47,11 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
 from mobdat.common import WorldInfo
-from mobdat.common import LayoutNodes, LayoutEdges, LayoutDecoration
-from mobdat.common import SocialNodes, SocialEdges, SocialDecoration
+from mobdat.common.graph import Graph
+from mobdat.common.graph import LayoutNodes, LayoutEdges, LayoutDecoration
+from mobdat.common.graph import SocialNodes, SocialEdges, SocialDecoration
 
 from mobdat.common.Utilities import GenName, GenNameFromCoordinates
-from mobdat.common import Graph
 
 import re, json
 

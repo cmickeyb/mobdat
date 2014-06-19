@@ -43,7 +43,7 @@ import os, sys
 
 from mobdat.builder import WorldBuilder
 from mobdat.common.Utilities import GenName, GenNameFromCoordinates
-from mobdat.common.SocialDecoration import BusinessType
+from mobdat.common.graph.SocialDecoration import BusinessType
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
