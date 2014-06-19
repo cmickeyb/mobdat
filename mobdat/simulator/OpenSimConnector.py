@@ -459,7 +459,7 @@ class OpenSimConnector(EventHandler.EventHandler, BaseConnector.BaseConnector) :
 
         # set up the simulator time to match, the daylength is the number of wallclock
         # hours necessary to complete one virtual day
-        self.OpenSimConnector.SetSunParameters(daylength=self.RealDayLength, currenttime=self.StartTimeOfDay)
+        self.OpenSimConnector.SetSunParameters(self.StartTimeOfDay, daylength=self.RealDayLength)
 
         # Connect to the event registry
         self.SubscribeEvent(EventTypes.EventCreateObject, self.HandleCreateObjectEvent)
