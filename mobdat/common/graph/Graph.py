@@ -153,9 +153,9 @@ class GraphObject :
     # -----------------------------------------------------------------
     def EdgeExists(self, endnode, edgetype = None) :
         for edge in self._IterEdges(self.OutputEdges, edgetype) :
-            if edge.EndNode == endnode : return True
+            if edge.EndNode == endnode : return edge
 
-        return False
+        return None
 
     # -----------------------------------------------------------------
     def AddInputEdge(self, edge) :

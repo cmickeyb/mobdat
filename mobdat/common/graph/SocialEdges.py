@@ -83,7 +83,7 @@ class ResidesAt(Graph.Edge) :
 class ConnectedTo(Graph.Edge) :
 
     # -----------------------------------------------------------------
-    def __init__(self, person1, person2) :
+    def __init__(self, person1, person2, weight = 1.0) :
         """
         Args:
             person1 -- object of type SocialNodes.Person
@@ -91,7 +91,7 @@ class ConnectedTo(Graph.Edge) :
         """
         Graph.Edge.__init__(self, person1, person2)
 
-
+        self.AddDecoration(Decoration.EdgeWeightDecoration(weight))
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

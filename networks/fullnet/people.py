@@ -126,7 +126,7 @@ def PlacePeople() :
 PlacePeople()
 
 # -----------------------------------------------------------------
-def ConnectPeople(people, quadrants) :
+def ConnectPeople(people, edgefactor, quadrants) :
     """
     Args:
         people -- list of SocialNodes.People objects
@@ -135,12 +135,14 @@ def ConnectPeople(people, quadrants) :
 
     global world
 
+    nodecount = len(people)
+    edgecount = edgefactor * nodecount
     scale = int(math.log(len(people), 2) + 1)
 
     quadpicker = WeightedChoice({0 : quadrants[0], 1 : quadrants[1], 2 : quadrants[2], 3 : quadrants[3]})
     quadmap = {}
 
-    while people and edgecount > 0:
+    while people or edgecount > 0:
         n1 = 0
         n2 = 0
 
@@ -150,17 +152,28 @@ def ConnectPeople(people, quadrants) :
             n2 = (n2 << 1) | (quadrant & 1)
 
         if n1 not in quadmap :
-            quadmap[n1] = people.pop()
+            quadmap[n1] = people.pop() if people else random.choice(quadmap.values())
 
         if n2 not in quadmap :
             quadmap[n2] = people.pop() if people else random.choice(quadmap.values())
 
-        if not quadmap[n1].EdgeExists(quadmap[n2], edgetype = 'ConnectedTo') :
-            edgecount = edgecount - 1
+        edgecount = edgecount - 1
+        
+        e1 = quadmap[n1].EdgeExists(quadmap[n2], edgetype = 'ConnectedTo')
+        if e1 :
+            print 'duplicate edge from {0} to {1}'.format(quadmap[n1].Name, quadmap[n2].Name)
+            e1.Weight.AddWeight(1.0)
+        else :
             world.AddEdge(SocialEdges.ConnectedTo(quadmap[n1], quadmap[n2]))
+
+        e2 = quadmap[n2].EdgeExists(quadmap[n1], edgetype = 'ConnectedTo')
+        if e2 :
+            print 'duplicate edge from {0} to {1}'.format(quadmap[n2].Name, quadmap[n1].Name)
+            e2.Weight.AddWeight(1.0)
+        else :
             world.AddEdge(SocialEdges.ConnectedTo(quadmap[n2], quadmap[n1]))
 
-ConnectPeople(world.FindNodes(nodetype = 'Person'), (4, 5, 6, 7))
+ConnectPeople(world.FindNodes(nodetype = 'Person'), 7, (4, 5, 6, 7))
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

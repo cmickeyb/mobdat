@@ -124,5 +124,32 @@ class EdgeTypeDecoration(Decoration) :
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-CommonDecorations = [Decoration, NodeTypeDecoration, EdgeTypeDecoration]
+class EdgeWeightDecoration(Decoration) :
+    DecorationName = 'Weight'
+
+    # -----------------------------------------------------------------
+    @staticmethod
+    def Load(graph, info) :
+        return EdgeWeightDecoration(info['Weight'])
+
+    # -----------------------------------------------------------------
+    def __init__(self, name, weight = 1.0) :
+        Decoration.__init__(self)
+        self.Weight = weight
+
+    # -----------------------------------------------------------------
+    def AddWeight(self, adjustment) :
+        self.Weight += adjustment
+
+    # -----------------------------------------------------------------
+    def Dump(self) :
+        result = Decoration.Dump(self)
+        result['Weight'] = self.Weight
+
+        return result
+
+
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+CommonDecorations = [Decoration, NodeTypeDecoration, EdgeTypeDecoration, EdgeWeightDecoration]
 
