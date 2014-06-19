@@ -48,7 +48,7 @@ import json, argparse
 import cmd, readline, traceback
 import re
 
-from mobdat.common import Graph, Decoration
+from mobdat.common.graph import Graph, Decoration
 from mobdat.builder import WorldBuilder
 
 DataBindings = None
