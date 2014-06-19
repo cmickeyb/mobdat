@@ -39,7 +39,7 @@ Vector3 for positions and velocity and Quaternion for rotations.
 """
 
 import os, sys
-import math
+import random, math
 
 sys.path.append(os.path.join(os.environ.get("SUMO_HOME"), "tools"))
 sys.path.append(os.path.join(os.environ.get("OPENSIM","/share/opensim"),"lib","python"))
@@ -62,6 +62,33 @@ def MakeEnum(*sequential, **named):
 DaysOfTheWeek = MakeEnum('Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun')
 Cardinals = MakeEnum('WEST', 'NORTH', 'EAST', 'SOUTH')
 
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+class WeightedChoice :
+
+    # -----------------------------------------------------------------
+    def __init__(self, choices = {}) :
+        self.Modified = False
+        self.WeightedList = []
+        self.Weights = {}
+
+        for choice, weight in choices.iteritems() :
+            self.AddChoice(choice, weight)
+
+    # -----------------------------------------------------------------
+    def AddChoice(self, choice, weight) :
+        self.Modified = True
+        self.Weights[choice] = weight
+
+    # -----------------------------------------------------------------
+    def Choose(self) :
+        if self.Modified :
+            for choice, weight in self.Weights.iteritems() :
+                self.WeightedList.extend([choice] * weight)
+            self.Modified = False
+
+        return random.choice(self.WeightedList)
+                
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class Vector3 :
