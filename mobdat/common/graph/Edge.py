@@ -29,7 +29,7 @@ LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
 
-@file    LayoutInfo.py
+@file    Edge.py
 @author  Mic Bowman
 @date    2013-12-03
 
@@ -47,101 +47,67 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
-import Node
-import SocialDecoration
+from GraphObject import *
+from Decoration import *
 from mobdat.common.Utilities import GenName
+
 
 logger = logging.getLogger(__name__)
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class PersonProfile(Node.Node) :
+def GenEdgeName(snode, enode) :
+    return snode.Name + '=O=' + enode.Name
+
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+class Edge(GraphObject) :
 
     # -----------------------------------------------------------------
-    def __init__(self, name) :
-        """
-        Args:
-            name -- string name 
-        """
-        Node.Node.__init__(self, name = name)
-        self.AddDecoration(SocialDecoration.VehicleTypeDecoration())
+    @staticmethod
+    def Load(graph, einfo) :
+        sname = einfo['StartNode']
+        snode = graph.Nodes[sname] if sname in graph.Nodes else graph.Collections[sname]
+        ename = einfo['EndNode']
+        enode = graph.Nodes[ename] if ename in graph.Nodes else graph.Collections[ename]
+        edge = Edge(snode, enode, einfo['Name'])
 
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class Person(Node.Node) :
+        edge.LoadDecorations(graph, einfo)
 
-    # -----------------------------------------------------------------
-    def __init__(self, name, profile) :
-        """
-        Args:
-            name -- string name 
-        """
-        Node.Node.__init__(self, name = name)
-
-        profile.AddMember(self)
+        return edge
 
     # -----------------------------------------------------------------
-    def SetJob(self, job) :
-        """
-        Args:
-            job -- object of type SocialDecoration.JobDescription
-        """
-        self.AddDecoration(SocialDecoration.JobDescriptionDecoration(job))
+    def __init__(self, snode, enode, name = None) :
+        if not name : name = GenEdgeName(snode, enode)
+        GraphObject.__init__(self, name)
+
+        self.StartNode = snode
+        self.EndNode = enode
+
+        snode.AddOutputEdge(self)
+        enode.AddInputEdge(self)
 
     # -----------------------------------------------------------------
-    def SetVehicle(self, vehicletype) :
-        """
-        Args:
-            job -- object of type SocialDecoration.JobDescription
-        """
-        name = GenName('veh' + vehicletype)
-        self.AddDecoration(SocialDecoration.VehicleDecoration(name, vehicletype))
+    def Dump(self) : 
+        result = GraphObject.Dump(self)
 
-        return name
+        result['StartNode'] = self.StartNode.Name
+        result['EndNode'] = self.EndNode.Name
+
+        return result
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class BusinessProfile(Node.Node) :
+class WeightedEdge(Edge) :
 
     # -----------------------------------------------------------------
-    def __init__(self, name, biztype, joblist) :
+    def __init__(self, node1, node2, weight = 1.0) :
         """
         Args:
-            name -- string name of the profile
-            biztype -- constant of type SocialDecoration.BusinessType
-            joblist -- dictionary mapping type SocialDecoration.JobDescription --> Demand
+            node1 -- object of type SocialNodes.Node
+            node2 -- object of type SocialNodes.Node
         """
-        Node.Node.__init__(self, name = name)
+        Edge.__init__(self, node1, node2)
 
-        self.AddDecoration(SocialDecoration.BusinessProfileDecoration(biztype))
-        self.AddDecoration(SocialDecoration.EmploymentProfileDecoration(joblist))
+        self.AddDecoration(EdgeWeightDecoration(weight))
 
-    # -----------------------------------------------------------------
-    def AddServiceProfile(self, bizhours, capacity, servicetime) :
-        """
-        Args:
-            bizhours -- object of type WeeklySchedule
-            capacity -- integer maximum customer capacity
-            servicetime -- float mean time to service a customer
-        """
-        self.AddDecoration(SocialDecoration.ServiceProfileDecoration(bizhours, capacity, servicetime))
-
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class Business(Node.Node) :
-
-    # -----------------------------------------------------------------
-    def __init__(self, name, profile) :
-        """
-        Args:
-            name -- string name of the business
-            profile -- object of type SocialNodes.BusinessProfile
-        """
-        Node.Node.__init__(self, name = name)
-
-        profile.AddMember(self)
-
-
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-Nodes = [ PersonProfile, Person, BusinessProfile, Business ]

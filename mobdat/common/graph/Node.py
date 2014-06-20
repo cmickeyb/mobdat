@@ -29,7 +29,7 @@ LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
 
-@file    LayoutInfo.py
+@file    Node.py
 @author  Mic Bowman
 @date    2013-12-03
 
@@ -47,50 +47,68 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
-import Edge
+from GraphObject import *
+
+from mobdat.common.Utilities import GenName
 
 logger = logging.getLogger(__name__)
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class EmployedBy(Edge.Edge) :
+def GenNodeName(prefix = 'node') :
+    return GenName(prefix)
+
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+class Node(GraphObject) :
 
     # -----------------------------------------------------------------
-    def __init__(self, person, employer) :
-        """
-        Args:
-            person -- object of type SocialInfo.Person
-            employer -- object of type SocialInfo.Business
-        """
-        Edge.Edge.__init__(self, person, employer)
-
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class ResidesAt(Edge.Edge) :
+    @staticmethod
+    def Load(graph, ninfo) :
+        node = Node(name = ninfo['Name'])
+        node.LoadDecorations(graph, ninfo)
+            
+        return node
 
     # -----------------------------------------------------------------
-    def __init__(self, entity, location) :
-        """
-        Args:
-            entity -- object of type SocialNodes.Person or SocialNodes.Business
-            location -- object of type LayoutNodes.BusinessLocation, LayoutNodes.ResidentialLocation or LayoutNodes.EndPoint
-        """
-        Edge.Edge.__init__(self, entity, location)
-
-
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class ConnectedTo(Edge.WeightedEdge) :
+    @staticmethod
+    def LoadMembers(graph, ninfo) :
+        node = graph.Nodes[ninfo['Name']]
+        for mname in ninfo['Members'] :
+            node.AddMember(graph.FindByName(mname))
 
     # -----------------------------------------------------------------
-    def __init__(self, person1, person2, weight = 1.0) :
-        """
-        Args:
-            person1 -- object of type SocialNodes.Person
-            person2 -- object of type SocialNodes.Person
-        """
-        Edge.WeightedEdge.__init__(self, person1, person2, weight)
+    def __init__(self, members = [], name = None, prefix = 'node') :
+        if not name : name = GenNodeName(prefix)
+        GraphObject.__init__(self, name)
 
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-Edges = [ EmployedBy, ResidesAt ]
+        self.Members = []
+        for member in members :
+            self.AddMember(member)
+
+    # -----------------------------------------------------------------
+    def AddMember(self, member) :
+        # add to the object the reference to the group
+        member.AddToCollection(self)
+
+        # add to the group the reference to the object
+        self.Members.append(member)
+
+    # -----------------------------------------------------------------
+    def DropMember(self, member) :
+        # drop the reference to the collection from the object
+        member.DropFromCollection(self)
+        
+        # drop the object
+        self.Members.remove(member)
+
+    # -----------------------------------------------------------------
+    def Dump(self) :
+        result = GraphObject.Dump(self)
+
+        result['Members'] = []
+        for member in self.Members :
+            result['Members'].append(member.Name)
+
+        return result
+

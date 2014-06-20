@@ -133,7 +133,7 @@ class EdgeWeightDecoration(Decoration) :
         return EdgeWeightDecoration(info['Weight'])
 
     # -----------------------------------------------------------------
-    def __init__(self, name, weight = 1.0) :
+    def __init__(self, weight = 1.0) :
         Decoration.__init__(self)
         self.Weight = weight
 

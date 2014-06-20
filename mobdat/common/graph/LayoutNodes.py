@@ -47,14 +47,13 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
-import Graph, Decoration
-import LayoutDecoration
+import Node, LayoutDecoration
 
 logger = logging.getLogger(__name__)
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class IntersectionType(Graph.Node) :
+class IntersectionType(Node.Node) :
     """
     The IntersectionType class is used to specify parameters for rendering
     intersections in Sumo and OpenSim.
@@ -68,13 +67,13 @@ class IntersectionType(Graph.Node) :
             itype -- string, indicates the stop light type for the intersection
             render -- boolean, flag to indicate that opensim should render the object
         """
-        Graph.Node.__init__(self, name = name)
+        Node.Node.__init__(self, name = name)
 
         self.AddDecoration(LayoutDecoration.IntersectionTypeDecoration(name, itype, render))
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class Intersection(Graph.Node) :
+class Intersection(Node.Node) :
     WEST  = 0
     NORTH = 1
     EAST  = 2
@@ -88,7 +87,7 @@ class Intersection(Graph.Node) :
             itype -- object of type Layout.IntersectionType
             x, y -- integer coordinates
         """
-        Graph.Node.__init__(self, name = name)
+        Node.Node.__init__(self, name = name)
         
         self.AddDecoration(LayoutDecoration.CoordDecoration(x, y))
         itype.AddMember(self)
@@ -183,7 +182,7 @@ class Intersection(Graph.Node) :
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-##class EndPoint(Graph.Node) :
+##class EndPoint(Node.Node) :
 class EndPoint(Intersection) :
     """
     EndPoint
@@ -212,7 +211,7 @@ class EndPoint(Intersection) :
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class LocationCapsule(Graph.Node) :
+class LocationCapsule(Node.Node) :
     """
     LocationCapsule
 
@@ -235,7 +234,7 @@ class LocationCapsule(Graph.Node) :
             itype -- object of type Layout.IntersectionType
             x, y -- integer coordinates
         """
-        Graph.Node.__init__(self, name = name)
+        Node.Node.__init__(self, name = name)
         self.AddDecoration(LayoutDecoration.CapsuleDecoration())
 
     # -----------------------------------------------------------------
@@ -248,7 +247,7 @@ class LocationCapsule(Graph.Node) :
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class BusinessLocation(Graph.Node) :
+class BusinessLocation(Node.Node) :
     """
     BusinessLocation
 
@@ -274,7 +273,7 @@ class BusinessLocation(Graph.Node) :
             name -- string
             profile -- object of type BusinessLocationProfile
         """
-        Graph.Node.__init__(self, name = name)
+        Node.Node.__init__(self, name = name)
         
         self.AddDecoration(LayoutDecoration.BusinessLocationDecoration())
         profile.AddMember(self)
@@ -289,7 +288,7 @@ class BusinessLocation(Graph.Node) :
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class ResidentialLocation(Graph.Node) :
+class ResidentialLocation(Node.Node) :
     """
     ResidentialLocation
 
@@ -315,7 +314,7 @@ class ResidentialLocation(Graph.Node) :
             name -- string
             profile -- object of type ResidentialLocationProfile
         """
-        Graph.Node.__init__(self, name = name)
+        Node.Node.__init__(self, name = name)
         
         self.AddDecoration(LayoutDecoration.ResidentialLocationDecoration())
         profile.AddMember(self)
@@ -330,7 +329,7 @@ class ResidentialLocation(Graph.Node) :
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class BusinessLocationProfile(Graph.Node) :
+class BusinessLocationProfile(Node.Node) :
 
     # -----------------------------------------------------------------
     def __init__(self, name, employees, customers, types) :
@@ -341,13 +340,13 @@ class BusinessLocationProfile(Graph.Node) :
             customers -- integer, max number of customers per node
             types -- dict mapping Business.BusinessTypes to count
         """
-        Graph.Node.__init__(self, name = name)
+        Node.Node.__init__(self, name = name)
         
         self.AddDecoration(LayoutDecoration.BusinessLocationProfileDecoration(employees, customers, types))
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class ResidentialLocationProfile(Graph.Node) :
+class ResidentialLocationProfile(Node.Node) :
 
     # -----------------------------------------------------------------
     def __init__(self, name, residents) :
@@ -355,13 +354,13 @@ class ResidentialLocationProfile(Graph.Node) :
         Args:
             residents -- integer, max number of residents per node
         """
-        Graph.Node.__init__(self, name = name)
+        Node.Node.__init__(self, name = name)
         
         self.AddDecoration(LayoutDecoration.ResidentialLocationProfileDecoration(residents))
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class RoadType(Graph.Node) :
+class RoadType(Node.Node) :
     """
     The RoadType class is used to specify parameters for rendering roads
     in Sumo and OpenSim.
@@ -379,6 +378,6 @@ class RoadType(Graph.Node) :
             render -- boolean, flag to indicate whether opensim should render
             center -- boolean, flag to indicate the coordinate origin 
         """
-        Graph.Node.__init__(self, name = name)
+        Node.Node.__init__(self, name = name)
 
         self.AddDecoration(LayoutDecoration.RoadTypeDecoration(name, lanes, pri, speed, wid, sig, render, center))

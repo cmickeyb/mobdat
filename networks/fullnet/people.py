@@ -47,8 +47,7 @@ sys.path.append(os.path.join(os.environ.get("OPENSIM","/share/opensim"),"lib","p
 #sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
 from mobdat.common.Utilities import GenName
-from mobdat.common.ValueTypes import WeightedChoice
-from mobdat.common.graph import SocialEdges
+from mobdat.common.graph import Generators, SocialEdges
 
 import random, math
 
@@ -137,43 +136,7 @@ def ConnectPeople(people, edgefactor, quadrants) :
     """
 
     global world
-
-    nodecount = len(people)
-    edgecount = edgefactor * nodecount
-    scale = int(math.log(len(people), 2) + 1)
-
-    quadpicker = WeightedChoice({0 : quadrants[0], 1 : quadrants[1], 2 : quadrants[2], 3 : quadrants[3]})
-    quadmap = {}
-    edgemap = {}
-
-    edges = 0
-    duplicates = 0
-    while people or edges < edgecount :
-        n1 = 0
-        n2 = 0
-
-        for j in range(scale) :
-            quadrant = quadpicker.Choose()
-            n1 = (n1 << 1) | (quadrant >> 1)
-            n2 = (n2 << 1) | (quadrant & 1)
-
-        if n1 not in quadmap :
-            quadmap[n1] = people.pop() if people else random.choice(quadmap.values())
-
-        if n2 not in quadmap :
-            quadmap[n2] = people.pop() if people else random.choice(quadmap.values())
-
-        edges += 1
-        if edges % 100 == 0 :
-            logger.debug('created %d of %d social edges so far', edges, edgecount)
-        
-        if (quadmap[n1], quadmap[n2]) not in edgemap :
-            edgemap[(quadmap[n1], quadmap[n2])]  = world.AddEdge(SocialEdges.ConnectedTo(quadmap[n1], quadmap[n2]))
-            edgemap[(quadmap[n2], quadmap[n1])]  = world.AddEdge(SocialEdges.ConnectedTo(quadmap[n2], quadmap[n1]))
-        else :
-            duplicates += 1
-
-    logger.info('created %d social connections, %d duplicates', edges, duplicates)
+    Generators.Generators.RMAT(world, people, edgefactor, quadrants, edgetype = SocialEdges.ConnectedTo)
 
 ConnectPeople(world.FindNodes(nodetype = 'Person'), 5, (4, 5, 6, 7))
 

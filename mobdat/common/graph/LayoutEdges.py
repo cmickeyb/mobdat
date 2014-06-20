@@ -47,14 +47,13 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
-import Graph, Decoration
-import LayoutDecoration
+import Edge
 
 logger = logging.getLogger(__name__)
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class Road(Graph.Edge) :
+class Road(Edge.Edge) :
     def __init__(self, name, snode, enode, etype) :
         """
         Args:
@@ -63,7 +62,7 @@ class Road(Graph.Edge) :
             enode -- object of type LayoutNodes.Intersection
             etype -- object of type LayoutInfo.RoadType (Graph.Node)
         """
-        Graph.Edge.__init__(self, snode, enode, name)
+        Edge.Edge.__init__(self, snode, enode, name)
         etype.AddMember(self)
 
 

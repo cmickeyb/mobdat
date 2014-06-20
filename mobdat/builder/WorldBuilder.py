@@ -47,7 +47,7 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
 from mobdat.common import WorldInfo
-from mobdat.common.graph import Graph
+from mobdat.common.graph import Graph, Edge
 from mobdat.common.graph import LayoutNodes, LayoutEdges, LayoutDecoration
 from mobdat.common.graph import SocialNodes, SocialEdges, SocialDecoration
 
@@ -251,7 +251,7 @@ class WorldBuilder(WorldInfo.WorldInfo) :
 
     # -----------------------------------------------------------------
     def AddRoad(self, snode, enode, etype) :
-        name = Graph.GenEdgeName(snode, enode)
+        name = Edge.GenEdgeName(snode, enode)
         edge = LayoutEdges.Road(name, snode, enode, etype)
         WorldInfo.WorldInfo.AddRoad(self, edge)
         
