@@ -37,7 +37,7 @@ This package defines modules for the mobdat simulation environment
 
 """
 
-__all__ = [ 'Decoration', 'Graph',
+__all__ = [ 'Decoration', 'Edge', 'Generators', 'Graph', 'Node', 
             'LayoutDecoration', 'LayoutEdges', 'LayoutNodes',
             'SocialDecoration', 'SocialEdges', 'SocialNodes'
             ]
