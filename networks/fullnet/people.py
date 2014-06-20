@@ -52,6 +52,8 @@ from mobdat.common.graph import SocialEdges
 
 import random, math
 
+logger = logging.getLogger('people')
+
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 wprof = world.AddPersonProfile('worker')
@@ -117,11 +119,11 @@ def PlacePeople() :
 
                 location = PlacePerson(person)
                 if not location :
-                    print 'ran out of residences after %s people' % people
+                    logger.warn('ran out of residences after %d people', people)
                     return
 
 
-    print 'created %s people' % people
+    logger.info('created %d people', people)
 
 PlacePeople()
 
@@ -130,7 +132,8 @@ def ConnectPeople(people, edgefactor, quadrants) :
     """
     Args:
         people -- list of SocialNodes.People objects
-        edgefactor -- relative 
+        edgefactor -- relative number of edges between people
+        quadrants -- vector integers that distributes the density of small world effects
     """
 
     global world
@@ -141,8 +144,11 @@ def ConnectPeople(people, edgefactor, quadrants) :
 
     quadpicker = WeightedChoice({0 : quadrants[0], 1 : quadrants[1], 2 : quadrants[2], 3 : quadrants[3]})
     quadmap = {}
+    edgemap = {}
 
-    while people or edgecount > 0:
+    edges = 0
+    duplicates = 0
+    while people or edges < edgecount :
         n1 = 0
         n2 = 0
 
@@ -157,24 +163,20 @@ def ConnectPeople(people, edgefactor, quadrants) :
         if n2 not in quadmap :
             quadmap[n2] = people.pop() if people else random.choice(quadmap.values())
 
-        edgecount = edgecount - 1
+        edges += 1
+        if edges % 100 == 0 :
+            logger.debug('created %d of %d social edges so far', edges, edgecount)
         
-        e1 = quadmap[n1].EdgeExists(quadmap[n2], edgetype = 'ConnectedTo')
-        if e1 :
-            print 'duplicate edge from {0} to {1}'.format(quadmap[n1].Name, quadmap[n2].Name)
-            e1.Weight.AddWeight(1.0)
+        if (quadmap[n1], quadmap[n2]) not in edgemap :
+            edgemap[(quadmap[n1], quadmap[n2])]  = world.AddEdge(SocialEdges.ConnectedTo(quadmap[n1], quadmap[n2]))
+            edgemap[(quadmap[n2], quadmap[n1])]  = world.AddEdge(SocialEdges.ConnectedTo(quadmap[n2], quadmap[n1]))
         else :
-            world.AddEdge(SocialEdges.ConnectedTo(quadmap[n1], quadmap[n2]))
+            duplicates += 1
 
-        e2 = quadmap[n2].EdgeExists(quadmap[n1], edgetype = 'ConnectedTo')
-        if e2 :
-            print 'duplicate edge from {0} to {1}'.format(quadmap[n2].Name, quadmap[n1].Name)
-            e2.Weight.AddWeight(1.0)
-        else :
-            world.AddEdge(SocialEdges.ConnectedTo(quadmap[n2], quadmap[n1]))
+    logger.info('created %d social connections, %d duplicates', edges, duplicates)
 
-ConnectPeople(world.FindNodes(nodetype = 'Person'), 7, (4, 5, 6, 7))
+ConnectPeople(world.FindNodes(nodetype = 'Person'), 5, (4, 5, 6, 7))
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-print "Loaded fullnet people builder extension file"
+logger.info("Loaded fullnet people builder extension file")

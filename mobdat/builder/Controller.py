@@ -89,4 +89,5 @@ def Controller(settings, pushlist) :
     logger.info('saving world data to %s',infofile)
 
     with open(infofile, "w") as fp :
-        json.dump(world.Dump(), fp, indent=2, ensure_ascii=True)
+        # json.dump(world.Dump(), fp, indent=2, ensure_ascii=True)
+        json.dump(world.Dump(), fp, ensure_ascii=True)

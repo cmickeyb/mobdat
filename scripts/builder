@@ -125,16 +125,16 @@ def ParseCommandLine(config, args) :
 # -----------------------------------------------------------------
 def SetupLoggers() :
     global logger
-    logger.setLevel(logging.INFO)
+    logger.setLevel(logging.DEBUG)
 
-    logfile = filename=os.path.join(os.path.dirname(__file__), "../logs/netbuilder.log")
+    logfile = filename=os.path.join(os.path.dirname(__file__), "../logs/builder.log")
     flog = logging.FileHandler(logfile, mode='w')
     flog.setFormatter(logging.Formatter('%(levelname)s [%(name)s] %(message)s'))
     logger.addHandler(flog)
 
     clog = logging.StreamHandler()
     clog.setFormatter(logging.Formatter('[%(name)s] %(message)s'))
-    clog.setLevel(logging.WARN)
+    clog.setLevel(logging.INFO)
     logger.addHandler(clog)
 
 # -----------------------------------------------------------------

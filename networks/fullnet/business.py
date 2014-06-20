@@ -39,6 +39,7 @@ social framework including people and businesses.
 """
 
 import os, sys
+import logging
 
 from mobdat.common.Schedule import WeeklySchedule
 from mobdat.common.Utilities import GenName
@@ -46,6 +47,8 @@ from mobdat.common.graph.Decoration import *
 from mobdat.common.graph import SocialNodes, SocialEdges, SocialDecoration
 
 import random
+
+logger = logging.getLogger('business')
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -244,13 +247,13 @@ def CountJobs() :
     names = sorted(JobCount.keys())
     for name in names :
         count = JobCount[name]
-        print "{:10} {:5}".format(name, count)
+        logger.debug("{:10} {:5}".format(name, count))
         people += count
 
-    print "Total Jobs: " + str(people)
+    logger.info("Total Jobs: %d", people)
 
 CountJobs()
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-print "Loaded fullnet business builder extension file"
+logger.info("Loaded fullnet business builder extension file")

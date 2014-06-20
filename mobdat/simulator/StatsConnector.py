@@ -79,7 +79,7 @@ class StatsConnector(EventHandler.EventHandler, BaseConnector.BaseConnector) :
             vcount = event.VehicleCount
             scount = event.CurrentStep
             timeofday = self.GetWorldTimeOfDay(scount)
-            print "{0} vehicles in the simulation, steps={1}, time={2:.2f}".format(vcount, scount, timeofday)
+            self.Logger.warn("{0} vehicles in the simulation, steps={1}, time={2:.2f}".format(vcount, scount, timeofday))
             
         self.Logger.info(str(event))
 

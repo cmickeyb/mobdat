@@ -40,10 +40,13 @@ mobdat.
 """
 
 import os, sys
+import logging
 
 from mobdat.builder import WorldBuilder
 from mobdat.common.Utilities import GenName, GenNameFromCoordinates
 from mobdat.common.graph.SocialDecoration import BusinessType
+
+logger = logging.getLogger('layout')
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
@@ -257,4 +260,4 @@ for n in ['main200E300S', 'main200E200S', 'main200E200N'] :
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-print "Loaded fullnet network builder extension file"
+logger.info("Loaded fullnet network builder extension file")
