@@ -133,13 +133,13 @@ def AddSchoolProfile(name, joblist, students) :
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 AddJobDescription('shift1',    30000,  False, WeeklySchedule.WorkWeekSchedule(4.0, 12.0))
-AddJobDescription('shift2',    30000,  False, WeeklySchedule.WorkWeekSchedule(12.0, 20.00))
-AddJobDescription('shift3',    30000,  False, WeeklySchedule.WorkWeekSchedule(20.0, 4.0))
+AddJobDescription('shift2',    30000,  False, WeeklySchedule.WorkWeekSchedule(10.0, 18.00))
+AddJobDescription('shift3',    30000,  False, WeeklySchedule.WorkWeekSchedule(16.0, 23.5))
 
 AddJobDescription('parttime1', 15000,  False, WeeklySchedule.WorkWeekSchedule(8.0, 12.0))
 AddJobDescription('parttime2', 15000,  False, WeeklySchedule.WorkWeekSchedule(12.0, 16.0))
 AddJobDescription('parttime3', 15000,  False, WeeklySchedule.WorkWeekSchedule(16.0, 20.0))
-AddJobDescription('parttime4', 15000,  False, WeeklySchedule.WorkWeekSchedule(20.0, 24.0))
+AddJobDescription('parttime4', 15000,  False, WeeklySchedule.WorkWeekSchedule(20.0, 23.5))
 
 AddJobDescription('worker',    30000,  True,  WeeklySchedule.WorkWeekSchedule(8.0, 17.0))
 AddJobDescription('seniorwrk', 60000,  True,  WeeklySchedule.WorkWeekSchedule(8.0, 17.0))
@@ -163,7 +163,7 @@ AddJobDescription('storemgr2', 50000,  False, WeeklySchedule.WorkWeekSchedule(14
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
 AddFactoryProfile("small-factory", {'worker' : 20, 'manager' : 2, 'seniormgr' : 1})
-AddFactoryProfile("large-factory", {'shift1' : 20, 'shift2' : 20, 'shift3' : 20, 'worker' : 20, 'manager' : 20, 'seniormgr' : 5, 'exec' : 2})
+AddFactoryProfile("large-factory", {'shift1' : 15, 'shift2' : 20, 'shift3' : 15, 'worker' : 30, 'manager' : 20, 'seniormgr' : 5, 'exec' : 2})
 
 AddRetailProfile("bank-branch", {'worker' : 8, 'seniorwrk' : 5, 'seniormgr' : 3, 'exec' : 1}, (9.0, 16.0), 20, 0.25)
 AddRetailProfile("bank-central", {'worker' : 20, 'seniorwrk' : 20, 'seniormgr' : 5, 'exec' : 1}, (9.0, 16.0), 20, 0.50)
@@ -230,6 +230,34 @@ def PlaceBusinesses() :
         pweights.AddChoice(profname, ProfileWeights.get(profname, 2))
         profiles[profname] = profile
 
+    # add some factories
+    factory = profiles['large-factory']
+    for i in range(8) :
+        name = GenName('large-factory')
+        business = world.AddBusiness(name, factory)
+        location = PlaceBusiness(business)
+        if not location :
+            break
+
+    # add some factories
+    school = profiles['high-school']
+    for i in range(2) :
+        name = GenName('high-school')
+        business = world.AddBusiness(name, school)
+        location = PlaceBusiness(business)
+        if not location :
+            break
+
+    # add some large services
+    service = profiles['large-service']
+    for i in range(2) :
+        name = GenName('large-service')
+        business = world.AddBusiness(name, service)
+        location = PlaceBusiness(business)
+        if not location :
+            break
+
+    # and fill in with more random businesses
     while len(profiles) > 0 :
         # this is a uniform distribution of businesses from the options
         # pname = random.choice(profiles.keys())

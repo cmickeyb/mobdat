@@ -107,8 +107,9 @@ class Traveler :
 
         self.Controller = EventController()
 
-        self.BuildDailyEvents(self.Connector.WorldDay)
-        self.ScheduleNextTrip()
+        self.EventList = None
+        if self.BuildDailyEvents(self.Connector.WorldDay) :
+            self.ScheduleNextTrip()
 
     # -----------------------------------------------------------------
     def FindBusinessByType(self, biztype, bizclass) :
@@ -168,19 +169,23 @@ class Traveler :
         # again with just work
         if not evlist.SolveConstraints() :
             if addextras :
-                self.BuildDailyEvents(worldday, False)
-                return
+                return self.BuildDailyEvents(worldday, False)
             else :
-                logger.info('Failed to resolve schedule constraints for traveler %s', self.Person.Name)
-                # evlist.DumpToLog()
-                return
+                logger.warn('Failed to resolve schedule constraints for traveler %s', self.Person.Name)
+                self.EventList = None
+                return False
 
         self.EventList = evlist
+        return True
 
     # -----------------------------------------------------------------
     def ScheduleNextTrip(self) :
+        if not self.EventList :
+            return
+
         if not self.EventList.MoreTripEvents() :
-            self.BuildDailyEvents(self.Connector.WorldDay + 1)
+            if not self.BuildDailyEvents(self.Connector.WorldDay + 1) :
+                return
 
         while self.EventList.MoreTripEvents() :
             tripev = self.EventList.PopTripEvent()

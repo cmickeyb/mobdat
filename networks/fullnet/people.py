@@ -140,6 +140,9 @@ def ConnectPeople(people, edgefactor, quadrants) :
 
 ConnectPeople(world.FindNodes(nodetype = 'Person'), 5, (4, 5, 6, 7))
 
+# -----------------------------------------------------------------
+
+
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 logger.info("Loaded fullnet people builder extension file")

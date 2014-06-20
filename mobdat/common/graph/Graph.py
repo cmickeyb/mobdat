@@ -48,6 +48,8 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
 from Decoration import *
+from Node import *
+from Edge import *
 from mobdat.common.Utilities import GenName
 
 import re
