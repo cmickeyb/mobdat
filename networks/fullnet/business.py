@@ -46,7 +46,7 @@ from mobdat.common.Utilities import GenName
 from mobdat.common.graph.Decoration import *
 from mobdat.common.graph import SocialNodes, SocialEdges, SocialDecoration
 
-import random
+from mobdat.common.ValueTypes import WeightedChoice
 
 logger = logging.getLogger('business')
 
@@ -163,7 +163,7 @@ AddJobDescription('storemgr2', 50000,  False, WeeklySchedule.WorkWeekSchedule(14
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
 AddFactoryProfile("small-factory", {'worker' : 20, 'manager' : 2, 'seniormgr' : 1})
-AddFactoryProfile("large-factory", {'shift1' : 30, 'shift2' : 30, 'shift3' : 30, 'worker' : 20, 'manager' : 20, 'seniormgr' : 5, 'exec' : 2})
+AddFactoryProfile("large-factory", {'shift1' : 20, 'shift2' : 20, 'shift3' : 20, 'worker' : 20, 'manager' : 20, 'seniormgr' : 5, 'exec' : 2})
 
 AddRetailProfile("bank-branch", {'worker' : 8, 'seniorwrk' : 5, 'seniormgr' : 3, 'exec' : 1}, (9.0, 16.0), 20, 0.25)
 AddRetailProfile("bank-central", {'worker' : 20, 'seniorwrk' : 20, 'seniormgr' : 5, 'exec' : 1}, (9.0, 16.0), 20, 0.50)
@@ -186,6 +186,21 @@ AddSchoolProfile("high-school", { 'teacher' : 30, 'admin' : 8, 'principal' : 4},
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+ProfileWeights = {
+    'coffee' : 5,
+    'bank-central' : 1,
+    'bank-branch' : 4,
+    'high-school' :  2,
+    'middle-school' : 4,
+    'elem-school' : 8,
+    'fastfood' : 8,
+    'small-restaurant' : 6,
+    'large-restaurant' : 2,
+    'large-service' : 4,
+    'small-service' : 8,
+    'small-factory' : 12,
+    'large-factory' : 6
+    }
 
 # -----------------------------------------------------------------
 def PlaceBusiness(business) :
@@ -209,15 +224,18 @@ def PlaceBusiness(business) :
 def PlaceBusinesses() :
     global world
 
+    pweights = WeightedChoice()
     profiles = {}
     for profname, profile in world.IterNodes(nodetype = 'BusinessProfile') :
+        pweights.AddChoice(profname, ProfileWeights.get(profname, 2))
         profiles[profname] = profile
 
     while len(profiles) > 0 :
         # this is a uniform distribution of businesses from the options
-        pname = random.choice(profiles.keys())
+        # pname = random.choice(profiles.keys())
+        pname = pweights.Choose()
         profile = profiles[pname]
-
+            
         name = GenName(pname)
         business = world.AddBusiness(name, profile)
         location = PlaceBusiness(business)
@@ -227,6 +245,7 @@ def PlaceBusinesses() :
         if not location :
             world.DropNode(business)
             del profiles[pname]
+            pweights.DropChoice(pname)
 
 PlaceBusinesses()
 

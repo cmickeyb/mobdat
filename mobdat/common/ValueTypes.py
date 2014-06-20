@@ -81,8 +81,14 @@ class WeightedChoice :
         self.Weights[choice] = weight
 
     # -----------------------------------------------------------------
+    def DropChoice(self, choice) :
+        self.Modified = True
+        del self.Weights[choice]
+
+    # -----------------------------------------------------------------
     def Choose(self) :
         if self.Modified :
+            self.WeightedList = []
             for choice, weight in self.Weights.iteritems() :
                 self.WeightedList.extend([choice] * weight)
             self.Modified = False
