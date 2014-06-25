@@ -141,7 +141,44 @@ def ConnectPeople(people, edgefactor, quadrants) :
 ConnectPeople(world.FindNodes(nodetype = 'Person'), 5, (4, 5, 6, 7))
 
 # -----------------------------------------------------------------
+def BumpPreference(person, preference, strength) :
+    person.Preference.AddWeight(preference, strength)
 
+def _PropogatePreference(node, preference, pmethod, weight, processednodes) :
+    logger.info('propogate preference {0} to person {1} with weight {2}'.format(preference, node.Name, weight))
+
+    pmethod(node, preference, weight)
+    processednodes[node] = True
+
+    if weight < 0.1 :
+        return
+
+    for edge in node.IterOutputEdges(edgetype = 'ConnectedTo') :
+        enode = edge.EndNode
+        if enode not in processednodes :
+            _PropogatePreference(enode, preference, pmethod, nweight, processednodes)
+    
+def PropogatePreference(seeds, preference, pmethod) :
+    processednodes = {}
+    for seed in seeds :
+        _PropogatePreference(seed, preference, pmethod, 0.5, processednodes)
+
+businesscache = {}
+def FindBusinessByType(biztype, bizclass) :
+    global businesscache, world
+
+    if (biztype, bizclass) not in businesscache :
+        predicate = SocialDecoration.BusinessProfileDecoration.BusinessTypePred(biztype, bizclass)
+        businesscache[(biztype, bizclass)] = world.FindNodes(nodetype = 'Business', predicate = predicate)
+
+        return businesscache[(biztype, bizclass)]
+
+people = world.FindNodes(nodetype = 'Person')
+
+seeds = random.sample(people, 10)
+biz = random.choice(FindBusinessByType(SocialDecoration.BusinessType.Food, 'coffee'))
+
+PropogatePreference(seeds, biz.Name, BumpPreference)
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

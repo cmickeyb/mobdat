@@ -78,6 +78,7 @@ class Person(Node.Node) :
         """
         Node.Node.__init__(self, name = name)
 
+        self.AddDecoration(SocialDecoration.PreferenceDecoration())
         profile.AddMember(self)
 
     # -----------------------------------------------------------------

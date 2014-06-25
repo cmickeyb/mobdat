@@ -379,7 +379,60 @@ class VehicleDecoration(Decoration) :
     
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+class PreferenceDecoration(Decoration) :
+    DecorationName = 'Preference'
+    
+    # -----------------------------------------------------------------
+    @staticmethod
+    def Load(graph, info) :
+        decr = PreferenceDecoration()
+        for name, weight in info['PreferenceMap'].iteritems() :
+            decr.SetWeight(name, weight)
+
+        return decr
+
+    # -----------------------------------------------------------------
+    def __init__(self) :
+        """
+        Args:
+        """
+        Decoration.__init__(self)
+
+        self.PreferenceMap = {}
+
+    # -----------------------------------------------------------------
+    def SetWeight(self, name, weight) :
+        if weight < 0 or 1 < weight :
+            raise ValueError('invalid preference weight')
+
+        self.PreferenceMap[name] = weight
+
+    # -----------------------------------------------------------------
+    def AddWeight(self, name, weight) :
+        if weight < 0 or 1 < weight :
+            raise ValueError('invalid preference weight')
+
+        if name not in self.PreferenceMap :
+            self.PreferenceMap[name] = 0
+
+        # a relatively simple cuumulative weighting algorithm
+        self.PreferenceMap[name] = self.PreferenceMap[name] + weight - self.PreferenceMap[name] * weight
+
+    # -----------------------------------------------------------------
+    def GetWeight(self, name, defaultweight = None) :
+        return self.PreferenceMap.get(name, defaultweight)
+
+    # -----------------------------------------------------------------
+    def Dump(self) :
+        result = Decoration.Dump(self)
+        result['PreferenceMap'] = self.PreferenceMap
+
+        return result
+    
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 CommonDecorations = [ EmploymentProfileDecoration, ServiceProfileDecoration, BusinessProfileDecoration,
                       JobDescriptionDecoration,
-                      VehicleTypeDecoration, VehicleDecoration ]
+                      VehicleTypeDecoration, VehicleDecoration,
+                      PreferenceDecoration ]
 
