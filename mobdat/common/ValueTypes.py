@@ -69,7 +69,7 @@ class WeightedChoice :
     # -----------------------------------------------------------------
     def __init__(self, choices = {}) :
         self.Modified = False
-        self.WeightedList = []
+        self.TotalWeight = 0
         self.Weights = {}
 
         for choice, weight in choices.iteritems() :
@@ -86,14 +86,25 @@ class WeightedChoice :
         del self.Weights[choice]
 
     # -----------------------------------------------------------------
+    def Choices(self) :
+        return self.Weights.keys()
+
+    # -----------------------------------------------------------------
     def Choose(self) :
         if self.Modified :
-            self.WeightedList = []
-            for choice, weight in self.Weights.iteritems() :
-                self.WeightedList.extend([choice] * weight)
+            self.TotalWeight = 0
+            for weight in self.Weights.itervalues() :
+                self.TotalWeight += weight
             self.Modified = False
 
-        return random.choice(self.WeightedList)
+        pick = random.uniform(0, self.TotalWeight)
+        
+        for choice, weight in self.Weights.iteritems() :
+            if pick - weight <= 0 : return choice
+            pick = pick - weight
+
+        # this should only happen on floating point oddness
+        return random.choice(self.Weights.keys())
                 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -225,3 +236,14 @@ class Quaternion :
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ZeroVector = Vector3(0.0, 0.0, 0.0)
+
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+if __name__ == '__main__' :
+    xx = WeightedChoice({ 'foo' :  0.0000001})
+    print xx.Choose()
+
+    weight = 1.0 / 3.0
+    yy = WeightedChoice({ 'a' :  weight, 'b' : weight, 'c' : weight})
+    for i in range(15) :
+        print yy.Choose()
