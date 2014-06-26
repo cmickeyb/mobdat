@@ -48,6 +48,7 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "
 from mobdat.common.ValueTypes import MakeEnum, DaysOfTheWeek
 from mobdat.common.Schedule import WeeklySchedule
 from Decoration import Decoration
+import SocialNodes
 
 import random
 
@@ -222,6 +223,12 @@ class BusinessProfileDecoration(Decoration) :
     @staticmethod
     def BusinessTypePred(biztype, bizclass) :
         return lambda node : node.BusinessProfile.BusinessType == biztype and node.BusinessProfile.TestAnnotation(bizclass)
+
+    # -------------------------------------------------------
+    @staticmethod
+    def FindByType(graph, biztype, bizclass) :
+        predicate = BusinessProfileDecoration.BusinessTypePred(biztype, bizclass)
+        return graph.FindNodes(nodetype = SocialNodes.Business.__name__, predicate = predicate)
 
     # -------------------------------------------------------
     @staticmethod
