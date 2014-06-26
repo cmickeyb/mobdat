@@ -29,7 +29,7 @@ LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
 
-@file    Generators.py
+@file    Generator.py
 @author  Mic Bowman
 @date    2013-12-03
 
@@ -87,79 +87,66 @@ class GaussianWeightGenerator(WeightGenerator) :
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class Generators :
+def RMAT(graph, nodelist, edgefactor = 3, quadrants = (4, 8, 12, 16), weightgen = None, edgetype = None) :
+    """
+    Generate a social graph from the provided nodes using the R-MAT, recursive
+    matrix routine (http://www.cs.cmu.edu/~christos/PUBLICATIONS/siam04.pdf)
 
-    # -----------------------------------------------------------------
-    @staticmethod
-    def _FindEdge(src, dst, edgetype) :
-        for e in src.FindOutputEdges(edgetype = edgetype.__name__) :
-            if e.EndNode == dst :
-                return e
+    Args:
+        graph -- Graph object
+        nodelist -- list of Node objects
+        edgefactor -- integer, relative number of edges between nodes
+        quadrants -- vector of integers that distributes the density of small world effects
+        edgetype -- subtype of Edge.WeightedEdge
+    """
 
-        return None
+    if not weightgen : weightgen = WeightGenerator(0.5)
+    if not edgetype : edgetype = WeightedEdge
 
-    # -----------------------------------------------------------------
-    @staticmethod
-    def RMAT(graph, nodelist, edgefactor = 3, quadrants = (4, 8, 12, 16), weightgen = None, edgetype = None) :
-        """
-        Generate a social graph from the provided nodes using the R-MAT, recursive
-        matrix routine (http://www.cs.cmu.edu/~christos/PUBLICATIONS/siam04.pdf)
+    nodes = nodelist[:]     # make a copy so we can pop off elements as necessary
+    edgecount = edgefactor * len(nodes)
+    scale = int(math.log(len(nodes), 2) + 1)
 
-        Args:
-            graph -- Graph object
-            nodelist -- list of Node objects
-            edgefactor -- integer, relative number of edges between nodes
-            quadrants -- vector of integers that distributes the density of small world effects
-            edgetype -- subtype of Edge.WeightedEdge
-        """
+    quadpicker = WeightedChoice({0 : quadrants[0], 1 : quadrants[1], 2 : quadrants[2], 3 : quadrants[3]})
+    quadmap = {}
+    edgemap = {}
 
-        if not weightgen : weightgen = WeightGenerator(0.5)
-        if not edgetype : edgetype = WeightedEdge
+    edges = 0
 
-        nodes = nodelist[:]     # make a copy so we can pop off elements as necessary
-        edgecount = edgefactor * len(nodes)
-        scale = int(math.log(len(nodes), 2) + 1)
+    while nodes or edges < edgecount :
+        n1 = 0
+        n2 = 0
 
-        quadpicker = WeightedChoice({0 : quadrants[0], 1 : quadrants[1], 2 : quadrants[2], 3 : quadrants[3]})
-        quadmap = {}
-        edgemap = {}
+        for j in range(scale) :
+            quadrant = quadpicker.Choose()
+            n1 = (n1 << 1) | (quadrant >> 1)
+            n2 = (n2 << 1) | (quadrant & 1)
 
-        edges = 0
+        # make sure we have nodes for the quadrant identifiers
+        if n1 not in quadmap :
+            quadmap[n1] = nodes.pop() if nodes else random.choice(quadmap.values())
+        node1 = quadmap[n1]
 
-        while nodes or edges < edgecount :
-            n1 = 0
-            n2 = 0
+        if n2 not in quadmap :
+            quadmap[n2] = nodes.pop() if nodes else random.choice(quadmap.values())
+        node2 = quadmap[n2]
 
-            for j in range(scale) :
-                quadrant = quadpicker.Choose()
-                n1 = (n1 << 1) | (quadrant >> 1)
-                n2 = (n2 << 1) | (quadrant & 1)
+        # and now create the edges between the nodes
+        edges += 1
+        if edges % 100 == 0 :
+            logger.debug('created %d of %d social edges so far', edges, edgecount)
 
-            # make sure we have nodes for the quadrant identifiers
-            if n1 not in quadmap :
-                quadmap[n1] = nodes.pop() if nodes else random.choice(quadmap.values())
-            node1 = quadmap[n1]
+        if (node1, node2) not in edgemap :
+            edge = node1.FindOutputEdge(node2, edgetype.__name__)
+            if edge :
+                edgemap[(node1, node2)] = edge
+                edgemap[(node2, node1)] = node2.FindOutputEdge(node1, edgetype.__name__)
+            else :
+                edgemap[(node1, node2)] = graph.AddEdge(edgetype(node1, node2, weightgen.GenWeight(node1, node2)))
+                edgemap[(node2, node1)] = graph.AddEdge(edgetype(node2, node1, weightgen.GenWeight(node2, node1)))
+        # else :
+        #     edgemap[(node1, node2)].Weight.AddWeight(edgeweight)
+        #     edgemap[(node2, node1)].Weight.AddWeight(edgeweight)
 
-            if n2 not in quadmap :
-                quadmap[n2] = nodes.pop() if nodes else random.choice(quadmap.values())
-            node2 = quadmap[n2]
-
-            # and now create the edges between the nodes
-            edges += 1
-            if edges % 100 == 0 :
-                logger.debug('created %d of %d social edges so far', edges, edgecount)
-
-            if (node1, node2) not in edgemap :
-                edge = Generators._FindEdge(node1, node2, edgetype)
-                if edge :
-                    edgemap[(node1, node2)] = edge
-                    edgemap[(node2, node1)] = Generators._FindEdge(node2, node1, edgetype)
-                else :
-                    edgemap[(node1, node2)] = graph.AddEdge(edgetype(node1, node2, weightgen.GenWeight(node1, node2)))
-                    edgemap[(node2, node1)] = graph.AddEdge(edgetype(node2, node1, weightgen.GenWeight(node2, node1)))
-            # else :
-            #     edgemap[(node1, node2)].Weight.AddWeight(edgeweight)
-            #     edgemap[(node2, node1)].Weight.AddWeight(edgeweight)
-
-        logger.info('created %d social connections', edges)
+    logger.info('created %d social connections', edges)
 

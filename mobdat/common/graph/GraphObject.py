@@ -116,6 +116,19 @@ class GraphObject :
         return self._FindEdges(self.OutputEdges, edgetype)
 
     # -----------------------------------------------------------------
+    def FindOutputEdge(self, enode, edgetype = None) :
+        for e in self._FindEdges(self.OutputEdges, edgetype) :
+            if e.EndNode == enode : return e
+
+        return None
+
+    def FindInputEdge(self, snode, edgetype = None) :
+        for e in self._FindEdges(self.InputEdges, edgetype) :
+            if e.StartNode == snode : return e
+
+        return None
+        
+    # -----------------------------------------------------------------
     def _IterEdges(self, edgelist, edgetype) :
         """
         _IterEdges -- Build and return an iterator over the edges of a

@@ -47,7 +47,7 @@ sys.path.append(os.path.join(os.environ.get("OPENSIM","/share/opensim"),"lib","p
 #sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
 from mobdat.common.Utilities import GenName
-from mobdat.common.graph import Generators, SocialEdges
+from mobdat.common.graph import Generator, Propagator, SocialEdges
 
 import random, math
 
@@ -135,8 +135,8 @@ def ConnectPeople(people, edgefactor, quadrants, edgeweight = 0.5) :
     """
 
     global world
-    weightgen = Generators.GaussianWeightGenerator(edgeweight)
-    Generators.Generators.RMAT(world, people, edgefactor, quadrants, weightgen = weightgen, edgetype = SocialEdges.ConnectedTo)
+    weightgen = Generator.GaussianWeightGenerator(edgeweight)
+    Generator.RMAT(world, people, edgefactor, quadrants, weightgen = weightgen, edgetype = SocialEdges.ConnectedTo)
 
 # Connect the world
 ConnectPeople(world.FindNodes(nodetype = 'Person'), 5, (4, 5, 6, 7), 0.5)
@@ -151,44 +151,6 @@ for name, biz in world.IterNodes(nodetype = 'Business') :
 
 # Connect people who live in the same area
 # TBD
-
-# -----------------------------------------------------------------
-def PropagatePreference(seeds, preference, seedweight, minweight) :
-    nodequeue = set()
-
-    # set the initial weights for the seed nodes, add adjacent nodes
-    # to the queue to be processed
-    for seed in seeds :
-        seed.Preference.SetWeight(preference, seedweight)
-        for edge in seed.IterOutputEdges(edgetype = 'ConnectedTo') :
-            nodequeue.add(edge.EndNode)
-
-    # process the queue, this is a little dangerous because of the
-    # potential for lack of convergence or at least the potential
-    # for convergence taking a very long time
-    totalprocessed = 0
-    while len(nodequeue) > 0 :
-        totalprocessed += 1
-        node = nodequeue.pop()
-        oldweight = node.Preference.GetWeight(preference, 0.0)
-
-        # compute the weight for this node as the weighted average
-        # of all the nodes that point to it
-        count = 0
-        aggregate = 0
-        for edge in node.IterInputEdges(edgetype = 'ConnectedTo') :
-            count += 1
-            aggregate += edge.StartNode.Preference.GetWeight(preference, 0.0) * edge.Weight.Weight
-
-        newweight = aggregate / count
-        if abs(oldweight - newweight) > minweight :
-            node.Preference.SetWeight(preference, newweight)
-            # logger.debug('propogate preference {0} to person {1} with weight {2:1.4f}'.format(preference, node.Name, newweight))
-
-            for edge in node.IterOutputEdges(edgetype = 'ConnectedTo') :
-                nodequeue.add(edge.EndNode)
-
-    logger.info('total nodes process {0} for preference {1}'.format(totalprocessed, preference))
 
 # -----------------------------------------------------------------
 bizcache = {}
@@ -207,7 +169,7 @@ def PropagateBusinessPreference(people, biztype, bizclass, seedsize = (5, 15)) :
         seedcount = random.randint(int(incr * seedsize[0]), int(incr * seedsize[1]))
         seeds = random.sample(people, seedcount)
 
-        PropagatePreference(seeds, biz.Name, random.uniform(0.7, 0.9), 0.03)
+        Propagator.PropagateAveragePreference(seeds, biz.Name, random.uniform(0.7, 0.9), 0.03)
 
 people = world.FindNodes(nodetype = 'Person')
 PropagateBusinessPreference(people, SocialDecoration.BusinessType.Food, 'coffee')
