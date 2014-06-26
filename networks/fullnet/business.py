@@ -237,6 +237,7 @@ def PlaceBusinesses() :
         business = world.AddBusiness(name, factory)
         location = PlaceBusiness(business)
         if not location :
+            world.DropNode(business)
             break
 
     # add some factories
@@ -246,6 +247,7 @@ def PlaceBusinesses() :
         business = world.AddBusiness(name, school)
         location = PlaceBusiness(business)
         if not location :
+            world.DropNode(business)
             break
 
     # add some large services
@@ -255,6 +257,7 @@ def PlaceBusinesses() :
         business = world.AddBusiness(name, service)
         location = PlaceBusiness(business)
         if not location :
+            world.DropNode(business)
             break
 
     # and fill in with more random businesses
