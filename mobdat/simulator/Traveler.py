@@ -49,9 +49,9 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "
 import random
 import Trip
 
-from mobdat.common import TravelTimeEstimator
+from mobdat.common import TravelTimeEstimator, ValueTypes
 from mobdat.common.timedevent import TimedEvent, TimedEventList, IntervalVariable
-from mobdat.common.graph import SocialDecoration
+from mobdat.common.graph import SocialDecoration 
 
 logger = logging.getLogger(__name__)
 
@@ -86,7 +86,7 @@ class EventController :
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class Traveler :
-    BusinessCache = {}
+    __BusinessCache = {}
 
     # -----------------------------------------------------------------
     def __init__(self, person, connector) :
@@ -112,27 +112,39 @@ class Traveler :
             self.ScheduleNextTrip()
 
     # -----------------------------------------------------------------
-    def FindBusinessByType(self, biztype, bizclass) :
-        if (biztype, bizclass) not in self.BusinessCache :
-            predicate = SocialDecoration.BusinessProfileDecoration.BusinessTypePred(biztype, bizclass)
-            self.BusinessCache[(biztype, bizclass)] = self.World.FindNodes(nodetype = 'Business', predicate = predicate)
+    def FindBizByType(self, biztype, bizclass) :
+        if (biztype, bizclass) not in self.__BusinessCache :
+            self.__BusinessCache[(biztype, bizclass)] = SocialDecoration.BusinessProfileDecoration.FindByType(self.World, biztype, bizclass)
 
-        return self.BusinessCache[(biztype, bizclass)]
+        return self.__BusinessCache[(biztype, bizclass)]
     
+    # -----------------------------------------------------------------
+    def CreatePreferenceList(self, bizlist) :
+        plist = ValueTypes.WeightedChoice()
+        for biz in bizlist :
+            weight = self.Person.Preference.GetWeight(biz.Name)
+            if weight : plist.AddChoice(biz, weight)
+
+        # make sure there is at least one on the list
+        if not plist.Choices() :
+            plist.AddChoice(random.choice(bizlist), 1.0)
+
+        return plist
+
     # -----------------------------------------------------------------
     def InitializeLocationNameMap(self) :
         self.LocationNameMap = {}
-        self.LocationNameMap['home'] = [ self.Person ]
-        self.LocationNameMap['work'] = [ self.Employer ]
+        self.LocationNameMap['home'] = ValueTypes.WeightedChoice({ self.Person : 1.0 })
+        self.LocationNameMap['work'] = ValueTypes.WeightedChoice({ self.Employer : 1.0 })
 
-        self.LocationNameMap['coffee'] = self.FindBusinessByType(SocialDecoration.BusinessType.Food, 'coffee')
-        self.LocationNameMap['lunch'] = self.FindBusinessByType(SocialDecoration.BusinessType.Food, 'fastfood')
-        self.LocationNameMap['dinner'] = self.FindBusinessByType(SocialDecoration.BusinessType.Food, 'small-restaurant')
-        self.LocationNameMap['shopping'] = self.FindBusinessByType(SocialDecoration.BusinessType.Service, None)
+        self.LocationNameMap['coffee'] = self.CreatePreferenceList(self.FindBizByType(SocialDecoration.BusinessType.Food, 'coffee'))
+        self.LocationNameMap['lunch'] = self.CreatePreferenceList(self.FindBizByType(SocialDecoration.BusinessType.Food, 'fastfood'))
+        self.LocationNameMap['dinner'] = self.CreatePreferenceList(self.FindBizByType(SocialDecoration.BusinessType.Food, 'small-restaurant'))
+        self.LocationNameMap['shopping'] = self.CreatePreferenceList(self.FindBizByType(SocialDecoration.BusinessType.Service, None))
 
     # -----------------------------------------------------------------
     def ResolveLocationName(self, name) :
-        location = random.choice(self.LocationNameMap[name])
+        location = self.LocationNameMap[name].Choose()
         return location.ResidesAt
 
     # -----------------------------------------------------------------

@@ -196,8 +196,7 @@ def PropagateBusinessPreference(people, biztype, bizclass, seedsize = (5, 15)) :
     global bizcache, world
 
     if (biztype, bizclass) not in bizcache :
-        predicate = SocialDecoration.BusinessProfileDecoration.BusinessTypePred(biztype, bizclass)
-        bizcache[(biztype, bizclass)] = world.FindNodes(nodetype = 'Business', predicate = predicate)
+        bizcache[(biztype, bizclass)] = SocialDecoration.BusinessProfileDecoration.FindByType(world, biztype, bizclass)
 
     bizlist = bizcache[(biztype, bizclass)]
 
@@ -205,7 +204,7 @@ def PropagateBusinessPreference(people, biztype, bizclass, seedsize = (5, 15)) :
 
     for biz in bizlist :
         logger.info('generating preferences for {0}'.format(biz.Name))
-        seedcount = random.randint(int(incr * 5), int(incr * 15))
+        seedcount = random.randint(int(incr * seedsize[0]), int(incr * seedsize[1]))
         seeds = random.sample(people, seedcount)
 
         PropagatePreference(seeds, biz.Name, random.uniform(0.7, 0.9), 0.03)
