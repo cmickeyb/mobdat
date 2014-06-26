@@ -406,6 +406,7 @@ class PreferenceDecoration(Decoration) :
             raise ValueError('invalid preference weight')
 
         self.PreferenceMap[name] = weight
+        return self.PreferenceMap[name]
 
     # -----------------------------------------------------------------
     def AddWeight(self, name, weight) :
@@ -417,6 +418,7 @@ class PreferenceDecoration(Decoration) :
 
         # a relatively simple cuumulative weighting algorithm
         self.PreferenceMap[name] = self.PreferenceMap[name] + weight - self.PreferenceMap[name] * weight
+        return self.PreferenceMap[name]
 
     # -----------------------------------------------------------------
     def GetWeight(self, name, defaultweight = None) :

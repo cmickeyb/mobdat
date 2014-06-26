@@ -121,13 +121,12 @@ def PlacePeople() :
                     logger.warn('ran out of residences after %d people', people)
                     return
 
-
     logger.info('created %d people', people)
 
 PlacePeople()
 
 # -----------------------------------------------------------------
-def ConnectPeople(people, edgefactor, quadrants) :
+def ConnectPeople(people, edgefactor, quadrants, edgeweight = 0.5) :
     """
     Args:
         people -- list of SocialNodes.People objects
@@ -136,49 +135,87 @@ def ConnectPeople(people, edgefactor, quadrants) :
     """
 
     global world
-    Generators.Generators.RMAT(world, people, edgefactor, quadrants, edgetype = SocialEdges.ConnectedTo)
+    weightgen = Generators.GaussianWeightGenerator(edgeweight)
+    Generators.Generators.RMAT(world, people, edgefactor, quadrants, weightgen = weightgen, edgetype = SocialEdges.ConnectedTo)
 
-ConnectPeople(world.FindNodes(nodetype = 'Person'), 5, (4, 5, 6, 7))
+# Connect the world
+ConnectPeople(world.FindNodes(nodetype = 'Person'), 5, (4, 5, 6, 7), 0.5)
+
+# Connect people who work at the same business
+for name, biz in world.IterNodes(nodetype = 'Business') :
+    employees = []
+    for edge in biz.IterInputEdges(edgetype = 'EmployedBy') :
+        employees.append(edge.StartNode)
+
+    ConnectPeople(employees, 5, (4, 5, 6, 7), 0.8)
+
+# Connect people who live in the same area
+# TBD
 
 # -----------------------------------------------------------------
-def BumpPreference(person, preference, strength) :
-    person.Preference.AddWeight(preference, strength)
+def PropagatePreference(seeds, preference, seedweight, minweight) :
+    nodequeue = set()
 
-def _PropogatePreference(node, preference, pmethod, weight, processednodes) :
-    logger.info('propogate preference {0} to person {1} with weight {2}'.format(preference, node.Name, weight))
-
-    pmethod(node, preference, weight)
-    processednodes[node] = True
-
-    if weight < 0.1 :
-        return
-
-    for edge in node.IterOutputEdges(edgetype = 'ConnectedTo') :
-        enode = edge.EndNode
-        if enode not in processednodes :
-            _PropogatePreference(enode, preference, pmethod, nweight, processednodes)
-    
-def PropogatePreference(seeds, preference, pmethod) :
-    processednodes = {}
+    # set the initial weights for the seed nodes, add adjacent nodes
+    # to the queue to be processed
     for seed in seeds :
-        _PropogatePreference(seed, preference, pmethod, 0.5, processednodes)
+        seed.Preference.SetWeight(preference, seedweight)
+        for edge in seed.IterOutputEdges(edgetype = 'ConnectedTo') :
+            nodequeue.add(edge.EndNode)
 
-businesscache = {}
-def FindBusinessByType(biztype, bizclass) :
-    global businesscache, world
+    # process the queue, this is a little dangerous because of the
+    # potential for lack of convergence or at least the potential
+    # for convergence taking a very long time
+    totalprocessed = 0
+    while len(nodequeue) > 0 :
+        totalprocessed += 1
+        node = nodequeue.pop()
+        oldweight = node.Preference.GetWeight(preference, 0.0)
 
-    if (biztype, bizclass) not in businesscache :
+        # compute the weight for this node as the weighted average
+        # of all the nodes that point to it
+        count = 0
+        aggregate = 0
+        for edge in node.IterInputEdges(edgetype = 'ConnectedTo') :
+            count += 1
+            aggregate += edge.StartNode.Preference.GetWeight(preference, 0.0) * edge.Weight.Weight
+
+        newweight = aggregate / count
+        if abs(oldweight - newweight) > minweight :
+            node.Preference.SetWeight(preference, newweight)
+            # logger.debug('propogate preference {0} to person {1} with weight {2:1.4f}'.format(preference, node.Name, newweight))
+
+            for edge in node.IterOutputEdges(edgetype = 'ConnectedTo') :
+                nodequeue.add(edge.EndNode)
+
+    logger.info('total nodes process {0} for preference {1}'.format(totalprocessed, preference))
+
+# -----------------------------------------------------------------
+bizcache = {}
+def PropagateBusinessPreference(people, biztype, bizclass, seedsize = (5, 15)) :
+    global bizcache, world
+
+    if (biztype, bizclass) not in bizcache :
         predicate = SocialDecoration.BusinessProfileDecoration.BusinessTypePred(biztype, bizclass)
-        businesscache[(biztype, bizclass)] = world.FindNodes(nodetype = 'Business', predicate = predicate)
+        bizcache[(biztype, bizclass)] = world.FindNodes(nodetype = 'Business', predicate = predicate)
 
-        return businesscache[(biztype, bizclass)]
+    bizlist = bizcache[(biztype, bizclass)]
+
+    incr = len(people) / 100.0
+
+    for biz in bizlist :
+        logger.info('generating preferences for {0}'.format(biz.Name))
+        seedcount = random.randint(int(incr * 5), int(incr * 15))
+        seeds = random.sample(people, seedcount)
+
+        PropagatePreference(seeds, biz.Name, random.uniform(0.7, 0.9), 0.03)
 
 people = world.FindNodes(nodetype = 'Person')
-
-seeds = random.sample(people, 10)
-biz = random.choice(FindBusinessByType(SocialDecoration.BusinessType.Food, 'coffee'))
-
-PropogatePreference(seeds, biz.Name, BumpPreference)
+PropagateBusinessPreference(people, SocialDecoration.BusinessType.Food, 'coffee')
+PropagateBusinessPreference(people, SocialDecoration.BusinessType.Food, 'fastfood')
+PropagateBusinessPreference(people, SocialDecoration.BusinessType.Food, 'small-restaurant')
+PropagateBusinessPreference(people, SocialDecoration.BusinessType.Food, 'large-restaurant')
+PropagateBusinessPreference(people, SocialDecoration.BusinessType.Service, None)
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

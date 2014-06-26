@@ -56,11 +56,51 @@ logger = logging.getLogger(__name__)
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+class WeightGenerator :
+
+    # -----------------------------------------------------------------
+    def __init__(self, weight) :
+        if weight < 0 or 1 < weight :
+            raise ValueError('Edge weight must be between 0 and 1')
+
+        self.Weight = weight
+
+    # -----------------------------------------------------------------
+    def GenWeight(self, snode, enode) :
+        return self.Weight
+
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+class GaussianWeightGenerator(WeightGenerator) :
+
+    # -----------------------------------------------------------------
+    def __init__(self, weight = 0.5, deviation = 0.2) :
+        WeightGenerator.__init__(self, weight)
+        self.Deviation = deviation
+
+    # -----------------------------------------------------------------
+    def GenWeight(self, snode, enode) :
+        while True :
+            value = random.gauss(self.Weight, self.Deviation)
+            if 0 < value and value < 1 :
+                return value
+
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class Generators :
 
     # -----------------------------------------------------------------
     @staticmethod
-    def RMAT(graph, nodelist, edgefactor = 3, quadrants = (4, 8, 12, 16), edgeweight = 1.0, edgetype = None) :
+    def _FindEdge(src, dst, edgetype) :
+        for e in src.FindOutputEdges(edgetype = edgetype.__name__) :
+            if e.EndNode == dst :
+                return e
+
+        return None
+
+    # -----------------------------------------------------------------
+    @staticmethod
+    def RMAT(graph, nodelist, edgefactor = 3, quadrants = (4, 8, 12, 16), weightgen = None, edgetype = None) :
         """
         Generate a social graph from the provided nodes using the R-MAT, recursive
         matrix routine (http://www.cs.cmu.edu/~christos/PUBLICATIONS/siam04.pdf)
@@ -73,6 +113,7 @@ class Generators :
             edgetype -- subtype of Edge.WeightedEdge
         """
 
+        if not weightgen : weightgen = WeightGenerator(0.5)
         if not edgetype : edgetype = WeightedEdge
 
         nodes = nodelist[:]     # make a copy so we can pop off elements as necessary
@@ -109,11 +150,16 @@ class Generators :
                 logger.debug('created %d of %d social edges so far', edges, edgecount)
 
             if (node1, node2) not in edgemap :
-                edgemap[(node1, node2)] = graph.AddEdge(edgetype(node1, node2, edgeweight))
-                edgemap[(node2, node1)] = graph.AddEdge(edgetype(node2, node1, edgeweight))
-            else :
-                edgemap[(node1, node2)].Weight.AddWeight(edgeweight)
-                edgemap[(node2, node1)].Weight.AddWeight(edgeweight)
+                edge = Generators._FindEdge(node1, node2, edgetype)
+                if edge :
+                    edgemap[(node1, node2)] = edge
+                    edgemap[(node2, node1)] = Generators._FindEdge(node2, node1, edgetype)
+                else :
+                    edgemap[(node1, node2)] = graph.AddEdge(edgetype(node1, node2, weightgen.GenWeight(node1, node2)))
+                    edgemap[(node2, node1)] = graph.AddEdge(edgetype(node2, node1, weightgen.GenWeight(node2, node1)))
+            # else :
+            #     edgemap[(node1, node2)].Weight.AddWeight(edgeweight)
+            #     edgemap[(node2, node1)].Weight.AddWeight(edgeweight)
 
         logger.info('created %d social connections', edges)
 
