@@ -99,13 +99,27 @@ def ParseEnvironment(config) :
 def ParseCommandLine(config, args) :
     parser = argparse.ArgumentParser()
     
+    parser.add_argument('--load', help='data file to load on startup')
+    parser.add_argument('--extension', help='list of extension files to process', nargs="*")
+    parser.add_argument('--noextension', help='do not process extension files')
+
     parser.add_argument('--capability', help='capability uuid')
     parser.add_argument('--scene', help='name of the scene in which the operation is performed')
     parser.add_argument('--endpoint', help='URL of the simulator dispatcher')
     parser.add_argument('--asendpoint', help='UDP endpoint of the dispatcher')
+
     parser.add_argument('pushlist', help='Connectors to apply to the network', nargs="*")
 
     options = parser.parse_args(args)
+
+    if options.load :
+        config["Builder"]["LoadFile"] = options.load
+
+    if options.noextension :
+        config["Builder"]["ExtensionFiles"] = []
+
+    if options.extension :
+        config["Builder"]["ExtensionFiles"] = options.extension
 
     if options.capability :
         config["OpenSimConnector"]["Capability"] = options.capability

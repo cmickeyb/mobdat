@@ -64,7 +64,9 @@ def Controller(settings, pushlist) :
     """
 
     laysettings = LayoutSettings.LayoutSettings(settings)
-    world = WorldBuilder.WorldBuilder()
+
+    loadfile = settings["Builder"].get("LoadFile",None)
+    world = WorldBuilder.WorldBuilder.LoadFromFile(loadfile) if loadfile else WorldBuilder.WorldBuilder()
 
     dbbindings = {"laysettings" : laysettings, "world" : world}
 
