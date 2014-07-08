@@ -302,13 +302,13 @@ class WorldBuilder(WorldInfo.WorldInfo) :
         if edge1 == None and edge2 == None:
             logger.warn("no edge found between %s and %s", node1.Name, node2.Name)
 
-        curx = node1.X
-        cury = node1.Y
+        curx = node1.Coord.X
+        cury = node1.Coord.Y
 
-        if node1.X == node2.X :
-            cury = (node1.Y + dist) if node1.Y < node2.Y else (node1.Y - dist)
-        elif node1.Y == node2.Y :
-            curx = (node1.X + dist) if node1.X < node2.X else (node1.X - dist)
+        if node1.Coord.X == node2.Coord.X :
+            cury = (node1.Coord.Y + dist) if node1.Coord.Y < node2.Coord.Y else (node1.Coord.Y - dist)
+        elif node1.Coord.Y == node2.Coord.Y :
+            curx = (node1.Coord.X + dist) if node1.Coord.X < node2.Coord.X else (node1.Coord.X - dist)
         else:
             logger.warn("expecting north/south or east/west nodes for split")
             return None
@@ -340,7 +340,7 @@ class WorldBuilder(WorldInfo.WorldInfo) :
             if not node.FindDecorationProvider('Coord') :
                 continue
 
-            cdist = (node.Coord.X - x)**2 + (node.Coord.Y - y)**2
+            cdist = (node.Coord.Coord.X - x)**2 + (node.Coord.Coord.Y - y)**2
             if cdist < sqdist :
                 result.append(node)
 
@@ -357,10 +357,10 @@ class WorldBuilder(WorldInfo.WorldInfo) :
 
             if cnode == None :
                 cnode = node
-                cdist = (cnode.X - target.X)**2 + (cnode.Y - target.Y)**2
+                cdist = (cnode.Coord.X - target.Coord.X)**2 + (cnode.Coord.Y - target.Coord.Y)**2
                 continue
 
-            dist = (node.X - target.X)**2 + (node.Y - target.Y)**2
+            dist = (node.Coord.X - target.Coord.X)**2 + (node.Coord.Y - target.Coord.Y)**2
             if (dist < cdist) :
                 cnode = node
                 cdist = dist
@@ -405,15 +405,15 @@ class WorldBuilder(WorldInfo.WorldInfo) :
         self.DropEdgeByName("%s=O=%s" % (node2.Name, node1.Name))
         rgenp = copy.copy(rgen)
 
-        if node1.X == node2.X :
-            if node1.Y < node2.Y :
+        if node1.Coord.X == node2.Coord.X :
+            if node1.Coord.Y < node2.Coord.Y :
                 return self._GenerateResidentialYAxis(node1,node2,rgen,prefix)
             else :
                 # reverse direction, reverse sense of left and right
                 rgenp.DrivewayLength = -rgenp.DrivewayLength
                 return self._GenerateResidentialYAxis(node2,node1,rgen,prefix)
         else :
-            if node1.X < node2.X :
+            if node1.Coord.X < node2.Coord.X :
                 return self._GenerateResidentialXAxis(node1,node2,rgen,prefix)
             else :
                 # reverse direction, reverse sense of left and right
@@ -425,20 +425,20 @@ class WorldBuilder(WorldInfo.WorldInfo) :
         lastnode = node1
 
         resnodes = []
-        cury = node1.Y + rgen.DrivewayBuffer
-        while cury + rgen.DrivewayBuffer <= node2.Y :
+        cury = node1.Coord.Y + rgen.DrivewayBuffer
+        while cury + rgen.DrivewayBuffer <= node2.Coord.Y :
             # first node is the intersection with the existing road
-            node = self.AddIntersection(node1.X, cury, rgen.IntersectionType, prefix)
+            node = self.AddIntersection(node1.Coord.X, cury, rgen.IntersectionType, prefix)
             self.ConnectIntersections(node,lastnode,rgen.RoadType)
             
             # this is the first residential endpoint
-            enode = self.AddEndPoint(node1.X + rgen.DrivewayLength, cury, rgen.ResidentialType, prefix)
+            enode = self.AddEndPoint(node1.Coord.X + rgen.DrivewayLength, cury, rgen.ResidentialType, prefix)
             self.ConnectIntersections(node,enode,rgen.DrivewayType)
             resnodes.append(enode)
 
             # this is the optional second residential endpoint
             if rgen.BothSides :
-                wnode = self.AddEndPoint(node1.X - rgen.DrivewayLength, cury, rgen.ResidentialType, prefix)
+                wnode = self.AddEndPoint(node1.Coord.X - rgen.DrivewayLength, cury, rgen.ResidentialType, prefix)
                 self.ConnectIntersections(node,wnode,rgen.DrivewayType)
                 resnodes.append(wnode)
 
@@ -453,20 +453,20 @@ class WorldBuilder(WorldInfo.WorldInfo) :
         lastnode = node1
 
         resnodes = []
-        curx = node1.X + rgen.DrivewayBuffer
-        while curx + rgen.DrivewayBuffer <= node2.X :
+        curx = node1.Coord.X + rgen.DrivewayBuffer
+        while curx + rgen.DrivewayBuffer <= node2.Coord.X :
             # first node is the intersection with the existing road
-            node = self.AddIntersection(curx, node1.Y, rgen.IntersectionType, prefix)
+            node = self.AddIntersection(curx, node1.Coord.Y, rgen.IntersectionType, prefix)
             self.ConnectIntersections(node,lastnode,rgen.RoadType)
 
             # this is the first residential endpoint
-            nnode = self.AddEndPoint(curx, node1.Y + rgen.DrivewayLength, rgen.ResidentialType, prefix)
+            nnode = self.AddEndPoint(curx, node1.Coord.Y + rgen.DrivewayLength, rgen.ResidentialType, prefix)
             self.ConnectIntersections(node,nnode,rgen.DrivewayType)
             resnodes.append(nnode)
 
             # this is the optional second residential endpoint
             if rgen.BothSides :
-                snode = self.AddEndPoint(curx, node1.Y - rgen.DrivewayLength, rgen.ResidentialType, prefix)
+                snode = self.AddEndPoint(curx, node1.Coord.Y - rgen.DrivewayLength, rgen.ResidentialType, prefix)
                 self.ConnectIntersections(node,snode,rgen.DrivewayType)
                 resnodes.append(snode)
 
@@ -485,10 +485,10 @@ class WorldBuilder(WorldInfo.WorldInfo) :
         dist2 = elength - slength
 
         # find the first split point
-        edge = origin.NorthEdge()
-        while (edge.EndNode.Y - edge.StartNode.Y <= dist1) :
-            dist1 = dist1 - (edge.EndNode.Y - edge.StartNode.Y)
-            edge = edge.EndNode.NorthEdge()
+        edge = origin.EdgeMap.NorthEdge()
+        while (edge.EndNode.Coord.Y - edge.StartNode.Coord.Y <= dist1) :
+            dist1 = dist1 - (edge.EndNode.Coord.Y - edge.StartNode.Coord.Y)
+            edge = edge.EndNode.EdgeMap.NorthEdge()
 
         # if the node already exists, don't overwrite the existing type
         cnode1 = edge.StartNode
@@ -496,18 +496,18 @@ class WorldBuilder(WorldInfo.WorldInfo) :
             cnode1 = self.AddIntersectionBetween(edge.StartNode, edge.EndNode, dist1, itype, prefix)
         
         # find the second split point
-        edge = cnode1.NorthEdge()
-        while (edge.EndNode.Y - edge.StartNode.Y <= dist2) :
-            dist2 = dist2 - (edge.EndNode.Y - edge.StartNode.Y)
-            edge = edge.EndNode.NorthEdge()
+        edge = cnode1.EdgeMap.NorthEdge()
+        while (edge.EndNode.Coord.Y - edge.StartNode.Coord.Y <= dist2) :
+            dist2 = dist2 - (edge.EndNode.Coord.Y - edge.StartNode.Coord.Y)
+            edge = edge.EndNode.EdgeMap.NorthEdge()
 
         cnode2 = edge.StartNode
         if dist2 > 0 :
             cnode2 = self.AddIntersectionBetween(edge.StartNode, edge.EndNode, dist2, itype, prefix)
 
         # cnode1 and cnode2 are the connection nodes, now build a path between them
-        dnode1 = self.AddIntersection(cnode1.X + offset, cnode1.Y, rgen.IntersectionType, prefix)
-        dnode2 = self.AddIntersection(cnode2.X + offset, cnode2.Y, rgen.IntersectionType, prefix)
+        dnode1 = self.AddIntersection(cnode1.Coord.X + offset, cnode1.Coord.Y, rgen.IntersectionType, prefix)
+        dnode2 = self.AddIntersection(cnode2.Coord.X + offset, cnode2.Coord.Y, rgen.IntersectionType, prefix)
 
         self.ConnectIntersections(cnode1, dnode1, rgen.RoadType)
         self.ConnectIntersections(cnode2, dnode2, rgen.RoadType)
@@ -519,10 +519,10 @@ class WorldBuilder(WorldInfo.WorldInfo) :
         dist2 = elength - slength
 
         # find the first split point
-        edge = origin.SouthEdge()
-        while (edge.StartNode.Y - edge.EndNode.Y <= dist1) :
-            dist1 = dist1 - (edge.StartNode.Y - edge.EndNode.Y)
-            edge = edge.StartNode.SouthEdge()
+        edge = origin.EdgeMap.SouthEdge()
+        while (edge.StartNode.Coord.Y - edge.EndNode.Coord.Y <= dist1) :
+            dist1 = dist1 - (edge.StartNode.Coord.Y - edge.EndNode.Coord.Y)
+            edge = edge.StartNode.EdgeMap.SouthEdge()
 
         # if the node already exists, don't overwrite the existing type
         cnode1 = edge.EndNode
@@ -530,18 +530,18 @@ class WorldBuilder(WorldInfo.WorldInfo) :
             cnode1 = self.AddIntersectionBetween(edge.StartNode, edge.EndNode, dist1, itype, prefix)
         
         # find the second split point
-        edge = cnode1.SouthEdge()
-        while (edge.StartNode.Y - edge.EndNode.Y <= dist2) :
-            dist2 = dist2 - (edge.StartNode.Y - edge.EndNode.Y)
-            edge = edge.StartNode.SouthEdge()
+        edge = cnode1.EdgeMap.SouthEdge()
+        while (edge.StartNode.Coord.Y - edge.EndNode.Coord.Y <= dist2) :
+            dist2 = dist2 - (edge.StartNode.Coord.Y - edge.EndNode.Coord.Y)
+            edge = edge.StartNode.EdgeMap.SouthEdge()
 
         cnode2 = edge.EndNode
         if dist2 > 0 :
             cnode2 = self.AddIntersectionBetween(edge.StartNode, edge.EndNode, dist2, itype, prefix)
 
         # cnode1 and cnode2 are the connection nodes, now build a path between them
-        dnode1 = self.AddIntersection(cnode1.X + offset, cnode1.Y, rgen.IntersectionType, prefix)
-        dnode2 = self.AddIntersection(cnode2.X + offset, cnode2.Y, rgen.IntersectionType, prefix)
+        dnode1 = self.AddIntersection(cnode1.Coord.X + offset, cnode1.Coord.Y, rgen.IntersectionType, prefix)
+        dnode2 = self.AddIntersection(cnode2.Coord.X + offset, cnode2.Coord.Y, rgen.IntersectionType, prefix)
 
         self.ConnectIntersections(cnode1, dnode1, rgen.RoadType)
         self.ConnectIntersections(cnode2, dnode2, rgen.RoadType)
@@ -553,10 +553,10 @@ class WorldBuilder(WorldInfo.WorldInfo) :
         dist2 = elength - slength
 
         # find the first split point
-        edge = origin.EastEdge()
-        while (edge.EndNode.X - edge.StartNode.X <= dist1) :
-            dist1 = dist1 - (edge.EndNode.X - edge.StartNode.X)
-            edge = edge.EndNode.EastEdge()
+        edge = origin.EdgeMap.EastEdge()
+        while (edge.EndNode.Coord.X - edge.StartNode.Coord.X <= dist1) :
+            dist1 = dist1 - (edge.EndNode.Coord.X - edge.StartNode.Coord.X)
+            edge = edge.EndNode.EdgeMap.EastEdge()
 
         # if the node already exists, don't overwrite the existing type
         cnode1 = edge.StartNode
@@ -564,18 +564,18 @@ class WorldBuilder(WorldInfo.WorldInfo) :
             cnode1 = self.AddIntersectionBetween(edge.StartNode, edge.EndNode, dist1, itype, prefix)
         
         # find the second split point
-        edge = cnode1.EastEdge()
-        while (edge.EndNode.X - edge.StartNode.X <= dist2) :
-            dist2 = dist2 - (edge.EndNode.X - edge.StartNode.X)
-            edge = edge.EndNode.EastEdge()
+        edge = cnode1.EdgeMap.EastEdge()
+        while (edge.EndNode.Coord.X - edge.StartNode.Coord.X <= dist2) :
+            dist2 = dist2 - (edge.EndNode.Coord.X - edge.StartNode.Coord.X)
+            edge = edge.EndNode.EdgeMap.EastEdge()
 
         cnode2 = edge.StartNode
         if dist2 > 0 :
             cnode2 = self.AddIntersectionBetween(edge.StartNode, edge.EndNode, dist2, itype, prefix)
 
         # cnode1 and cnode2 are the connection nodes, now build a path between them
-        dnode1 = self.AddIntersection(cnode1.X, cnode1.Y + offset, rgen.IntersectionType, prefix)
-        dnode2 = self.AddIntersection(cnode2.X, cnode2.Y + offset, rgen.IntersectionType, prefix)
+        dnode1 = self.AddIntersection(cnode1.Coord.X, cnode1.Coord.Y + offset, rgen.IntersectionType, prefix)
+        dnode2 = self.AddIntersection(cnode2.Coord.X, cnode2.Coord.Y + offset, rgen.IntersectionType, prefix)
 
         self.ConnectIntersections(cnode1, dnode1, rgen.RoadType)
         self.ConnectIntersections(cnode2, dnode2, rgen.RoadType)

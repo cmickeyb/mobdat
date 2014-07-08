@@ -79,7 +79,7 @@
 
 	{
 	    "Name" : "Marble Driveway",
-	    "RoadTypes" : ["driveway"],
+	    "RoadTypes" : ["driveway_road"],
 	    "ZOffset" : 20.5,
 	    "AssetID" : "6d5ad1c2-54db-42a2-8544-b9117d3b1db5"
 	},
@@ -381,7 +381,7 @@
 	    "ZOffset" : 20.5,
 	    "Padding" : 2.5,
 	    "Signature" : ["1L/1L", "D/D", "1L/1L", "D/D"],
-            "IntersectionTypes" : [ "driveway" ]
+            "IntersectionTypes" : [ "driveway_node" ]
 	},
 
 	{
@@ -390,7 +390,7 @@
 	    "ZOffset" : 20.5,
 	    "Padding" : 2.5,
 	    "Signature" : ["1L/1L", "0L/0L", "1L/1L", "D/D"],
-            "IntersectionTypes" : [ "driveway" ]
+            "IntersectionTypes" : [ "driveway_node" ]
 	},
 
 	{
@@ -399,7 +399,7 @@
 	    "ZOffset" : 20.5,
 	    "Padding" : 2.5,
 	    "Signature" : ["1L/1L", "0L/0L", "1L/1L", "0L/0L"],
-            "IntersectionTypes" : [ "driveway" ]
+            "IntersectionTypes" : [ "driveway_node" ]
 	},
 
 	{
@@ -408,7 +408,7 @@
 	    "ZOffset" : 20.5,
 	    "Padding" : 2.5,
 	    "Signature" : ["1L/1L", "0L/0L", "0L/0L", "1L/1L"],
-            "IntersectionTypes" : [ "driveway" ]
+            "IntersectionTypes" : [ "driveway_node" ]
 	},
 
 	{
@@ -417,7 +417,7 @@
 	    "ZOffset" : 20.5,
 	    "Padding" : 2.5,
 	    "Signature" : ["1L/1L", "1L/1L", "0L", "1L/1L"],
-            "IntersectionTypes" : [ "driveway" ]
+            "IntersectionTypes" : [ "driveway_node" ]
 	},
 
 	{
@@ -426,7 +426,7 @@
 	    "ZOffset" : 20.5,
 	    "Padding" : 5,
 	    "Signature" : ["2L/2L", "D/D", "2L/2L", "D/D"],
-            "IntersectionTypes" : [ "driveway" ]
+            "IntersectionTypes" : [ "driveway_node" ]
 	}
     ],
 

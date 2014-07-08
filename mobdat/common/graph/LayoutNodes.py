@@ -74,10 +74,6 @@ class IntersectionType(Node.Node) :
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class Intersection(Node.Node) :
-    WEST  = 0
-    NORTH = 1
-    EAST  = 2
-    SOUTH = 3
 
     # -----------------------------------------------------------------
     def __init__(self, name, itype, x, y) :
@@ -90,95 +86,9 @@ class Intersection(Node.Node) :
         Node.Node.__init__(self, name = name)
         
         self.AddDecoration(LayoutDecoration.CoordDecoration(x, y))
+        self.AddDecoration(LayoutDecoration.EdgeMapDecoration())
         itype.AddMember(self)
 
-    # -----------------------------------------------------------------
-    @property
-    def X(self) :
-        return self.Coord.X
-
-    # -----------------------------------------------------------------
-    @property
-    def Y(self) :
-        return self.Coord.Y
-
-    # -----------------------------------------------------------------
-    def _EdgeMapPosition(self, node) :
-        deltax = node.X - self.X
-        deltay = node.Y - self.Y
-        # west
-        if deltax < 0 and deltay == 0 :
-            return self.WEST
-        # north
-        elif deltax == 0 and deltay > 0 :
-            return self.NORTH
-        # east
-        elif deltax > 0 and deltay == 0 :
-            return self.EAST
-        # south
-        elif deltax == 0 and deltay < 0 :
-            return self.SOUTH
-
-        # this means that self & node are at the same location
-        return -1 
-
-    # -----------------------------------------------------------------
-    def WestEdge(self) :
-        emap = self.OutputEdgeMap()
-        return emap[self.WEST]
-
-    # -----------------------------------------------------------------
-    def NorthEdge(self) :
-        emap = self.OutputEdgeMap()
-        return emap[self.NORTH]
-
-    # -----------------------------------------------------------------
-    def EastEdge(self) :
-        emap = self.OutputEdgeMap()
-        return emap[self.EAST]
-
-    # -----------------------------------------------------------------
-    def SouthEdge(self) :
-        emap = self.OutputEdgeMap()
-        return emap[self.SOUTH]
-
-    # -----------------------------------------------------------------
-    def OutputEdgeMap(self) :
-        edgemap = [None, None, None, None]
-        for e in self.IterOutputEdges('Road') :
-            position = self._EdgeMapPosition(e.EndNode)
-            edgemap[position] = e
-
-        return edgemap
-
-    # -----------------------------------------------------------------
-    def InputEdgeMap(self) :
-        edgemap = [None, None, None, None]
-        for e in self.IterInputEdges('Road') :
-            position = self._EdgeMapPosition(e.StartNode)
-            edgemap[position] = e
-
-        return edgemap
-
-    # -----------------------------------------------------------------
-    # signature returned is west, north, east, south
-    # -----------------------------------------------------------------
-    def Signature(self) :
-        osignature = []
-        for e in self.OutputEdgeMap() :
-            sig = e.RoadType.Signature if e else '0L'
-            osignature.append(sig)
-
-        isignature = []
-        for e in self.InputEdgeMap() :
-            sig = e.RoadType.Signature if e else '0L'
-            isignature.append(sig)
-
-        signature = []
-        for i in range(0,4) :
-            signature.append("{0}/{1}".format(osignature[i], isignature[i]))
-
-        return signature
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

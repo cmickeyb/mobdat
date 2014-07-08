@@ -134,36 +134,36 @@ class OpenSimBuilder :
         sbump = self.NodeMap[snode.Name].Padding
         ebump = self.NodeMap[enode.Name].Padding
     
-        deltax = enode.X - snode.X
-        deltay = enode.Y - snode.Y
+        deltax = enode.Coord.X - snode.Coord.X
+        deltay = enode.Coord.Y - snode.Coord.Y
 
         # west
         if deltax < 0 and deltay == 0 :
-            s1x = snode.X - sbump
-            s1y = snode.Y
-            e1x = enode.X + ebump
-            e1y = enode.Y
+            s1x = snode.Coord.X - sbump
+            s1y = snode.Coord.Y
+            e1x = enode.Coord.X + ebump
+            e1y = enode.Coord.Y
 
         # north
         elif deltax == 0 and deltay > 0 :
-            s1x = snode.X
-            s1y = snode.Y + sbump
-            e1x = enode.X
-            e1y = enode.Y - ebump
+            s1x = snode.Coord.X
+            s1y = snode.Coord.Y + sbump
+            e1x = enode.Coord.X
+            e1y = enode.Coord.Y - ebump
 
         # east
         elif deltax > 0 and deltay == 0 :
-            s1x = snode.X + sbump
-            s1y = snode.Y
-            e1x = enode.X - ebump
-            e1y = enode.Y
+            s1x = snode.Coord.X + sbump
+            s1y = snode.Coord.Y
+            e1x = enode.Coord.X - ebump
+            e1y = enode.Coord.Y
 
         # south
         elif deltax == 0 and deltay < 0 :
-            s1x = snode.X
-            s1y = snode.Y - sbump
-            e1x = enode.X
-            e1y = enode.Y + ebump
+            s1x = snode.Coord.X
+            s1y = snode.Coord.Y - sbump
+            e1x = enode.Coord.X
+            e1y = enode.Coord.Y + ebump
 
         else :
             self.Logger.warn('something went wrong computing the signature')
@@ -211,7 +211,7 @@ class OpenSimBuilder :
     # -----------------------------------------------------------------
     def CreateNode(self, name, node) :
         tname = node.IntersectionType.Name
-        sig1 = node.Signature()
+        sig1 = node.EdgeMap.Signature()
 
         if tname not in self.LayoutSettings.IntersectionTypeMap :
             self.Logger.warn('Unable to locate node type %s' % (tname))
@@ -225,8 +225,8 @@ class OpenSimBuilder :
             if rot >= 0 :
                 self.NodeMap[name] = itype
 
-                p1x = node.X + self.WorldCenterX
-                p1y = node.Y + self.WorldCenterY
+                p1x = node.Coord.X + self.WorldCenterX
+                p1y = node.Coord.Y + self.WorldCenterY
                 p1z = itype.ZOffset
                 asset = itype.AssetID
                 if type(asset) == dict :

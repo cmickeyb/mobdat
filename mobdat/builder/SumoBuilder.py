@@ -107,11 +107,11 @@ class SumoBuilder :
 
             for name, node in self.World.IterNodes(nodetype = 'Intersection') :
                 itype = node.IntersectionType.IntersectionType
-                fp.write("  <node id=\"%s\" x=\"%d\" y=\"%d\" z=\"0\"  type=\"%s\" />\n" % (name, self.Scale(node.X), self.Scale(node.Y), itype))
+                fp.write("  <node id=\"%s\" x=\"%d\" y=\"%d\" z=\"0\"  type=\"%s\" />\n" % (name, self.Scale(node.Coord.X), self.Scale(node.Coord.Y), itype))
 
             for name, node in self.World.IterNodes(nodetype = 'EndPoint') :
                 itype = node.IntersectionType.IntersectionType
-                fp.write("  <node id=\"%s\" x=\"%d\" y=\"%d\" z=\"0\"  type=\"%s\" />\n" % (name, self.Scale(node.X), self.Scale(node.Y), itype))
+                fp.write("  <node id=\"%s\" x=\"%d\" y=\"%d\" z=\"0\"  type=\"%s\" />\n" % (name, self.Scale(node.Coord.X), self.Scale(node.Coord.Y), itype))
 
             fp.write("</nodes>\n")
 
@@ -125,11 +125,11 @@ class SumoBuilder :
             
             for name, node in self.World.IterNodes(nodetype = 'Intersection') :
                 
-                if not node.Signature() == ['2L/2L', '2L/2L', '2L/2L', '2L/2L' ] :
+                if not node.EdgeMap.Signature() == ['2L/2L', '2L/2L', '2L/2L', '2L/2L' ] :
                     continue
 
-                oedges = node.OutputEdgeMap()
-                iedges = node.InputEdgeMap()
+                oedges = node.EdgeMap.OutputEdgeMap()
+                iedges = node.EdgeMap.InputEdgeMap()
                 for pos in range(4) :
                     lpos = (pos + 1) % 4 # left turn
                     spos = (pos + 2) % 4 # straight across

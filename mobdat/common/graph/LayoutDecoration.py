@@ -86,6 +86,110 @@ class CoordDecoration(Decoration) :
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+class EdgeMapDecoration(Decoration) :
+    DecorationName = 'EdgeMap'
+
+    WEST  = 0
+    NORTH = 1
+    EAST  = 2
+    SOUTH = 3
+
+    # -----------------------------------------------------------------
+    @staticmethod
+    def Load(graph, info) :
+        return EdgeMapDecoration()
+
+    # -----------------------------------------------------------------
+    def __init__(self) :
+        """
+        Args:
+            name -- string
+            itype -- object of type Layout.IntersectionType
+            x, y -- integer coordinates
+        """
+        Decoration.__init__(self)
+
+    # -----------------------------------------------------------------
+    def _EdgeMapPosition(self, node) :
+        deltax = node.Coord.X - self.HostObject.Coord.X
+        deltay = node.Coord.Y - self.HostObject.Coord.Y
+        # west
+        if deltax < 0 and deltay == 0 :
+            return self.WEST
+        # north
+        elif deltax == 0 and deltay > 0 :
+            return self.NORTH
+        # east
+        elif deltax > 0 and deltay == 0 :
+            return self.EAST
+        # south
+        elif deltax == 0 and deltay < 0 :
+            return self.SOUTH
+
+        # this means that self & node are at the same location
+        return -1 
+
+    # -----------------------------------------------------------------
+    def WestEdge(self) :
+        emap = self.OutputEdgeMap()
+        return emap[self.WEST]
+
+    # -----------------------------------------------------------------
+    def NorthEdge(self) :
+        emap = self.OutputEdgeMap()
+        return emap[self.NORTH]
+
+    # -----------------------------------------------------------------
+    def EastEdge(self) :
+        emap = self.OutputEdgeMap()
+        return emap[self.EAST]
+
+    # -----------------------------------------------------------------
+    def SouthEdge(self) :
+        emap = self.OutputEdgeMap()
+        return emap[self.SOUTH]
+
+    # -----------------------------------------------------------------
+    def OutputEdgeMap(self) :
+        edgemap = [None, None, None, None]
+        for e in self.HostObject.IterOutputEdges('Road') :
+            position = self._EdgeMapPosition(e.EndNode)
+            edgemap[position] = e
+
+        return edgemap
+
+    # -----------------------------------------------------------------
+    def InputEdgeMap(self) :
+        edgemap = [None, None, None, None]
+        for e in self.HostObject.IterInputEdges('Road') :
+            position = self._EdgeMapPosition(e.StartNode)
+            edgemap[position] = e
+
+        return edgemap
+
+    # -----------------------------------------------------------------
+    # signature returned is west, north, east, south
+    # -----------------------------------------------------------------
+    def Signature(self) :
+        osignature = []
+        for e in self.OutputEdgeMap() :
+            sig = e.RoadType.Signature if e else '0L'
+            osignature.append(sig)
+
+        isignature = []
+        for e in self.InputEdgeMap() :
+            sig = e.RoadType.Signature if e else '0L'
+            isignature.append(sig)
+
+        signature = []
+        for i in range(0,4) :
+            signature.append("{0}/{1}".format(osignature[i], isignature[i]))
+
+        return signature
+
+
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class IntersectionTypeDecoration(Decoration) :
     DecorationName = 'IntersectionType'
 
@@ -491,7 +595,7 @@ class ResidentialLocationDecoration(Decoration) :
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-CommonDecorations = [ CoordDecoration, IntersectionTypeDecoration, RoadTypeDecoration, 
+CommonDecorations = [ CoordDecoration, IntersectionTypeDecoration, RoadTypeDecoration, EdgeMapDecoration,
                       EndPointDecoration, CapsuleDecoration,
                       BusinessLocationProfileDecoration, BusinessLocationDecoration,
                       ResidentialLocationProfileDecoration, ResidentialLocationDecoration ]

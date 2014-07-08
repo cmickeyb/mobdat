@@ -79,8 +79,8 @@ e2C = world.AddRoadType('etype2C', 2, 20, 1.0, sig='2L')
 e1way = world.AddRoadType('1way2lane', 2, 40, 2.0, sig='2L', center=True) 
 
 # driveway
-dntype = world.AddIntersectionType('driveway', 'priority_stop') 
-edrv = world.AddRoadType('driveway', 1, 10, 0.5, sig='D')
+dntype = world.AddIntersectionType('driveway_node', 'priority_stop') 
+edrv = world.AddRoadType('driveway_road', 1, 10, 0.5, sig='D')
 
 # parking lots
 #plotnode  = world.AddIntersectionType('parking_drive_intersection', 'priority', False)
@@ -185,8 +185,8 @@ world.AddBusinessLocationProfile('plaza', 40, 25,  { BusinessType.Factory : 1.0,
 world.AddBusinessLocationProfile('mall',  15, 75,  { BusinessType.Factory : 0.1, BusinessType.Service : 1.0, BusinessType.Food : 1.0 })
 world.AddBusinessLocationProfile('civic', 20, 150, { BusinessType.School : 1.0, BusinessType.Civic : 1.0 })
 
-world.AddResidentialLocationProfile('townhouse', 7)
-world.AddResidentialLocationProfile('apartment', 12)
+world.AddResidentialLocationProfile('townhouse_rp', 7)
+world.AddResidentialLocationProfile('apartment_rp', 12)
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -194,16 +194,16 @@ rgenv = WorldBuilder.ResidentialGenerator(e1C, dntype, edrv, rntype, bspace = 20
 rgenh = WorldBuilder.ResidentialGenerator(e1C, dntype, edrv, rntype, bspace = 40, spacing = 10)
 
 for ew in [-400, -300, 300, 400] :
-    for nw in range (-200, 200, 100) :
-        node1 = world.Nodes[ConvertNodeCoordinate('main', (ew, nw))]
-        node2 = world.Nodes[ConvertNodeCoordinate('main', (ew, nw + 100))]
-        world.AddResidentialLocation('townhouse', world.GenerateResidential(node1, node2, rgenv))
+    for ns in range (-200, 200, 100) :
+        node1 = world.Nodes[ConvertNodeCoordinate('main', (ew, ns))]
+        node2 = world.Nodes[ConvertNodeCoordinate('main', (ew, ns + 100))]
+        world.AddResidentialLocation('townhouse', world.GenerateResidential(node1, node2, rgenv, prefix='thouse'))
 
-for nw in [-400, 400] :
+for ns in [-400, 400] :
     for ew in [-300, -200, 100, 200] :
-        node1 = world.Nodes[ConvertNodeCoordinate('main', (ew, nw))]
-        node2 = world.Nodes[ConvertNodeCoordinate('main', (ew + 100, nw))]
-        world.AddResidentialLocation('townhouse', world.GenerateResidential(node1, node2, rgenv))
+        node1 = world.Nodes[ConvertNodeCoordinate('main', (ew, ns))]
+        node2 = world.Nodes[ConvertNodeCoordinate('main', (ew + 100, ns))]
+        world.AddResidentialLocation('townhouse', world.GenerateResidential(node1, node2, rgenv, prefix='thouse'))
 
 rgenv.BothSides = False
 world.AddResidentialLocation('townhouse', world.GenerateResidential(world.Nodes['main300W200N'],world.Nodes['main400W200N'], rgenv))
