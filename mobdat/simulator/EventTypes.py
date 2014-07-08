@@ -165,10 +165,11 @@ class ObjectEvent :
     def __str__(self) :
         fstring = "Identity:{0}"
         return fstring.format(self.ObjectIdentity)
+
     # -----------------------------------------------------------------
     def Dump(self) :
         fstring = "<{0},{1}>"
-        return fstring.format(self.__class__.__name__,str(self))
+        return fstring.format(self.__class__.__name__, ObjectEvent.__str__(self))
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -180,7 +181,7 @@ class EventCreateObject(ObjectEvent) :
 
     # -----------------------------------------------------------------
     def __str__(self) :
-        pstring = super(EventCreateObject,self).__str__()
+        pstring = ObjectEvent.__str__(self)
         fstring = "{0},ObjectType:{1}"
         return fstring.format(pstring,self.ObjectType)
 
@@ -197,12 +198,9 @@ class EventAddVehicle(ObjectEvent) :
 
     # -----------------------------------------------------------------
     def __str__(self) :
-        #pstring = super(EventCreateVehicle,self).__str__()
-        #fstring = "{0},Route:{1}"
-        #return fstring.format(pstring,self.Route)
-
-        pstring = "Identity:%s,Type:%s,Route:%s" % (self.ObjectIdentity, self.ObjectType, self.Route)
-        return pstring
+        pstring = ObjectEvent.__str__(self)
+        fstring = "{0},Route:{1}"
+        return fstring.format(pstring,self.Route)
 
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -211,11 +209,6 @@ class EventDeleteObject(ObjectEvent) :
     # -----------------------------------------------------------------
     def __init__(self, identity) :
         ObjectEvent.__init__(self, identity)
-
-    # -----------------------------------------------------------------
-    def __str__(self) :
-        pstring = super(EventCreateObject,self).__str__()
-        return pstring
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -228,9 +221,9 @@ class EventPropertyChange(ObjectEvent) :
 
     # -----------------------------------------------------------------
     def __str__(self) :
-        pstring = super(EventCreateObject,self).__str__()
+        pstring = ObjectEvent.__str__(self)
         fstring = "{0},{1}:{2}"
-        return string.format(pstring,self.ObjectProperty,self.ObjectValue)
+        return fstring.format(pstring,self.ObjectProperty,self.ObjectValue)
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -245,9 +238,9 @@ class EventObjectDynamics(ObjectEvent) :
 
     # -----------------------------------------------------------------
     def __str__(self) :
-        pstring = super(EventCreateObject,self).__str__()
+        pstring = ObjectEvent.__str__(self)
         fstring = "{0},x:{1},y:{2},z:{3}"
-        return string.format(pstring,self.ObjectPosition.x,self.ObjectPosition.y,self.ObjectPosition.z)
+        return fstring.format(pstring,self.ObjectPosition.x,self.ObjectPosition.y,self.ObjectPosition.z)
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -259,9 +252,9 @@ class EventInductionLoop(ObjectEvent) :
 
     # -----------------------------------------------------------------
     def __str__(self) :
-        pstring = super(EventInductionLoop,self).__str__()
+        pstring = ObjectEvent.__str__(self)
         fstring = "{0},VehicleCount:{1}"
-        return string.format(pstring,self.VehicleCount)
+        return fstring.format(pstring,self.VehicleCount)
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -273,8 +266,8 @@ class EventTrafficLightStateChange(ObjectEvent) :
 
     # -----------------------------------------------------------------
     def __str__(self) :
-        pstring = super(EventCreateObject,self).__str__()
-        fstring = "{0},state:{2}"
-        return string.format(pstring,self.StopLightState)
+        pstring = ObjectEvent.__str__(self)
+        fstring = "{0},state:{1}"
+        return fstring.format(pstring,self.StopLightState)
 
 

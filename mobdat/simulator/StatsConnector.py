@@ -46,6 +46,7 @@ sys.path.append(os.path.join(os.environ.get("OPENSIM","/share/opensim"),"lib","p
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
+import re
 import BaseConnector, EventHandler, EventTypes
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -65,6 +66,10 @@ class StatsConnector(EventHandler.EventHandler, BaseConnector.BaseConnector) :
         BaseConnector.BaseConnector.__init__(self, settings, world, netsettings)
 
         self.Logger = logging.getLogger(__name__)
+
+        self.CollectObjectDynamics = settings["StatsConnector"].get("CollectObjectDynamics", False)
+        self.CollectObjectPattern =  settings["StatsConnector"].get("CollectObjectPattern", ".*")
+        self.CollectObjectRE = re.compile(self.CollectObjectPattern, re.IGNORECASE)
 
         self.CurrentStep = 0
         self.CurrentTime = 0
@@ -93,6 +98,14 @@ class StatsConnector(EventHandler.EventHandler, BaseConnector.BaseConnector) :
         pass
 
     # -----------------------------------------------------------------
+    def HandleObjectDynamicsEvent(self, event) :
+        if self.CollectObjectRE.match(event.ObjectIdentity) :
+            name = event.ObjectIdentity
+            x = event.ObjectPosition.x
+            y = event.ObjectPosition.y
+            self.Logger.info("dynamics, {0}, {1}, {2:.4f}, {3:.4f}".format(self.CurrentStep, name, x, y))
+
+    # -----------------------------------------------------------------
     def SimulationStart(self) :
         # print "StatsConnector initialized"
 
@@ -105,6 +118,9 @@ class StatsConnector(EventHandler.EventHandler, BaseConnector.BaseConnector) :
 
         self.SubscribeEvent(EventTypes.TimerEvent, self.HandleTimerEvent)
         self.SubscribeEvent(EventTypes.ShutdownEvent, self.HandleShutdownEvent)
+
+        if self.CollectObjectDynamics :
+            self.SubscribeEvent(EventTypes.EventObjectDynamics, self.HandleObjectDynamicsEvent)
 
         # all set... time to get to work!
         self.HandleEvents()

@@ -4,7 +4,7 @@
         "TimeSteps" : 0,
         "Interval" : 0.200,
         "SecondsPerStep" : 2.0,
-        "StartTimeOfDay" : 0.0,
+        "StartTimeOfDay" : 3.0,
         "MaximumTravelers" : 0, 
 	"WorldInfoFile" : "networks/fullnet/data/worldinfo.js",
         "Connectors" : ["opensim", "sumo", "social", "stats"]
@@ -45,6 +45,12 @@
         "ExtensionFiles" : [ ],
         "VelocityFudgeFactor" : 1.0,
         "SumoPort" : 8813
+    },
+
+    "StatsConnector" :
+    {
+        "CollectObjectDynamics" : true,
+        "CollectObjectPattern" : "worker[357]+_trip.*"
     },
 
     "RoadTypes" :
