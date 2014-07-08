@@ -178,7 +178,12 @@ class WorldBuilder(WorldInfo.WorldInfo) :
             profname -- string name of the business location profile collection
             endpoints -- list of endpoint objects of type LayoutNodes.Endpoint
         """
-        location = LayoutNodes.BusinessLocation(GenName('bizloc'), self.Nodes[profname])
+
+        profile = self.Nodes[profname]
+        if profile.NodeType.Name != LayoutNodes.BusinessLocationProfile.__name__ :
+            raise ValueError('Invalid business location profile name; {0}'.format(profname))
+
+        location = LayoutNodes.BusinessLocation(GenName('bizloc'), profile)
         WorldInfo.WorldInfo.AddBusinessLocation(self, location)
 
         # business locations have one capsule containing all endpoints
@@ -208,7 +213,11 @@ class WorldBuilder(WorldInfo.WorldInfo) :
             profname -- string name of the business location profile collection
             endpoints -- list of endpoint objects of type LayoutNodes.Endpoint
         """
-        location = LayoutNodes.ResidentialLocation(GenName('rezloc'), self.Nodes[profname])
+        profile = self.Nodes[profname]
+        if profile.NodeType.Name != LayoutNodes.ResidentialLocationProfile.__name__ :
+            raise ValueError('Invalid residential location profile name; {0}'.format(profname))
+
+        location = LayoutNodes.ResidentialLocation(GenName('rezloc'), profile)
         WorldInfo.WorldInfo.AddResidentialLocation(self, location)
 
         # residential locations have one endpoint per capsule

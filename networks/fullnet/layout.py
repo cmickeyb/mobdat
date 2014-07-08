@@ -197,37 +197,37 @@ for ew in [-400, -300, 300, 400] :
     for ns in range (-200, 200, 100) :
         node1 = world.Nodes[ConvertNodeCoordinate('main', (ew, ns))]
         node2 = world.Nodes[ConvertNodeCoordinate('main', (ew, ns + 100))]
-        world.AddResidentialLocation('townhouse', world.GenerateResidential(node1, node2, rgenv, prefix='thouse'))
+        world.AddResidentialLocation('townhouse_rp', world.GenerateResidential(node1, node2, rgenv, prefix='thouse'))
 
 for ns in [-400, 400] :
     for ew in [-300, -200, 100, 200] :
         node1 = world.Nodes[ConvertNodeCoordinate('main', (ew, ns))]
         node2 = world.Nodes[ConvertNodeCoordinate('main', (ew + 100, ns))]
-        world.AddResidentialLocation('townhouse', world.GenerateResidential(node1, node2, rgenv, prefix='thouse'))
+        world.AddResidentialLocation('townhouse_rp', world.GenerateResidential(node1, node2, rgenv, prefix='thouse'))
 
 rgenv.BothSides = False
-world.AddResidentialLocation('townhouse', world.GenerateResidential(world.Nodes['main300W200N'],world.Nodes['main400W200N'], rgenv))
-world.AddResidentialLocation('townhouse', world.GenerateResidential(world.Nodes['main300E200N'],world.Nodes['main400E200N'], rgenv))
+world.AddResidentialLocation('townhouse_rp', world.GenerateResidential(world.Nodes['main300W200N'],world.Nodes['main400W200N'], rgenv))
+world.AddResidentialLocation('townhouse_rp', world.GenerateResidential(world.Nodes['main300E200N'],world.Nodes['main400E200N'], rgenv))
 
 rgenv.DrivewayLength = - rgenv.DrivewayLength
-world.AddResidentialLocation('townhouse', world.GenerateResidential(world.Nodes['main400W200S'],world.Nodes['main300W200S'], rgenv))
-world.AddResidentialLocation('townhouse', world.GenerateResidential(world.Nodes['main400E200S'],world.Nodes['main300E200S'], rgenv))
+world.AddResidentialLocation('townhouse_rp', world.GenerateResidential(world.Nodes['main400W200S'],world.Nodes['main300W200S'], rgenv))
+world.AddResidentialLocation('townhouse_rp', world.GenerateResidential(world.Nodes['main400E200S'],world.Nodes['main300E200S'], rgenv))
 
 # some of the malls to be marked as residential apartments
 rgenplR = WorldBuilder.ResidentialGenerator(plotentry, plotnode, plotdrive, antype, driveway = -8, bspace = 5, spacing = 5, both = False)
 rgenplL = WorldBuilder.ResidentialGenerator(plotentry, plotnode, plotdrive, antype, driveway = 8, bspace = 5, spacing = 5, both = False)
 
 for n in ['main200W200S', 'main100E200S', 'main200E200S', 'main300W200N', 'main200W200N', 'main100E200N'] :
-    world.AddResidentialLocation('apartment', world.BuildSimpleParkingLotEW(world.Nodes[n], pntype, rgenplR, 'apartment', offset=-15, slength=40, elength=60))
-    world.AddResidentialLocation('apartment', world.BuildSimpleParkingLotEW(world.Nodes[n], pntype, rgenplL, 'apartment', offset=15, slength=40, elength=60))
+    world.AddResidentialLocation('apartment_rp', world.BuildSimpleParkingLotEW(world.Nodes[n], pntype, rgenplR, 'apartment', offset=-15, slength=40, elength=60))
+    world.AddResidentialLocation('apartment_rp', world.BuildSimpleParkingLotEW(world.Nodes[n], pntype, rgenplL, 'apartment', offset=15, slength=40, elength=60))
 
 for n in ['main200W200S', 'main200W100S', 'main200W200N', 'main200W100N'] : 
-    world.AddResidentialLocation('apartment', world.BuildSimpleParkingLotNS(world.Nodes[n], pntype, rgenplR, 'apartment', offset=-30))
-    world.AddResidentialLocation('apartment', world.BuildSimpleParkingLotNS(world.Nodes[n], pntype, rgenplL, 'apartment', offset=30))
+    world.AddResidentialLocation('apartment_rp', world.BuildSimpleParkingLotNS(world.Nodes[n], pntype, rgenplR, 'apartment', offset=-30))
+    world.AddResidentialLocation('apartment_rp', world.BuildSimpleParkingLotNS(world.Nodes[n], pntype, rgenplL, 'apartment', offset=30))
 
 for n in ['main200E100S', 'main200E0N', 'main200E100N'] : 
-    world.AddResidentialLocation('apartment', world.BuildSimpleParkingLotNS(world.Nodes[n], pntype, rgenplR, 'apartment', offset=-30))
-    world.AddResidentialLocation('apartment', world.BuildSimpleParkingLotNS(world.Nodes[n], pntype, rgenplL, 'apartment', offset=30))
+    world.AddResidentialLocation('apartment_rp', world.BuildSimpleParkingLotNS(world.Nodes[n], pntype, rgenplR, 'apartment', offset=-30))
+    world.AddResidentialLocation('apartment_rp', world.BuildSimpleParkingLotNS(world.Nodes[n], pntype, rgenplL, 'apartment', offset=30))
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # BUILD THE BUSINESS NEIGHBORHOODS
