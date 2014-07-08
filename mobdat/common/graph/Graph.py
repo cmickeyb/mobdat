@@ -152,6 +152,9 @@ class Graph :
 
     # -----------------------------------------------------------------
     def AddNode(self, node) :
+        if node.Name in self.Nodes :
+            raise NameError("node with name {0} already exists in the graph".format(node.Name))
+
         self.Nodes[node.Name] = node
 
     # -----------------------------------------------------------------
@@ -240,6 +243,9 @@ class Graph :
 
     # -----------------------------------------------------------------
     def AddEdge(self, edge) :
+        if edge.Name in self.Edges :
+            raise NameError("edge with name {0} already exists in the graph".format(edge.Name))
+
         self.Edges[edge.Name] = edge
         return edge
 

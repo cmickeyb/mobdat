@@ -56,6 +56,19 @@ logger = logging.getLogger(__name__)
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+def _RequireEdge(graph, node1, node2, weight, edgetype) :
+    edge = edgetype(node1, node2, weight)
+    if edge.Name in graph.Edges :
+        if edge.NodeType.Name != edgetype.__name__ :
+            raise NameError('duplicate social edge with different type; {0} to {1}'.format(edge.NodeType.Name, edgetype.__name__))
+
+        edge.Weight.AddWeight(weight)
+        return edge
+
+    return graph.AddEdge(edge)
+
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class WeightGenerator :
 
     # -----------------------------------------------------------------
@@ -137,16 +150,11 @@ def RMAT(graph, nodelist, edgefactor = 3, quadrants = (4, 8, 12, 16), weightgen 
             logger.debug('created %d of %d social edges so far', edges, edgecount)
 
         if (node1, node2) not in edgemap :
-            edge = node1.FindOutputEdge(node2, edgetype.__name__)
-            if edge :
-                edgemap[(node1, node2)] = edge
-                edgemap[(node2, node1)] = node2.FindOutputEdge(node1, edgetype.__name__)
-            else :
-                edgemap[(node1, node2)] = graph.AddEdge(edgetype(node1, node2, weightgen.GenWeight(node1, node2)))
-                edgemap[(node2, node1)] = graph.AddEdge(edgetype(node2, node1, weightgen.GenWeight(node2, node1)))
-        # else :
-        #     edgemap[(node1, node2)].Weight.AddWeight(edgeweight)
-        #     edgemap[(node2, node1)].Weight.AddWeight(edgeweight)
+            edgemap[(node1, node2)] = _RequireEdge(graph, node1, node2, weightgen.GenWeight(node1, node2), edgetype)
+            edgemap[(node2, node1)] = _RequireEdge(graph, node2, node1, weightgen.GenWeight(node2, node1), edgetype)
+        else :
+            edgemap[(node1, node2)].Weight.AddWeight(weightgen.GenWeight(node1, node2))
+            edgemap[(node2, node1)].Weight.AddWeight(weightgen.GenWeight(node2, node1))
 
     logger.info('created %d social connections', edges)
 
