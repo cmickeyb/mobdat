@@ -101,7 +101,7 @@ def ParseCommandLine(config, args) :
     
     parser.add_argument('--load', help='data file to load on startup')
     parser.add_argument('--extension', help='list of extension files to process', nargs="*")
-    parser.add_argument('--noextension', help='do not process extension files')
+    parser.add_argument('--noextension', help='do not process extension files', action='store_true')
 
     parser.add_argument('--capability', help='capability uuid')
     parser.add_argument('--scene', help='name of the scene in which the operation is performed')

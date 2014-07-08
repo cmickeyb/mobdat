@@ -263,7 +263,7 @@ class SumoConnector(EventHandler.EventHandler, BaseConnector.BaseConnector) :
     # -----------------------------------------------------------------
     def SimulationStart(self) :
         sumoBinary = checkBinary('sumo')
-        sumoCommandLine = [sumoBinary, "-c", self.ConfigFile, "-l", "sumo.log"]
+        sumoCommandLine = [sumoBinary, "-c", self.ConfigFile, "-l", "logs/sumo.log"]
         
         self.SumoProcess = subprocess.Popen(sumoCommandLine, stdout=sys.stdout, stderr=sys.stderr)
         traci.init(self.Port)
