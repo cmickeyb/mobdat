@@ -64,11 +64,35 @@ class PersonProfile(Node.Node) :
             name -- string name 
         """
         Node.Node.__init__(self, name = name)
+        self.AddDecoration(SocialDecoration.PreferenceDecoration())
         self.AddDecoration(SocialDecoration.VehicleTypeDecoration())
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class Person(Node.Node) :
+
+    # -----------------------------------------------------------------
+    @staticmethod
+    def SetJob(person, job) :
+        """
+        Args:
+            person -- object of type Person
+            job -- object of type SocialDecoration.JobDescription
+        """
+        person.AddDecoration(SocialDecoration.JobDescriptionDecoration(job))
+
+    # -----------------------------------------------------------------
+    @staticmethod
+    def SetVehicle(person, vehicletype) :
+        """
+        Args:
+            person -- object of type Person
+            job -- object of type SocialDecoration.JobDescription
+        """
+        name = GenName('veh' + vehicletype)
+        person.AddDecoration(SocialDecoration.VehicleDecoration(name, vehicletype))
+
+        return name
 
     # -----------------------------------------------------------------
     def __init__(self, name, profile) :
@@ -81,28 +105,22 @@ class Person(Node.Node) :
         self.AddDecoration(SocialDecoration.PreferenceDecoration())
         profile.AddMember(self)
 
-    # -----------------------------------------------------------------
-    def SetJob(self, job) :
-        """
-        Args:
-            job -- object of type SocialDecoration.JobDescription
-        """
-        self.AddDecoration(SocialDecoration.JobDescriptionDecoration(job))
-
-    # -----------------------------------------------------------------
-    def SetVehicle(self, vehicletype) :
-        """
-        Args:
-            job -- object of type SocialDecoration.JobDescription
-        """
-        name = GenName('veh' + vehicletype)
-        self.AddDecoration(SocialDecoration.VehicleDecoration(name, vehicletype))
-
-        return name
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class BusinessProfile(Node.Node) :
+
+    # -----------------------------------------------------------------
+    @staticmethod
+    def AddServiceProfile(biz, bizhours, capacity, servicetime) :
+        """
+        Args:
+            bizhours -- object of type WeeklySchedule
+            capacity -- integer maximum customer capacity
+            servicetime -- float mean time to service a customer
+        """
+        biz.AddDecoration(SocialDecoration.ServiceProfileDecoration(bizhours, capacity, servicetime))
+
 
     # -----------------------------------------------------------------
     def __init__(self, name, biztype, joblist) :
@@ -116,16 +134,6 @@ class BusinessProfile(Node.Node) :
 
         self.AddDecoration(SocialDecoration.BusinessProfileDecoration(biztype))
         self.AddDecoration(SocialDecoration.EmploymentProfileDecoration(joblist))
-
-    # -----------------------------------------------------------------
-    def AddServiceProfile(self, bizhours, capacity, servicetime) :
-        """
-        Args:
-            bizhours -- object of type WeeklySchedule
-            capacity -- integer maximum customer capacity
-            servicetime -- float mean time to service a customer
-        """
-        self.AddDecoration(SocialDecoration.ServiceProfileDecoration(bizhours, capacity, servicetime))
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

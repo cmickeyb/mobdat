@@ -47,7 +47,7 @@ sys.path.append(os.path.join(os.environ.get("OPENSIM","/share/opensim"),"lib","p
 #sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
 from mobdat.common.Utilities import GenName
-from mobdat.common.graph import Generator, Propagator, SocialEdges
+from mobdat.common.graph import Generator, Propagator, SocialEdges, SocialNodes
 
 import random, math
 
@@ -70,6 +70,30 @@ for vtype in laysettings.VehicleTypes.itervalues() :
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+# -----------------------------------------------------------------
+def IrwinHallDistribution(mean) :
+    count = 5
+    v = math.fsum([random.random() for n in range(0, count)]) / float(count)
+    # v is now distributed across the range 0 to 1
+    if v < 0.5 :
+        return v * mean / 0.5
+    else :
+        return mean + (v - 0.5) * (1 - mean) / 0.5
+
+# -----------------------------------------------------------------
+RulePreferences = {
+    'CoffeeBeforeWork' : 0.6,
+    'LunchDuringWork' : 0.75,
+    'RestaurantAfterWork' : 0.8,
+    'ShoppingTrip' : 0.8
+    }
+
+def SetRulePreferences(person) :
+    global RulePreferences
+
+    for key, val in RulePreferences.iteritems() :
+        person.Preference.SetWeight('rule_' + key, IrwinHallDistribution(val))
 
 # -----------------------------------------------------------------
 ResidentialNodes = None
@@ -111,10 +135,11 @@ def PlacePeople() :
                 people += 1
                 name = GenName(wprof.Name)
                 person = world.AddPerson(name, wprof)
-                person.SetJob(job)
                 world.SetEmployer(person, biz)
 
-                person.SetVehicle(wprof.VehicleType.PickVehicleType())
+                SocialNodes.Person.SetJob(person, job)
+                SocialNodes.Person.SetVehicle(person, wprof.VehicleType.PickVehicleType())
+                SetRulePreferences(person)
 
                 location = PlacePerson(person)
                 if not location :

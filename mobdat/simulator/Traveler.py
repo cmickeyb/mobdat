@@ -47,7 +47,7 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
 import random
-import Trip
+import Trip, LocationKeyMap
 
 from mobdat.common import TravelTimeEstimator, ValueTypes
 from mobdat.common.timedevent import TimedEvent, TimedEventList, IntervalVariable
@@ -60,11 +60,11 @@ logger = logging.getLogger(__name__)
 class EventController :
 
     # -----------------------------------------------------------------
-    def __init__(self) :
-        self.CoffeeBeforeWork = 0.6
-        self.LunchDuringWork = 0.75
-        self.RestaurantAfterWork = 0.8
-        self.ShoppingTrip = 0.8
+    def __init__(self, person) :
+        self.CoffeeBeforeWork = person.Preference.GetWeight('rule_CoffeeBeforeWork', 0.6)
+        self.LunchDuringWork = person.Preference.GetWeight('rule_LunchDuringWork', 0.75)
+        self.RestaurantAfterWork = person.Preference.GetWeight('rule_RestaurantAfterWork', 0.8)
+        self.ShoppingTrip = person.Preference.GetWeight('rule_ShoppingTrip', 0.8)
 
     # -----------------------------------------------------------------
     def FireCoffeeBeforeWork(self, schedule) :
@@ -99,53 +99,16 @@ class Traveler :
         self.World = self.Connector.World
 
         self.Person = person
-        self.Employer = self.Person.EmployedBy
         self.Job = self.Person.JobDescription
 
-        self.InitializeLocationNameMap()
+        self.LocationKeyMap = LocationKeyMap.LocationKeyMap(self.World, self.Person)
         self.TravelEstimator = TravelTimeEstimator.TravelTimeEstimator()
 
-        self.Controller = EventController()
+        self.Controller = EventController(self.Person)
 
         self.EventList = None
         if self.BuildDailyEvents(self.Connector.WorldDay) :
             self.ScheduleNextTrip()
-
-    # -----------------------------------------------------------------
-    def FindBizByType(self, biztype, bizclass) :
-        if (biztype, bizclass) not in self.__BusinessCache :
-            self.__BusinessCache[(biztype, bizclass)] = SocialDecoration.BusinessProfileDecoration.FindByType(self.World, biztype, bizclass)
-
-        return self.__BusinessCache[(biztype, bizclass)]
-    
-    # -----------------------------------------------------------------
-    def CreatePreferenceList(self, bizlist) :
-        plist = ValueTypes.WeightedChoice()
-        for biz in bizlist :
-            weight = self.Person.Preference.GetWeight(biz.Name)
-            if weight : plist.AddChoice(biz, weight)
-
-        # make sure there is at least one on the list
-        if not plist.Choices() :
-            plist.AddChoice(random.choice(bizlist), 1.0)
-
-        return plist
-
-    # -----------------------------------------------------------------
-    def InitializeLocationNameMap(self) :
-        self.LocationNameMap = {}
-        self.LocationNameMap['home'] = ValueTypes.WeightedChoice({ self.Person : 1.0 })
-        self.LocationNameMap['work'] = ValueTypes.WeightedChoice({ self.Employer : 1.0 })
-
-        self.LocationNameMap['coffee'] = self.CreatePreferenceList(self.FindBizByType(SocialDecoration.BusinessType.Food, 'coffee'))
-        self.LocationNameMap['lunch'] = self.CreatePreferenceList(self.FindBizByType(SocialDecoration.BusinessType.Food, 'fastfood'))
-        self.LocationNameMap['dinner'] = self.CreatePreferenceList(self.FindBizByType(SocialDecoration.BusinessType.Food, 'small-restaurant'))
-        self.LocationNameMap['shopping'] = self.CreatePreferenceList(self.FindBizByType(SocialDecoration.BusinessType.Service, None))
-
-    # -----------------------------------------------------------------
-    def ResolveLocationName(self, name) :
-        location = self.LocationNameMap[name].Choose()
-        return location.ResidesAt
 
     # -----------------------------------------------------------------
     def BuildDailyEvents(self, worldday, addextras = True) :
@@ -174,8 +137,13 @@ class Traveler :
                     dinnerev = AddRestaurantAfterWorkEvent(evlist, workev, worldtime)
                     if self.Controller.FireShopping(schedule) :
                         AddShoppingTrip(evlist, worldtime, maxcount = 2, prevevent = dinnerev)
+
                 elif self.Controller.FireShopping(schedule) :
                     AddShoppingTrip(evlist, worldtime)
+
+        # if its not a work day, then see if we should go shopping
+        elif self.Controller.FireShopping(schedule) :
+            AddShoppingTrip(evlist, worldtime)
 
         # attempt to solve the constraints, if it doesn't work, then try
         # again with just work
@@ -206,8 +174,8 @@ class Traveler :
             # this just allows us to start in the middle of the day, traveler at work
             # will start at work rather than starting at home
             if starttime > self.Connector.WorldTime :
-                source = self.ResolveLocationName(tripev.SrcName)
-                destination = self.ResolveLocationName(tripev.DstName)
+                source = self.LocationKeyMap.ResolveLocationKey(tripev.SrcName)
+                destination = self.LocationKeyMap.ResolveLocationKey(tripev.DstName)
                 self.Connector.AddTripToEventQueue(Trip.Trip(self, starttime, source, destination))
 
                 logger.info('Scheduled trip from %s to %s', source.Name, destination.Name)
