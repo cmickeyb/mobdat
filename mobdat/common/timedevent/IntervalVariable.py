@@ -137,6 +137,27 @@ class IntervalVariable :
     def GetValue(self) :
         return self.IntervalStart if self.IsFixed() else None
 
+    # -----------------------------------------------------------------
+    def Overlaps(self, s, e) :
+        # IntervalStart is between s & e
+        if s <= self.IntervalStart and self.IntervalStart <= e : return True
+
+        # IntervalEnd is between s & e
+        if s <= self.IntervalEnd and self.IntervalEnd <= e : return True
+
+        # The interval contains [s, e]
+        if self.IntervalStart <= s and e <= self.IntervalEnd : return True
+
+        return False
+
+    # -----------------------------------------------------------------
+    def LT(self, value, maybe = True) :
+        return self.IntervalStart < value if maybe else self.IntervalEnd < value
+
+    # -----------------------------------------------------------------
+    def GT(self, value, maybe = True) :
+        return self.IntervalEnd > value if maybe else self.IntervalStart > value
+
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class GaussianIntervalVariable(IntervalVariable) :
