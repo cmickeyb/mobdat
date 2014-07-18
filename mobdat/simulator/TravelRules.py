@@ -59,8 +59,9 @@ logger = logging.getLogger(__name__)
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class TravelRule :
 
-    def __init__(self) :
-        pass
+    def __init__(self, world, person) :
+        self.World = world
+        self.Person = person 
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -81,10 +82,8 @@ class WorkRule(TravelRule) :
 
     # -----------------------------------------------------------------
     def __init__(self, world, person) :
-        TravelRule.__init__(self)
+        TravelRule.__init__(self, world, person)
 
-        self.World = world
-        self.Person = person 
         self.Job = self.Person.JobDescription
 
     # -----------------------------------------------------------------
@@ -118,10 +117,7 @@ class CoffeeBeforeWorkRule(TravelRule) :
 
     # -----------------------------------------------------------------
     def __init__(self, world, person) :
-        TravelRule.__init__(self)
-
-        self.World = world
-        self.Person = person 
+        TravelRule.__init__(self, world, person)
 
     # -----------------------------------------------------------------
     def Apply(self, worldday, evlist) :
@@ -156,10 +152,7 @@ class LunchDuringWorkRule(TravelRule) :
 
     # -----------------------------------------------------------------
     def __init__(self, world, person) :
-        TravelRule.__init__(self)
-
-        self.World = world
-        self.Person = person 
+        TravelRule.__init__(self, world, person)
 
     # -----------------------------------------------------------------
     def Apply(self, worldday, evlist) :
@@ -177,27 +170,29 @@ class LunchDuringWorkRule(TravelRule) :
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class DinnerAfterWorkRule(TravelRule) :
-            
+class DinnerRule(TravelRule) :
+    
     # -----------------------------------------------------------------
     @staticmethod
-    def _AddEvent(evlist, workevent, worldtime) :
+    def _AddEvent(evlist, worldtime, workevent = None, interval = (0.0, 24.0)) :
         """Add a PlaceEvent for dinner after a work event. 
         """
 
-        event = TimedEvent.PostEventEvent.Create('dinner', worldtime, (0.0, 24.0), (0.0, 24.0), 1.5)
-        idr = evlist.AddPlaceEvent(event)
+        if workevent :
+            event = TimedEvent.PostEventEvent.Create('dinner', worldtime, interval, interval, 1.5)
+            idr = evlist.AddPlaceEvent(event)
 
-        evlist.InsertAfterPlaceEvent(workevent, idr)
-
+            evlist.InsertAfterPlaceEvent(workevent, idr)
+        else :
+            event = TimedEvent.VariableMiddleEvent.Create('dinner', worldtime, interval, interval, 1.5)
+            ids = evlist.AddPlaceEvent(event)
+            evlist.InsertWithinPlaceEvent(evlist.LastEvent.EventID, ids)
+            
         return idr
 
     # -----------------------------------------------------------------
     def __init__(self, world, person) :
-        TravelRule.__init__(self)
-
-        self.World = world
-        self.Person = person 
+        TravelRule.__init__(self, world, person)
 
     # -----------------------------------------------------------------
     def Apply(self, worldday, evlist) :
@@ -209,41 +204,38 @@ class DinnerAfterWorkRule(TravelRule) :
 
         for workev in worklist :
             if workev.EventEnd.GT(worldtime + 15.0) and workev.EventEnd.LT(worldtime + 20.0) :
-                return self._AddEvent(evlist, workev, worldtime)
+                return self._AddEvent(evlist, worldtime, workevent = workev)
 
-        return None
+        return self._AddEvent(evlist, worldtime, interval = (16.0, 22.0))
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class EveningShoppingTripRule(TravelRule) :
+class ShoppingTripRule(TravelRule) :
 
     # -----------------------------------------------------------------
     @staticmethod
-    def _AddEvent(evlist, worldtime, maxcount = 4, prevevent = None) :
+    def _AddEvent(evlist, worldtime, interval = (7.0, 22.0), maxcount = 4, prevevent = None) :
         # happens between 7am and 10pm
 
         if prevevent :
             ids = prevevent
         else :
-            event = TimedEvent.VariableMiddleEvent.Create('shopping', worldtime, (7.0, 22.0), (7.0, 22.0), 0.75)
+            event = TimedEvent.VariableMiddleEvent.Create('shopping', worldtime, interval, interval, 0.5)
             ids = evlist.AddPlaceEvent(event)
             evlist.InsertWithinPlaceEvent(evlist.LastEvent.EventID, ids)
 
-        stops = int(random.triangular(0, 4, 1))
+        stops = int(random.triangular(0, maxcount, 1))
         while stops > 0 :
             stops = stops - 1
 
-            postev = TimedEvent.PostEventEvent.Create('shopping', worldtime, (7.0, 22.0), (7.0, 22.0), 0.5)
+            postev = TimedEvent.PostEventEvent.Create('shopping', worldtime, interval, interval, 0.5)
             idnew = evlist.AddPlaceEvent(postev)
             evlist.InsertAfterPlaceEvent(ids, idnew)
             ids = idnew
 
     # -----------------------------------------------------------------
     def __init__(self, world, person) :
-        TravelRule.__init__(self)
-
-        self.World = world
-        self.Person = person 
+        TravelRule.__init__(self, world, person)
 
     # -----------------------------------------------------------------
     def Apply(self, worldday, evlist) :
@@ -257,3 +249,22 @@ class EveningShoppingTripRule(TravelRule) :
             return self._AddEvent(evlist, worldtime, maxcount = 2, prevevent = dinnerev)
 
         return self._AddEvent(evlist, worldtime)
+
+# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+RuleMap = {
+    'Work' : WorkRule,
+    'CoffeeBeforeWork' : CoffeeBeforeWorkRule,
+    'LunchDuringWork' : LunchDuringWorkRule,
+    'Dinner' : DinnerRule,
+    'ShoppingTrip' : ShoppingTripRule
+    }
+
+def BuildRuleMap(world, person) :
+    rulemap = {}
+    for name, rule in RuleMap.iteritems() :
+        rulemap[name] = rule(world, person)
+
+    return rulemap
+
+    

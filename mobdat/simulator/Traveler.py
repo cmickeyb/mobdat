@@ -55,38 +55,10 @@ from mobdat.common.graph import SocialDecoration
 
 logger = logging.getLogger(__name__)
 
-# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-class EventController :
-
-    # -----------------------------------------------------------------
-    def __init__(self, person) :
-        self.CoffeeBeforeWork = person.Preference.GetWeight('rule_CoffeeBeforeWork', 0.6)
-        self.LunchDuringWork = person.Preference.GetWeight('rule_LunchDuringWork', 0.75)
-        self.RestaurantAfterWork = person.Preference.GetWeight('rule_RestaurantAfterWork', 0.8)
-        self.ShoppingTrip = person.Preference.GetWeight('rule_ShoppingTrip', 0.8)
-
-    # -----------------------------------------------------------------
-    def FireCoffeeBeforeWork(self, schedule) :
-        return schedule.StartTime > 3.0 and schedule.StartTime < 10.0 and random.uniform(0.0, 1.0) > self.CoffeeBeforeWork
-
-    # -----------------------------------------------------------------
-    def FireLunchAtWork(self, schedule) :
-        return schedule.StartTime < 11.0 and 14.5 < schedule.EndTime and random.uniform(0.0, 1.0) > self.LunchDuringWork
-
-    # -----------------------------------------------------------------
-    def FireDinnerAfterWork(self, schedule) :
-        return 15.0 < schedule.EndTime and schedule.EndTime < 20.0  and random.uniform(0.0, 1.0) > self.RestaurantAfterWork
-
-    # -----------------------------------------------------------------
-    def FireShopping(self, schedule) :
-        return random.uniform(0.0, 1.0) > self.ShoppingTrip
-
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class Traveler :
-    __BusinessCache = {}
 
     # -----------------------------------------------------------------
     def __init__(self, person, connector) :
@@ -101,10 +73,10 @@ class Traveler :
         self.Person = person
         self.Job = self.Person.JobDescription
 
+        self.RuleMap = TravelRules.BuildRuleMap(self.World, self.Person)
+
         self.LocationKeyMap = LocationKeyMap.LocationKeyMap(self.World, self.Person)
         self.TravelEstimator = TravelTimeEstimator.TravelTimeEstimator()
-
-        self.Controller = EventController(self.Person)
 
         self.EventList = None
         if self.BuildDailyEvents(self.Connector.WorldDay) :
@@ -118,35 +90,22 @@ class Traveler :
         evlist = TimedEventList.TimedEventList(homeev, estimator = self.TravelEstimator)
         lastev = evlist.LastEvent.EventID
 
-        worldtime = worldday * 24.0
-        schedule = self.Job.Schedule.NextScheduledEvent(worldtime)
-        if schedule.Day == worldday :
-            jobdeviation = 2.0 if self.Job.FlexibleHours else 0.2
-            workev = AddWorkEvent(evlist, lastev, schedule, deviation = jobdeviation)
+        if self.RuleMap['Work'].Apply(worldday, evlist) :
 
             if addextras :
-                if self.Controller.FireCoffeeBeforeWork(schedule) :
-                    AddCoffeeBeforeWorkEvent(evlist, workev, worldtime)
-
-                if self.Controller.FireLunchAtWork(schedule) :
-                    AddLunchToWorkEvent(evlist, workev, worldtime)
-
-                if self.Controller.FireDinnerAfterWork(schedule) :
-                    # in case work was split, find the last work event today
-                    workev = evlist.FindEvents(lambda ev : ev.Details == 'work')[-1].EventID
-                    dinnerev = AddRestaurantAfterWorkEvent(evlist, workev, worldtime)
-                    if self.Controller.FireShopping(schedule) :
-                        AddShoppingTrip(evlist, worldtime, maxcount = 2, prevevent = dinnerev)
-
-                elif self.Controller.FireShopping(schedule) :
-                    AddShoppingTrip(evlist, worldtime)
+                self.RuleMap['CoffeeBeforeWork'].Apply(worldday, evlist)
+                self.RuleMap['LunchDuringWork'].Apply(worldday, evlist)
+                self.RuleMap['Dinner'].Apply(worldday, evlist) :
+                self.RuleMap['ShoppingTrip'].Apply(worldday, evlist)
 
         # if its not a work day, then see if we should go shopping
-        elif self.Controller.FireShopping(schedule) :
-            AddShoppingTrip(evlist, worldtime)
+        else :
+            self.RuleMap['Dinner'].Apply(worldday, evlist) :
+            self.RuleMap['ShoppingTrip'].Apply(worldday, evlist)
 
         # attempt to solve the constraints, if it doesn't work, then try
-        # again with just work
+        # again with just work, really need to add an "optional" or "maximal"
+        # notion to the constraint solver
         if not evlist.SolveConstraints() :
             if addextras :
                 return self.BuildDailyEvents(worldday, False)
@@ -163,9 +122,12 @@ class Traveler :
         if not self.EventList :
             return
 
-        if not self.EventList.MoreTripEvents() :
-            if not self.BuildDailyEvents(self.Connector.WorldDay + 1) :
-                return
+        # this builds out daily events up to one week in the future with
+        # the idea that we should be able to go through at least a full
+        # work week looking for something interesting to happen
+        for day in range(0, 7) :
+            if self.EventList.MoreTripEvents() : break
+            self.BuildDailyEvents(self.Connector.WorldDay + day + 1) :
 
         while self.EventList.MoreTripEvents() :
             tripev = self.EventList.PopTripEvent()
