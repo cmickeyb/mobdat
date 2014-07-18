@@ -111,7 +111,7 @@ class CoffeeBeforeWorkRule(TravelRule) :
         event = TimedEvent.PreEventEvent.Create('coffee', worldtime, (0.0, 24.0), (0.0, 24.0), 0.2)
         idc = evlist.AddPlaceEvent(event)
 
-        evlist.InsertAfterPlaceEvent(evlist.PrevPlaceID(workevent), idc)
+        evlist.InsertAfterPlaceEvent(evlist.PrevPlaceID(workevent.EventID), idc)
 
         return idc
 
@@ -146,7 +146,7 @@ class LunchDuringWorkRule(TravelRule) :
         event = TimedEvent.VariableMiddleEvent.Create('lunch', worldtime, (11.5, 13.0), (12.5, 14.0), 0.75)
         idl = evlist.AddPlaceEvent(event)
 
-        evlist.InsertWithinPlaceEvent(workevent, idl)
+        evlist.InsertWithinPlaceEvent(workevent.EventID, idl)
 
         return idl
 
@@ -182,11 +182,11 @@ class DinnerRule(TravelRule) :
             event = TimedEvent.PostEventEvent.Create('dinner', worldtime, interval, interval, 1.5)
             idr = evlist.AddPlaceEvent(event)
 
-            evlist.InsertAfterPlaceEvent(workevent, idr)
+            evlist.InsertAfterPlaceEvent(workevent.EventID, idr)
         else :
             event = TimedEvent.VariableMiddleEvent.Create('dinner', worldtime, interval, interval, 1.5)
-            ids = evlist.AddPlaceEvent(event)
-            evlist.InsertWithinPlaceEvent(evlist.LastEvent.EventID, ids)
+            idr = evlist.AddPlaceEvent(event)
+            evlist.InsertWithinPlaceEvent(evlist.LastEvent.EventID, idr)
             
         return idr
 
@@ -218,7 +218,7 @@ class ShoppingTripRule(TravelRule) :
         # happens between 7am and 10pm
 
         if prevevent :
-            ids = prevevent
+            ids = prevevent.EventID
         else :
             event = TimedEvent.VariableMiddleEvent.Create('shopping', worldtime, interval, interval, 0.5)
             ids = evlist.AddPlaceEvent(event)

@@ -47,7 +47,7 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
 import random
-import Trip, LocationKeyMap
+import Trip, LocationKeyMap, TravelRules
 
 from mobdat.common import TravelTimeEstimator, ValueTypes
 from mobdat.common.timedevent import TimedEvent, TimedEventList, IntervalVariable
@@ -84,23 +84,35 @@ class Traveler :
 
     # -----------------------------------------------------------------
     def BuildDailyEvents(self, worldday, addextras = True) :
+        """
+        BuildDailyEvents -- build a days worth of events for the person
+        based on a static set of rules. This is still too hard-coded for me...
+        Everyone shares the same set of rules though personalities would have
+        a lot to do with the rules. That is, this should be abstracted
+        and implemented in the person profiles object.
+
+        Args:
+            worldday -- integer, day to create
+            addextras -- boolean, flag to shortcut optional rules
+
+        """
+
         logger.debug('Compute day %d schedule for %s', worldday, self.Person.Name)
 
         homeev = TimedEvent.BackgroundEvent.Create('home', 0.0, (0.0, 0.0), (24.0 * 1000.0, 24.0 * 1000.0))
         evlist = TimedEventList.TimedEventList(homeev, estimator = self.TravelEstimator)
-        lastev = evlist.LastEvent.EventID
 
         if self.RuleMap['Work'].Apply(worldday, evlist) :
 
             if addextras :
                 self.RuleMap['CoffeeBeforeWork'].Apply(worldday, evlist)
                 self.RuleMap['LunchDuringWork'].Apply(worldday, evlist)
-                self.RuleMap['Dinner'].Apply(worldday, evlist) :
+                self.RuleMap['Dinner'].Apply(worldday, evlist)
                 self.RuleMap['ShoppingTrip'].Apply(worldday, evlist)
 
         # if its not a work day, then see if we should go shopping
         else :
-            self.RuleMap['Dinner'].Apply(worldday, evlist) :
+            self.RuleMap['Dinner'].Apply(worldday, evlist)
             self.RuleMap['ShoppingTrip'].Apply(worldday, evlist)
 
         # attempt to solve the constraints, if it doesn't work, then try
@@ -127,7 +139,7 @@ class Traveler :
         # work week looking for something interesting to happen
         for day in range(0, 7) :
             if self.EventList.MoreTripEvents() : break
-            self.BuildDailyEvents(self.Connector.WorldDay + day + 1) :
+            self.BuildDailyEvents(self.Connector.WorldDay + day + 1) 
 
         while self.EventList.MoreTripEvents() :
             tripev = self.EventList.PopTripEvent()
@@ -159,72 +171,4 @@ class Traveler :
     # -----------------------------------------------------------------
     def TripStarted(self, trip) :
         pass
-
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-def AddWorkEvent(evlist, event, schedule, deviation = 2.0) :
-    duration = schedule.WorldEndTime - schedule.WorldStartTime
-    sinterval = (schedule.WorldStartTime - deviation, schedule.WorldStartTime + deviation)
-    einterval = (schedule.WorldEndTime - deviation, schedule.WorldEndTime + deviation)
-
-    workEV = TimedEvent.AggregateDurationEvent.Create('work', 0.0, sinterval, einterval, duration)
-    workID = evlist.AddPlaceEvent(workEV)
-    evlist.InsertWithinPlaceEvent(event, workID)
-
-    return workID
-
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-def AddCoffeeBeforeWorkEvent(evlist, workevent, worldtime) :
-    """Add a PlaceEvent for coffee before a work event. This moves the
-    coffee event as close as possible to the work event.
-    """
-
-    event = TimedEvent.PreEventEvent.Create('coffee', worldtime, (0.0, 24.0), (0.0, 24.0), 0.2)
-    idc = evlist.AddPlaceEvent(event)
-
-    evlist.InsertAfterPlaceEvent(evlist.PrevPlaceID(workevent), idc)
-
-    return idc
-
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-def AddLunchToWorkEvent(evlist, workevent, worldtime) :
-    event = TimedEvent.VariableMiddleEvent.Create('lunch', worldtime, (11.5, 13.0), (12.5, 14.0), 0.75)
-    idl = evlist.AddPlaceEvent(event)
-
-    evlist.InsertWithinPlaceEvent(workevent, idl)
-
-    return idl
-
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-def AddRestaurantAfterWorkEvent(evlist, workevent, worldtime) :
-    event = TimedEvent.PostEventEvent.Create('dinner', worldtime, (0.0, 24.0), (0.0, 24.0), 1.5)
-    idr = evlist.AddPlaceEvent(event)
-
-    evlist.InsertAfterPlaceEvent(workevent, idr)
-
-    return idr
-
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-def AddShoppingTrip(evlist, worldtime, maxcount = 4, prevevent = None) :
-    # happens between 7am and 10pm
-
-    if prevevent :
-        ids = prevevent
-    else :
-        event = TimedEvent.VariableMiddleEvent.Create('shopping', worldtime, (7.0, 22.0), (7.0, 22.0), 0.75)
-        ids = evlist.AddPlaceEvent(event)
-        evlist.InsertWithinPlaceEvent(evlist.LastEvent.EventID, ids)
-
-    stops = int(random.triangular(0, 4, 1))
-    while stops > 0 :
-        stops = stops - 1
-
-        postev = TimedEvent.PostEventEvent.Create('shopping', worldtime, (7.0, 22.0), (7.0, 22.0), 0.5)
-        idnew = evlist.AddPlaceEvent(postev)
-        evlist.InsertAfterPlaceEvent(ids, idnew)
-        ids = idnew
 
