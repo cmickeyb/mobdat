@@ -47,7 +47,7 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "lib")))
 
 import random
-import Trip, LocationKeyMap, TravelRules
+import Trip, LocationKeyMap, TravelerProfiles
 
 from mobdat.common import TravelTimeEstimator, ValueTypes
 from mobdat.common.timedevent import TimedEvent, TimedEventList, IntervalVariable
@@ -71,12 +71,10 @@ class Traveler :
         self.World = self.Connector.World
 
         self.Person = person
-        self.Job = self.Person.JobDescription
-
-        self.RuleMap = TravelRules.BuildRuleMap(self.World, self.Person)
 
         self.LocationKeyMap = LocationKeyMap.LocationKeyMap(self.World, self.Person)
         self.TravelEstimator = TravelTimeEstimator.TravelTimeEstimator()
+        self.TravelerProfile = TravelerProfiles.ProfileMap[self.Person.PersonProfile.Name](self.Person, self.World, self.TravelEstimator)
 
         self.EventList = None
         if self.BuildDailyEvents(self.Connector.WorldDay) :
@@ -97,23 +95,7 @@ class Traveler :
 
         """
 
-        logger.debug('Compute day %d schedule for %s', worldday, self.Person.Name)
-
-        homeev = TimedEvent.BackgroundEvent.Create('home', 0.0, (0.0, 0.0), (24.0 * 1000.0, 24.0 * 1000.0))
-        evlist = TimedEventList.TimedEventList(homeev, estimator = self.TravelEstimator)
-
-        if self.RuleMap['Work'].Apply(worldday, evlist) :
-
-            if addextras :
-                self.RuleMap['CoffeeBeforeWork'].Apply(worldday, evlist)
-                self.RuleMap['LunchDuringWork'].Apply(worldday, evlist)
-                self.RuleMap['Dinner'].Apply(worldday, evlist)
-                self.RuleMap['ShoppingTrip'].Apply(worldday, evlist)
-
-        # if its not a work day, then see if we should go shopping
-        else :
-            self.RuleMap['Dinner'].Apply(worldday, evlist)
-            self.RuleMap['ShoppingTrip'].Apply(worldday, evlist)
+        evlist = self.TravelerProfile.BuildDailyEvents(worldday, addextras)
 
         # attempt to solve the constraints, if it doesn't work, then try
         # again with just work, really need to add an "optional" or "maximal"

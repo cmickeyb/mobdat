@@ -80,6 +80,12 @@ class GraphObject :
         if provider :
             return provider.Decorations[attr]
 
+        # Check to see if the attribute is the name of a collection in which
+        # this node is a member, gives explicit access to the collections
+        for coll in self.Collections.itervalues() :
+            if attr == coll.Decorations['NodeType'].Name :
+                return coll
+
         # Next look for an edge with the right name, if there
         # are multiple then take the first one found
         for edge in self.OutputEdges :
