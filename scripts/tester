@@ -256,11 +256,11 @@ class TestController(cmd.Cmd) :
             logger.warn('unhandled error\n%s', traceback.format_exc(5))
 
     # -----------------------------------------------------------------
-    def do_person(self, args) :
+    def do_people(self, args) :
         """
-        person -- Subcommand to operate on people in the perinfo database
-            person byemp [bizpattern]*
-            person byjob [jobpattern]*
+        people -- Subcommand to operate on people in the perinfo database
+            people byemp [bizpattern]*
+            people byjob [jobpattern]*
         """
         pargs = args.split()
         try :
@@ -283,6 +283,35 @@ class TestController(cmd.Cmd) :
                     joblist[person.JobDescription.Name] = 1
                 for jobname in joblist.iterkeys() :
                     print jobname
+
+        except :
+            logger.warn('unhandled error\n%s', traceback.format_exc(5))
+
+    # -----------------------------------------------------------------
+    def do_person(self, args) :
+        """
+        person -- Subcommand to operate on a person
+            person network name
+            person pref name [keyword*]
+        """
+        pargs = args.split()
+        try :
+            if pargs[0] == 'network' :
+                name = pargs[1]
+                if name in DataBindings['world'].Nodes :
+                    person = DataBindings['world'].Nodes[name]
+                    for edge in person.IterOutputEdges(edgetype = 'ConnectedTo') :
+                        print "{0} --> {1} : {2}".format(name, edge.EndNode.Name, edge.Weight.Weight)
+
+            if pargs[0] == 'pref' :
+                name = pargs[1]
+                if name in DataBindings['world'].Nodes :
+                    person = DataBindings['world'].Nodes[name]
+                    for spattern in pargs[2:] :
+                        pattern = re.compile(spattern, re.IGNORECASE)
+                        for preference, weight in person.Preference.PreferenceMap.iteritems() :
+                            if pattern.match(preference) :
+                                print "{0} --> {1}".format(preference, weight)
 
         except :
             logger.warn('unhandled error\n%s', traceback.format_exc(5))
