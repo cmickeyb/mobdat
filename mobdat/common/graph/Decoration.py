@@ -134,12 +134,16 @@ class EdgeWeightDecoration(Decoration) :
 
     # -----------------------------------------------------------------
     def __init__(self, weight = 1.0) :
+        if weight < 0 or 1 < weight :
+            raise ValueError('invalid preference weight')
+
         Decoration.__init__(self)
         self.Weight = weight
 
     # -----------------------------------------------------------------
     def AddWeight(self, adjustment) :
-        self.Weight += adjustment
+        self.Weight = self.Weight + adjustment - self.Weight * adjustment
+        # self.Weight += adjustment
 
     # -----------------------------------------------------------------
     def Dump(self) :
