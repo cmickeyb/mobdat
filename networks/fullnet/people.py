@@ -164,7 +164,7 @@ def ConnectPeople(people, edgefactor, quadrants, edgeweight = 0.5) :
     Generator.RMAT(world, people, edgefactor, quadrants, weightgen = weightgen, edgetype = SocialEdges.ConnectedTo)
 
 # Connect the world
-ConnectPeople(world.FindNodes(nodetype = 'Person'), 5, (4, 5, 6, 7), 0.5)
+ConnectPeople(world.FindNodes(nodetype = 'Person'), 2, (4, 5, 6, 7), 0.4)
 
 # Connect people who work at the same business
 for name, biz in world.IterNodes(nodetype = 'Business') :
@@ -172,14 +172,14 @@ for name, biz in world.IterNodes(nodetype = 'Business') :
     for edge in biz.IterInputEdges(edgetype = 'EmployedBy') :
         employees.append(edge.StartNode)
 
-    ConnectPeople(employees, 5, (4, 5, 6, 7), 0.8)
+    ConnectPeople(employees, 3, (4, 5, 6, 7), 0.7)
 
 # Connect people who live in the same area
 # TBD
 
 # -----------------------------------------------------------------
 bizcache = {}
-def PropagateBusinessPreference(people, biztype, bizclass, seedsize = (5, 15)) :
+def PropagateBusinessPreference(people, biztype, bizclass, seedsize = (7, 13)) :
     global bizcache, world
 
     if (biztype, bizclass) not in bizcache :
@@ -192,9 +192,10 @@ def PropagateBusinessPreference(people, biztype, bizclass, seedsize = (5, 15)) :
     for biz in bizlist :
         logger.info('generating preferences for {0}'.format(biz.Name))
         seedcount = random.randint(int(incr * seedsize[0]), int(incr * seedsize[1]))
-        seeds = random.sample(people, seedcount)
+        seeds = set(random.sample(people, seedcount))
 
-        Propagator.PropagateAveragePreference(seeds, biz.Name, random.uniform(0.7, 0.9), 0.03)
+        # Propagator.PropagateMaximumPreference(seeds, biz.Name, (0.3, 0.9), 0.1)
+        Propagator.PropagateAveragePreference(seeds, biz.Name, (0.7, 0.9), 0.1)
 
 people = world.FindNodes(nodetype = 'Person')
 PropagateBusinessPreference(people, SocialDecoration.BusinessType.Food, 'coffee')
