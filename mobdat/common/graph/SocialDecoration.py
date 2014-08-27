@@ -410,7 +410,7 @@ class PreferenceDecoration(Decoration) :
     # -----------------------------------------------------------------
     def SetWeight(self, name, weight) :
         if weight < 0 or 1 < weight :
-            raise ValueError('invalid preference weight')
+            raise ValueError('invalid preference weight; %f' % weight)
 
         self.PreferenceMap[name] = weight
         return self.PreferenceMap[name]
