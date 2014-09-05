@@ -51,13 +51,16 @@ from mobdat.common.graph import Graph, Decoration
 from mobdat.builder import WorldBuilder
 
 DataBindings = None
+AppSettings = None
+
 logger = logging.getLogger(__name__)
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
 def ParseConfigurationFile(cfile) :
     try :
-        config = json.load(open(cfile))
+        global AppSettings
+        AppSettings = json.load(open(cfile))
     except IOError as detail :
         warnings.warn("Error parsing configuration file %s; IO error %s" % (cfile, str(detail)))
         sys.exit(-1)
@@ -71,7 +74,34 @@ def ParseConfigurationFile(cfile) :
         warnings.warn('Error parsing configuration file %s; %s' % (cfile, sys.exc_info()[0]))
         sys.exit(-1)
 
-    return config
+# -----------------------------------------------------------------
+# -----------------------------------------------------------------
+def ParseCommandLine(args) :
+    parser = argparse.ArgumentParser()
+    
+    parser.add_argument('--load', help='data file to load on startup')
+    parser.add_argument('--data', help='name of the file to write graph data')
+    parser.add_argument('--image', help='name of the file to write graph image')
+    parser.add_argument('--depth', help='number of hops to expand from the starting set', default=2)
+    parser.add_argument('nodelist', help='nodes from which to start the expansion', nargs="*")
+
+    options = parser.parse_args(args)
+
+    global AppSettings
+
+    if options.load :
+        AppSettings["General"]["WorldInfoFile"] = options.load
+
+    if options.data :
+        AppSettings["General"]["GraphDataFile"] = options.data
+
+    if options.image :
+        AppSettings["General"]["GraphImageFile"] = options.image
+
+    if options.depth :
+        AppSettings["General"]["Depth"] = options.depth
+        
+    AppSettings["General"]["NodeList"] = options.nodelist
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
@@ -92,8 +122,10 @@ def SetupLoggers() :
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
-def InitializeDataBindings(settings) :
-    cf = settings["General"].get("WorldInfoFile","world.js")
+def InitializeDataBindings() :
+    global AppSettings
+
+    cf = AppSettings["General"].get("WorldInfoFile","world.js")
     world = WorldBuilder.WorldBuilder.LoadFromFile(cf)
 
     global DataBindings
@@ -114,62 +146,49 @@ def RequireNode(graph, person) :
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
-def DumpGraph() :
-    global DataBindings
+def WriteGraphData(graph) :
+    global AppSettings
 
-    graph = pgv.AGraph(directed=True)
+    logger.info('generating graph data file')
+    graph.write(AppSettings["General"].get("GraphDataFile","test.dot"))
 
-    logger.info('adding nodes')
-    for pname, person in DataBindings['world'].IterNodes(nodetype = 'Person') :
-        graph.add_node(pname)
-
-    logger.info('adding edges')
-    for pname, person in DataBindings['world'].IterNodes(nodetype = 'Person') :
-        for edge in person.IterOutputEdges(edgetype = 'ConnectedTo') :
-            graph.add_edge(edge.StartNode.Name, edge.EndNode.Name)
-
-    graph.write("test.dot")
-    graph.draw("test.png", prog='circo')
+    if "GraphImageFile" in AppSettings["General"] :
+        logger.info('generating graph image file')
+        graph.draw(AppSettings["General"]["GraphImageFile"], prog='neato')
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
-def DumpGraph2() :
-    global DataBindings
+def BuildGraph() :
+    """
+    BuildGraph -- dump an undirected graph of nodes within maxdepth of a starting
+    set of nodes
+    """
 
-    nodes = set()
-    graph = pgv.AGraph(directed=False)
-    #graph.graph_attr['size'] = "200.0,200.0"
-    #graph.graph_attr['ratio'] = 'fill'
+    global AppSettings
+    maxdepth = int(AppSettings["General"].get("Depth", 2))
+    nodelist = AppSettings["General"].get("NodeList", [])
 
-    logger.info('adding nodes')
-    for pname, person in DataBindings['world'].IterNodes(nodetype = 'Person') :
-        RequireNode(graph, person)
-        for edge in person.IterOutputEdges(edgetype = 'ConnectedTo') :
-            if edge.EndNode not in nodes :
-                RequireNode(graph, edge.EndNode)
-                graph.add_edge(edge.StartNode.Name, edge.EndNode.Name, weight=edge.Weight.Weight)
-
-    graph.write("test.dot")
-    #graph.draw("test.png", prog='fdp')
-    graph.draw("test.png", prog='neato')
-
-# -----------------------------------------------------------------
-# -----------------------------------------------------------------
-def DumpGraph3() :
     global DataBindings
 
     nodes = set()
     graph = pgv.AGraph(directed=False)
-    #graph.graph_attr['size'] = "200.0,200.0"
-    #graph.graph_attr['ratio'] = 'fill'
 
     logger.info('adding nodes')
+
+    # add the initial set of nodes 
+    nextpass = set()
+    for nname in nodelist :
+        if nname in DataBindings['world'].Nodes :
+            nextpass.add(DataBindings['world'].Nodes[nname])
+        else :
+            logger.warn('unknown node %s', nname)
 
     expanded = set()
-    nextpass = set( [ DataBindings['world'].Nodes['worker222'] ] )
     depth = 0
 
-    while depth < 3 : 
+    while depth < maxdepth : 
+        logger.info('processing depth %d', depth)
+
         depth += 1
         thispass = nextpass
         nextpass = set()
@@ -178,17 +197,13 @@ def DumpGraph3() :
             RequireNode(graph, person)
 
             for edge in person.IterOutputEdges(edgetype = 'ConnectedTo') :
-                if edge.EndNode not in expanded :
+                if edge.EndNode not in expanded and edge.EndNode not in thispass :
                     RequireNode(graph, edge.EndNode)
                     graph.add_edge(edge.StartNode.Name, edge.EndNode.Name, weight=edge.Weight.Weight)
                     nextpass.add(edge.EndNode)
 
-    logger.info('generating graph data file')
-    graph.write("test.dot")
+    WriteGraphData(graph)
 
-    logger.info('generating graph image file')
-    #graph.draw("test.png", prog='fdp')
-    graph.draw("test.png", prog='neato')
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
@@ -200,9 +215,11 @@ def Main() :
     parser.add_argument('--config', help='configuration file for simulation settings', default='settings.js')
     (options, remainder) = parser.parse_known_args()
     
-    settings = ParseConfigurationFile(options.config)
-    InitializeDataBindings(settings)
-    DumpGraph2()
+    ParseConfigurationFile(options.config)
+    ParseCommandLine(remainder)
+
+    InitializeDataBindings()
+    BuildGraph()
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
