@@ -103,12 +103,12 @@ class CoffeeBeforeWorkRule(TravelRule) :
             
     # -----------------------------------------------------------------
     @staticmethod
-    def _AddEvent(evlist, workevent, worldtime) :
+    def _AddEvent(evlist, workevent, worldtime, interval = (0.0, 24.0), duration = 0.2) :
         """Add a PlaceEvent for coffee before a work event. This moves the
         coffee event as close as possible to the work event.
         """
 
-        event = TimedEvent.PreEventEvent.Create('coffee', worldtime, (0.0, 24.0), (0.0, 24.0), 0.2)
+        event = TimedEvent.PreEventEvent.Create('coffee', worldtime, interval, interval, duration)
         idc = evlist.AddPlaceEvent(event)
 
         evlist.InsertAfterPlaceEvent(evlist.PrevPlaceID(workevent.EventID), idc)
@@ -118,6 +118,12 @@ class CoffeeBeforeWorkRule(TravelRule) :
     # -----------------------------------------------------------------
     def __init__(self, world, person) :
         TravelRule.__init__(self, world, person)
+
+        try :
+            self.ServiceProfile = self.World.FindNodeByName('coffee').ServiceProfile
+        except :
+            logger.error('unable to locate service profile for coffee')
+            sys.exit(-1)
 
     # -----------------------------------------------------------------
     def Apply(self, worldday, evlist) :
@@ -129,7 +135,10 @@ class CoffeeBeforeWorkRule(TravelRule) :
 
         for workev in worklist :
             if worklist[0].EventStart.Overlaps(worldtime + 3.0, worldtime + 10.0) :
-                return self._AddEvent(evlist, workev, worldtime)
+                duration = self.ServiceProfile.ServiceTime
+                interval = self.ServiceProfile.Schedule.ScheduleForDay(worldday)
+
+                return self._AddEvent(evlist, workev, worldtime, interval[0], duration)
 
         return None
 
