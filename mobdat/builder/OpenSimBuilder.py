@@ -49,6 +49,8 @@ import uuid
 import OpenSimRemoteControl
 from mobdat.common.graph import Graph
 
+import json
+
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class OpenSimBuilder :
@@ -198,7 +200,13 @@ class OpenSimBuilder :
                     self.LayoutSettings.RoadTypeMap[road.RoadType.Name][0].AssetID = asset
 
                 (p1x, p1y, p2x, p2y) = self.ComputeLocation(road.StartNode, road.EndNode)
-                startparms = "{ 'spoint' : '<%f, %f, %f>', 'epoint' : '<%f, %f, %f>' }" % (p1x, p1y, zoff, p2x, p2y, zoff)
+
+                #startparms = "{ 'spoint' : '<%f, %f, %f>', 'epoint' : '<%f, %f, %f>' }" % (p1x, p1y, zoff, p2x, p2y, zoff)
+                sparms = {}
+                sparms['spoint'] = '<%f, %f, %f>' % (p1x, p1y, zoff)
+                sparms['epoint'] = '<%f, %f, %f>' % (p2x, p2y, zoff)
+                sparms['type'] = road.RoadType.Dump()
+                startparms = json.dumps(sparms)
 
                 if abs(p1x - p2x) > 0.1 or abs(p1y - p2y) > 0.1 :
                     result = self.OpenSimConnector.CreateObject(asset, pos=[p1x, p1y, zoff], name=road.Name, parm=startparms)
@@ -233,7 +241,12 @@ class OpenSimBuilder :
                     asset = self.FindAssetInObject(asset)
                     itype.AssetID = asset
 
-                startparms = "{ 'center' : '<%f, %f, %f>', 'angle' : %f }" % (p1x, p1y, p1z, 90.0 * rot)
+                #startparms = "{ 'center' : '<%f, %f, %f>', 'angle' : %f }" % (p1x, p1y, p1z, 90.0 * rot)
+                sparms = {}
+                sparms['center'] = '<%f, %f, %f>' % (p1x, p1y, p1z)
+                sparms['angle' ] = 90.0 * rot
+                sparms['type'] = node.IntersectionType.Dump()
+                startparms = json.dumps(sparms)
 
                 if node.IntersectionType.Render :
                     result = self.OpenSimConnector.CreateObject(asset, pos=[p1x, p1y, p1z], name=name, parm=startparms)
