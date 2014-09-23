@@ -237,8 +237,9 @@ class TestController(cmd.Cmd) :
     def do_edge(self, args) :
         """
         edge -- Subcommand to operation on edges in the world database
-            collection dump [name]*
-            collection list [namepattern]*
+            edge dump [name]*
+            edge list [namepattern]*
+            edge eval name [fields]+
         """
         pargs = args.split()
         try :
@@ -252,6 +253,15 @@ class TestController(cmd.Cmd) :
                     if name in DataBindings['world'].Edges :
                         print self._DumpDict(DataBindings['world'].Edges[name].Dump())
 
+            elif pargs[0] == 'eval' :
+                gobj = DataBindings['world'].FindEdgeByName(pargs[1])
+                for field in pargs[2:] :
+                    gobj = getattr(gobj, field)
+
+                if isinstance(gobj, Graph.GraphObject) or isinstance(gobj, Decoration.Decoration) :
+                    print self._DumpDict(gobj.Dump())
+                else :
+                    print gobj
         except :
             logger.warn('unhandled error\n%s', traceback.format_exc(5))
 
