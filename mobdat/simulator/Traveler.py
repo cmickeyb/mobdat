@@ -78,7 +78,7 @@ class Traveler :
 
         self.EventList = None
         if self.BuildDailyEvents(self.Connector.WorldDay) :
-            self.ScheduleNextTrip()
+            self._ScheduleFirstTrip()
 
     # -----------------------------------------------------------------
     def BuildDailyEvents(self, worldday, addextras = True) :
@@ -102,6 +102,7 @@ class Traveler :
         # notion to the constraint solver
         if not evlist.SolveConstraints() :
             if addextras :
+                logger.info('Trip constraints failed for traveler %s', self.Person.Name)
                 return self.BuildDailyEvents(worldday, False)
             else :
                 logger.warn('Failed to resolve schedule constraints for traveler %s', self.Person.Name)
@@ -112,7 +113,36 @@ class Traveler :
         return True
 
     # -----------------------------------------------------------------
-    def ScheduleNextTrip(self) :
+    def _ScheduleFirstTrip(self) :
+        """
+        _ScheduleFirstTrip -- schedule the first trip, this is a unique situation because the world time
+        might be in the middle of the current day, start the trip where the traveler would be at that time
+        """
+
+        source = self.LocationKeyMap.ResolveLocationKey('home')
+        while self.EventList.MoreTripEvents() :
+            tripev = self.EventList.PopTripEvent()
+            starttime = float(tripev.StartTime)
+            
+            if starttime > self.Connector.WorldTime :
+                destination = self.LocationKeyMap.ResolveLocationKey(tripev.DstName)
+                self.Connector.AddTripToEventQueue(Trip.Trip(self, starttime, source, destination))
+
+                logger.info('Scheduled trip of to %s for %s from %s to %s', tripev.DstName, self.Person.Name, source.Name, destination.Name)
+                return
+
+            # this just allows us to start in the middle of the day, traveler at work
+            # will start at work rather than starting at home, we start wherever we
+            # supposedly ended the last trip
+            source = self.LocationKeyMap.ResolveLocationKey(tripev.DstName)
+
+        logger.info('No trip events for %s', self.Person.Name)
+
+    # -----------------------------------------------------------------
+    def _ScheduleNextTrip(self, source) :
+        """
+        _ScheduleNextTrip -- schedule the next trip for this traveler
+        """
         if not self.EventList :
             return
 
@@ -123,21 +153,20 @@ class Traveler :
             if self.EventList.MoreTripEvents() : break
             self.BuildDailyEvents(self.Connector.WorldDay + day + 1) 
 
-        while self.EventList.MoreTripEvents() :
-            tripev = self.EventList.PopTripEvent()
-            starttime = float(tripev.StartTime)
+        tripev = self.EventList.PopTripEvent()
+        starttime = float(tripev.StartTime)
 
-            # this just allows us to start in the middle of the day, traveler at work
-            # will start at work rather than starting at home
-            if starttime > self.Connector.WorldTime :
-                source = self.LocationKeyMap.ResolveLocationKey(tripev.SrcName)
-                destination = self.LocationKeyMap.ResolveLocationKey(tripev.DstName)
-                self.Connector.AddTripToEventQueue(Trip.Trip(self, starttime, source, destination))
+        # there is a reasonable chance that this is a moot trip (for example, a person
+        # works at a coffee shop and gets their coffee there, if that happens then
+        # just skip this trip & schedule another one, an alternative would be to 
+        # drop the work place from all choices of service destinations
+        destination = self.LocationKeyMap.ResolveLocationKey(tripev.DstName)
+        if source.Name == destination.Name :
+            return self._ScheduleNextTrip(source)
+        
+        self.Connector.AddTripToEventQueue(Trip.Trip(self, starttime, source, destination))
 
-                logger.info('Scheduled trip from %s to %s', source.Name, destination.Name)
-                return
-
-        logger.info('No trip events for %s', self.Person.Name)
+        logger.info('Scheduled trip of to %s for %s from %s to %s', tripev.DstName, self.Person.Name, source.Name, destination.Name)
 
     # -----------------------------------------------------------------
     def TripCompleted(self, trip) :
@@ -148,7 +177,7 @@ class Traveler :
             trip -- initialized Trip object
         """
         self.TravelEstimator.SaveTravelTime(trip.Source, trip.Destination, self.Connector.WorldTime - trip.ActualStartTime)
-        self.ScheduleNextTrip()
+        self._ScheduleNextTrip(trip.Destination)
 
     # -----------------------------------------------------------------
     def TripStarted(self, trip) :
