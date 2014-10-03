@@ -72,9 +72,12 @@ def _RequireEdge(graph, node1, node2, weight, edgetype) :
 class WeightGenerator :
 
     # -----------------------------------------------------------------
-    def __init__(self, weight) :
-        if weight < 0 or 1 < weight :
-            raise ValueError('Edge weight must be between 0 and 1')
+    def __init__(self, weight, minweight = 0.0, maxweight = 1.0) :
+        self.MinWeight = minweight
+        self.MaxWeight = maxweight
+
+        if weight < self.MinWeight or self.MaxWeight < weight :
+            raise ValueError('Edge weight must be between %s and %s', self.MinWeight, self.MaxWeight)
 
         self.Weight = weight
 
@@ -87,15 +90,15 @@ class WeightGenerator :
 class GaussianWeightGenerator(WeightGenerator) :
 
     # -----------------------------------------------------------------
-    def __init__(self, weight = 0.5, deviation = 0.2) :
-        WeightGenerator.__init__(self, weight)
+    def __init__(self, weight = 0.5, deviation = 0.2, minweight = 0.0, maxweight = 1.0) :
+        WeightGenerator.__init__(self, weight, minweight, maxweight)
         self.Deviation = deviation
 
     # -----------------------------------------------------------------
     def GenWeight(self, snode, enode) :
         while True :
             value = random.gauss(self.Weight, self.Deviation)
-            if 0 < value and value < 1 :
+            if self.MinWeight <= value and value <= self.MaxWeight :
                 return value
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
