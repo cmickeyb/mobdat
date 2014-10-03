@@ -195,6 +195,7 @@ class DinnerRule(TravelRule) :
         else :
             event = TimedEvent.VariableMiddleEvent.Create('dinner', worldtime, interval, interval, 1.5)
             idr = evlist.AddPlaceEvent(event)
+
             evlist.InsertWithinPlaceEvent(evlist.LastEvent.EventID, idr)
             
         return idr
@@ -231,6 +232,7 @@ class ShoppingTripRule(TravelRule) :
         else :
             event = TimedEvent.VariableMiddleEvent.Create('shopping', worldtime, interval, interval, 0.5)
             ids = evlist.AddPlaceEvent(event)
+
             evlist.InsertWithinPlaceEvent(evlist.LastEvent.EventID, ids)
 
         stops = int(random.triangular(0, maxcount, 1))

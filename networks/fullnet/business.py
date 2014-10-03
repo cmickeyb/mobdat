@@ -41,6 +41,8 @@ social framework including people and businesses.
 import os, sys
 import logging
 
+import random
+
 from mobdat.common.Schedule import WeeklySchedule
 from mobdat.common.Utilities import GenName
 from mobdat.common.graph.Decoration import *
@@ -221,6 +223,21 @@ def PlaceBusiness(business) :
     return bestloc
 
 # -----------------------------------------------------------------
+def GenWeight(weight, deviation, minweight, maxweight) :
+    while True :
+        value = random.gauss(weight, deviation)
+        if minweight < value and value < maxweight :
+            return value
+
+# -----------------------------------------------------------------
+def ScaleProfile(profile) :
+    scale = GenWeight(1.0, 0.5, 0.5, 3.0)
+    offset = GenWeight(0.0, 0.2, -1.5, 1.5)
+    name = GenName('sp_' + profile.Name)
+
+    return world.AddScaledBusinessProfile(name, profile, scale, offset)
+    
+# -----------------------------------------------------------------
 def PlaceBusinesses() :
     global world
 
@@ -234,7 +251,7 @@ def PlaceBusinesses() :
     factory = profiles['large-factory']
     for i in range(8) :
         name = GenName('large-factory')
-        business = world.AddBusiness(name, factory)
+        business = world.AddBusiness(name, ScaleProfile(factory))
         location = PlaceBusiness(business)
         if not location :
             world.DropNode(business)
@@ -244,7 +261,7 @@ def PlaceBusinesses() :
     school = profiles['high-school']
     for i in range(2) :
         name = GenName('high-school')
-        business = world.AddBusiness(name, school)
+        business = world.AddBusiness(name, ScaleProfile(school))
         location = PlaceBusiness(business)
         if not location :
             world.DropNode(business)
@@ -254,7 +271,7 @@ def PlaceBusinesses() :
     service = profiles['large-service']
     for i in range(2) :
         name = GenName('large-service')
-        business = world.AddBusiness(name, service)
+        business = world.AddBusiness(name, ScaleProfile(service))
         location = PlaceBusiness(business)
         if not location :
             world.DropNode(business)
@@ -268,7 +285,7 @@ def PlaceBusinesses() :
         profile = profiles[pname]
             
         name = GenName(pname)
-        business = world.AddBusiness(name, profile)
+        business = world.AddBusiness(name, ScaleProfile(profile))
         location = PlaceBusiness(business)
 
         # if we could not place the business, then all locations

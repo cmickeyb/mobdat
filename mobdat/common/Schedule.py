@@ -109,9 +109,9 @@ class WeeklySchedule :
         return WeeklySchedule(sched)
 
     # -----------------------------------------------------------------
-    def __init__(self, schedule) :
+    def __init__(self, schedule, offset = 0.0) :
         for d in range(DaysOfTheWeek.Mon, DaysOfTheWeek.Sun + 1) :
-            self.__dict__[DaysOfTheWeek.KeyName[d]] = schedule[d]
+            self.__dict__[DaysOfTheWeek.KeyName[d]] = map(lambda x : (x[0] + offset, x[1] + offset), schedule[d])
 
     # -----------------------------------------------------------------
     def ScheduleForDay(self, day) :

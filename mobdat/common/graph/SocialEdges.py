@@ -93,4 +93,17 @@ class ConnectedTo(Edge.WeightedEdge) :
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-Edges = [ EmployedBy, ResidesAt ]
+class DerivedFrom(Edge.Edge) :
+
+    # -----------------------------------------------------------------
+    def __init__(self, child, parent) :
+        """
+        Args:
+            child -- object of type SocialNodes.*Profile
+            parent -- object of type SocialNodes.*Profile
+        """
+        Edge.Edge.__init__(self, child, parent)
+
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+Edges = [ EmployedBy, ResidesAt, ConnectedTo, DerivedFrom ]

@@ -181,12 +181,12 @@ world.ConnectIntersections(world.Nodes['main100E200N'], world.Nodes['plaza50E200
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-world.AddBusinessLocationProfile('plaza', 40, 25,  { BusinessType.Factory : 1.0, BusinessType.Service : 0.5, BusinessType.Food : 0.25 })
-world.AddBusinessLocationProfile('mall',  15, 75,  { BusinessType.Factory : 0.1, BusinessType.Service : 1.0, BusinessType.Food : 1.0 })
-world.AddBusinessLocationProfile('civic', 20, 150, { BusinessType.School : 1.0, BusinessType.Civic : 1.0 })
+world.AddBusinessLocationProfile('plaza', 50, 25,  { BusinessType.Factory : 1.0, BusinessType.Service : 0.5, BusinessType.Food : 0.25 })
+world.AddBusinessLocationProfile('mall',  18, 75,  { BusinessType.Factory : 0.1, BusinessType.Service : 1.0, BusinessType.Food : 1.0 })
+world.AddBusinessLocationProfile('civic', 25, 150, { BusinessType.School : 1.0, BusinessType.Civic : 1.0 })
 
-world.AddResidentialLocationProfile('townhouse_rp', 7)
-world.AddResidentialLocationProfile('apartment_rp', 12)
+world.AddResidentialLocationProfile('townhouse_rp', 9)
+world.AddResidentialLocationProfile('apartment_rp', 17)
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

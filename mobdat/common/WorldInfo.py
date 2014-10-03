@@ -118,6 +118,18 @@ class WorldInfo(Graph.Graph) :
 
         self.AddNode(business)
 
+    # -----------------------------------------------------------------
+    def RelateDerivedProfiles(self, child, parent) :
+        """
+        Add an edge that captures the DerivedFrom relationship
+        between two profiles
+
+        Args:
+            child -- object of type SocialNodes.*Profile
+            parent -- object of type SocialNodes.*Profile
+        """
+        self.AddEdge(SocialEdges.DerivedFrom(child, parent))
+
     # =================================================================
     # =================================================================
 

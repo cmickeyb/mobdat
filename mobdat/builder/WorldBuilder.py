@@ -138,6 +138,26 @@ class WorldBuilder(WorldInfo.WorldInfo) :
         return bizprof
 
     # -----------------------------------------------------------------
+    def AddScaledBusinessProfile(self, name, parent, scale = 1.0, offset = 0.0) :
+        """
+        Args:
+            name -- unique string name for the business profile
+            parent -- object of type SocialNodes.BusinessProfile
+            scale -- factor to adjust number of employees of each type
+            offset -- factor to adjust job start times
+            
+        """
+
+        biztype = parent.BusinessProfile.BusinessType
+        joblist = parent.EmploymentProfile.ScaleProfile(scale, offset)
+        bizprof = SocialNodes.BusinessProfile(name, biztype, joblist)
+
+        WorldInfo.WorldInfo.AddBusinessProfile(self, bizprof)
+        WorldInfo.WorldInfo.RelateDerivedProfiles(self, bizprof, parent)
+
+        return bizprof
+
+    # -----------------------------------------------------------------
     def AddBusiness(self, name, profile) :
         """
         Args:

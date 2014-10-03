@@ -222,3 +222,28 @@ class GraphObject :
 
         return result
 
+    # -----------------------------------------------------------------
+    def DumpAttributes(self) :
+        result = dict()
+
+        # Names of decorations
+        result['Decoration'] = []
+        for decoration in self.Decorations :
+            result['Decoration'].append(decoration)
+
+        # inherit the decorations of all the collections the object is in
+        result['Collections'] = []
+        result['CollectionDecorations'] = []
+        for coll in self.Collections.itervalues() :
+            result['Collections'].append(coll.NodeType.Name)
+            for attr in coll.Decorations :
+                result['CollectionDecorations'].append(attr)
+
+        # Next look for an edge with the right name, if there
+        # are multiple then take the first one found
+        result['Edges'] = []
+        for edge in self.OutputEdges :
+            result['Edges'].append(edge.NodeType.Name)
+
+        return result
+

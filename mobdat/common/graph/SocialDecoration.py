@@ -78,8 +78,8 @@ class JobDescription :
         self.Schedule = schedule
 
     # -------------------------------------------------------
-    def Copy(self) :
-        return JobDescription(self.Name, self.Salary, self.FlexibleHours, self.Schedule)
+    def Copy(self, offset = 0.0) :
+        return JobDescription(self.Name, self.Salary, self.FlexibleHours, WeeklySchedule(self.Schedule.Dump(), offset))
 
     # -------------------------------------------------------
     def Dump(self) :
@@ -118,6 +118,18 @@ class EmploymentProfileDecoration(Decoration) :
         self.JobList = dict()
         for job, demand in joblist.iteritems() :
             self.JobList[job.Copy()] = demand
+
+    # -------------------------------------------------------
+    def ScaleProfile(self, scale = 1.0, offset = 0.0) :
+        """
+        """
+
+        joblist = dict()
+        for job, demand in self.JobList.iteritems() :
+            d = int(demand * scale)
+            joblist[job.Copy(offset)] = d if d > 0 else 1
+
+        return joblist
 
     # -------------------------------------------------------
     def PeakEmployeeCount(self, day = DaysOfTheWeek.Mon) :
