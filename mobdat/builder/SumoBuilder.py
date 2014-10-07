@@ -68,6 +68,7 @@ class SumoBuilder :
             self.Path = settings["SumoConnector"].get("SumoNetworkPath",".")
             self.Prefix = settings["SumoConnector"].get("SumoDataFilePrefix","network")
             self.ScaleValue = settings["SumoConnector"].get("NetworkScaleFactor",3.0)
+            self.VehicleScaleValue = settings["SumoConnector"].get("VehicleScaleFactor",2.0)
         except NameError as detail: 
             self.Logger.warn("Failed processing sumo configuration; name error %s", (str(detail)))
             sys.exit(-1)
@@ -81,6 +82,10 @@ class SumoBuilder :
     # -----------------------------------------------------------------
     def Scale(self, value) :
         return self.ScaleValue * value
+
+    # -----------------------------------------------------------------
+    def VehicleScale(self, value) :
+        return self.VehicleScaleValue * value
 
     # -----------------------------------------------------------------
     def CreateRoads(self) :
@@ -152,7 +157,7 @@ class SumoBuilder :
             for name, rtype in self.World.IterNodes(nodetype = 'RoadType') :
                 etype = rtype.RoadType
                 fp.write("  <type id=\"%s\" priority=\"%d\" numLanes=\"%d\" speed=\"%f\" width=\"%f\" />\n" %
-                         (etype.Name, etype.Priority, etype.Lanes, self.Scale(etype.Speed), self.Scale(etype.Width)))
+                         (etype.Name, etype.Priority, etype.Lanes, self.Scale(etype.Speed), self.VehicleScale(etype.Width)))
 
             fp.write("</types>\n")
 
@@ -168,7 +173,7 @@ class SumoBuilder :
             for v in self.LayoutSettings.VehicleTypes :
                 vtype = self.LayoutSettings.VehicleTypes[v]
                 fp.write(vtfmt.format(v, self.Scale(vtype.Acceleration), self.Scale(vtype.Deceleration),
-                                      vtype.Sigma, self.Scale(vtype.Length), self.Scale(vtype.MinGap), self.Scale(vtype.MaxSpeed)) + "\n")
+                                      vtype.Sigma, self.VehicleScale(vtype.Length), self.VehicleScale(vtype.MinGap), self.Scale(vtype.MaxSpeed)) + "\n")
 
             fp.write("\n")
 
@@ -193,4 +198,4 @@ class SumoBuilder :
         self.CreateRoads()
         self.CreateRoadTypes()
         self.CreateRoutes()
-        self.CreateConnections()
+        # self.CreateConnections()
