@@ -75,8 +75,12 @@ e1C = world.AddRoadType('etype1C', 1, 20, 1.0, sig='1L')
 e2A = world.AddRoadType('etype2A', 2, 70, 3.0, sig='2L')
 e2B = world.AddRoadType('etype2B', 2, 40, 2.0, sig='2L')
 e2C = world.AddRoadType('etype2C', 2, 20, 1.0, sig='2L')
+e3A = world.AddRoadType('etype3A', 3, 70, 3.0, sig='3L')
+e3B = world.AddRoadType('etype3B', 3, 40, 2.0, sig='3L')
+e3C = world.AddRoadType('etype3C', 3, 20, 1.0, sig='3L')
 
-e1way = world.AddRoadType('1way2lane', 2, 40, 2.0, sig='2L', center=True) 
+e2oneway = world.AddRoadType('1way2lane', 2, 40, 2.0, sig='2L', center=True) 
+e3oneway = world.AddRoadType('1way3lane', 3, 40, 2.0, sig='3L', center=True) 
 
 # driveway
 dntype = world.AddIntersectionType('driveway_node', 'priority_stop') 
@@ -135,14 +139,14 @@ world.DropEdgeByName('plaza50W250N=O=plaza0E250N')
 world.DropEdgeByName('plaza0E250N=O=plaza50E250N')
 
 # The one way streets are all 2 lanes
-world.SetRoadTypeByPattern('plaza50[EW].*=O=plaza50[EW].*',e1way)
-world.SetRoadTypeByPattern('plaza.*250[NS]=O=plaza.*250[NS]',e1way)
+world.SetRoadTypeByPattern('plaza50[EW].*=O=plaza50[EW].*',e3oneway)
+world.SetRoadTypeByPattern('plaza.*250[NS]=O=plaza.*250[NS]',e3oneway)
 
 # The central north/south road is four lane
-world.SetRoadTypeByPattern('plaza[0-9]*[EW]100[NS]=O=plaza[0-9]*[EW]100[NS]',e2A)
-world.SetRoadTypeByPattern('plaza[0-9]*[EW]0N=O=plaza[0-9]*[EW]0N',e2A)
-world.SetRoadTypeByPattern('plaza0E[0-9]*[NS]=O=plaza0E[0-9]*[NS]',e2A)
-world.SetRoadTypeByPattern('plaza0E[0-9]*[NS]=O=plaza0E[0-9]*[NS]',e2A)
+world.SetRoadTypeByPattern('plaza[0-9]*[EW]100[NS]=O=plaza[0-9]*[EW]100[NS]',e3A)
+world.SetRoadTypeByPattern('plaza[0-9]*[EW]0N=O=plaza[0-9]*[EW]0N',e3A)
+world.SetRoadTypeByPattern('plaza0E[0-9]*[NS]=O=plaza0E[0-9]*[NS]',e3A)
+world.SetRoadTypeByPattern('plaza0E[0-9]*[NS]=O=plaza0E[0-9]*[NS]',e3A)
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # CONNECT THE GRIDS
@@ -153,22 +157,22 @@ world.AddIntersection(0, -300, sntype, 'main') # south end of the plaza
 world.AddIntersection(0, 300, sntype, 'main')  # north end of the plaza
 
 # And connect them to the east and west main grids
-world.ConnectIntersections(world.Nodes['main100W300N'],world.Nodes['main0E300N'],e2A)
-world.ConnectIntersections(world.Nodes['main100E300N'],world.Nodes['main0E300N'],e2A)
-world.ConnectIntersections(world.Nodes['main100W300S'],world.Nodes['main0E300S'],e2A)
-world.ConnectIntersections(world.Nodes['main100E300S'],world.Nodes['main0E300S'],e2A)
+world.ConnectIntersections(world.Nodes['main100W300N'],world.Nodes['main0E300N'],e3A)
+world.ConnectIntersections(world.Nodes['main100E300N'],world.Nodes['main0E300N'],e3A)
+world.ConnectIntersections(world.Nodes['main100W300S'],world.Nodes['main0E300S'],e3A)
+world.ConnectIntersections(world.Nodes['main100E300S'],world.Nodes['main0E300S'],e3A)
 
 # Connect the plaza nodes to the north & south ends
-world.ConnectIntersections(world.Nodes['plaza0E250S'],world.Nodes['main0E300S'],e2A)
-world.ConnectIntersections(world.Nodes['plaza0E250N'],world.Nodes['main0E300N'],e2A)
+world.ConnectIntersections(world.Nodes['plaza0E250S'],world.Nodes['main0E300S'],e3A)
+world.ConnectIntersections(world.Nodes['plaza0E250N'],world.Nodes['main0E300N'],e3A)
 
 # Connect the plaza nodes to the east and west roads
-world.ConnectIntersections(world.Nodes['main100W100N'],world.Nodes['plaza50W100N'],e2A)
-world.ConnectIntersections(world.Nodes['main100W100S'],world.Nodes['plaza50W100S'],e2A)
-world.ConnectIntersections(world.Nodes['main100E100N'],world.Nodes['plaza50E100N'],e2A)
-world.ConnectIntersections(world.Nodes['main100E100S'],world.Nodes['plaza50E100S'],e2A)
-world.ConnectIntersections(world.Nodes['main100W0N'],world.Nodes['plaza50W0N'],e2A)
-world.ConnectIntersections(world.Nodes['main100E0N'],world.Nodes['plaza50E0N'],e2A)
+world.ConnectIntersections(world.Nodes['main100W100N'],world.Nodes['plaza50W100N'],e3A)
+world.ConnectIntersections(world.Nodes['main100W100S'],world.Nodes['plaza50W100S'],e3A)
+world.ConnectIntersections(world.Nodes['main100E100N'],world.Nodes['plaza50E100N'],e3A)
+world.ConnectIntersections(world.Nodes['main100E100S'],world.Nodes['plaza50E100S'],e3A)
+world.ConnectIntersections(world.Nodes['main100W0N'],world.Nodes['plaza50W0N'],e3A)
+world.ConnectIntersections(world.Nodes['main100E0N'],world.Nodes['plaza50E0N'],e3A)
 
 world.ConnectIntersections(world.Nodes['main100W200S'], world.Nodes['plaza50W200S'], e1A)
 world.ConnectIntersections(world.Nodes['main100E200S'], world.Nodes['plaza50E200S'], e1A)
@@ -185,8 +189,8 @@ world.AddBusinessLocationProfile('plaza', 50, 25,  { BusinessType.Factory : 1.0,
 world.AddBusinessLocationProfile('mall',  18, 75,  { BusinessType.Factory : 0.1, BusinessType.Service : 1.0, BusinessType.Food : 1.0 })
 world.AddBusinessLocationProfile('civic', 25, 150, { BusinessType.School : 1.0, BusinessType.Civic : 1.0 })
 
-world.AddResidentialLocationProfile('townhouse_rp', 9)
-world.AddResidentialLocationProfile('apartment_rp', 17)
+world.AddResidentialLocationProfile('townhouse_rp', 13)
+world.AddResidentialLocationProfile('apartment_rp', 27)
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
