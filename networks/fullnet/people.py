@@ -172,7 +172,10 @@ for name, biz in world.IterNodes(nodetype = 'Business') :
     for edge in biz.IterInputEdges(edgetype = 'EmployedBy') :
         employees.append(edge.StartNode)
 
-    ConnectPeople(employees, 3, (4, 5, 6, 7), 0.7)
+    try :
+        ConnectPeople(employees, 3, (4, 5, 6, 7), 0.7)
+    except :
+        logger.warn('failed to create social network for {0} employees of business {1}'.format(len(employees), name))
 
 # Connect people who live in the same area
 # TBD
@@ -189,13 +192,15 @@ def PropagateBusinessPreference(people, biztype, bizclass, seedsize = (7, 13)) :
 
     incr = len(people) / 100.0
 
+    bizcount = len(bizlist)
     for biz in bizlist :
-        logger.info('generating preferences for {0}'.format(biz.Name))
+        logger.info('generating preferences for {0}, {1} remaining'.format(biz.Name, bizcount))
         seedcount = random.randint(int(incr * seedsize[0]), int(incr * seedsize[1]))
         seeds = set(random.sample(people, seedcount))
 
         # Propagator.PropagateMaximumPreference(seeds, biz.Name, (0.3, 0.9), 0.1)
         Propagator.PropagateAveragePreference(seeds, biz.Name, (0.7, 0.9), 0.1)
+        bizcount -= 1
 
 people = world.FindNodes(nodetype = 'Person')
 PropagateBusinessPreference(people, SocialDecoration.BusinessType.Food, 'coffee')
