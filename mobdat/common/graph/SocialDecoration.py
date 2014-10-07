@@ -248,7 +248,7 @@ class BusinessProfileDecoration(Decoration) :
         return BusinessProfileDecoration(pinfo['BusinessType'], pinfo['Annotations'])
 
     # -------------------------------------------------------
-    def __init__(self, biztype, annotations = []) :
+    def __init__(self, biztype, annotations = None) :
         """
         The business profile class captures the structure of a 
         generic business pattern. The profile can be used to
@@ -261,8 +261,9 @@ class BusinessProfileDecoration(Decoration) :
         self.BusinessType = biztype
         self.Annotations = {}
 
-        for word in annotations :
-            self.Annotations[word] = True
+        if annotations :
+            for word in annotations :
+                self.Annotations[word] = True
 
     # -------------------------------------------------------
     def AddAnnotation(self, word) :

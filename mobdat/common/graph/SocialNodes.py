@@ -123,7 +123,7 @@ class BusinessProfile(Node.Node) :
 
 
     # -----------------------------------------------------------------
-    def __init__(self, name, biztype, joblist) :
+    def __init__(self, name, biztype, joblist, annotations = None) :
         """
         Args:
             name -- string name of the profile
@@ -132,7 +132,7 @@ class BusinessProfile(Node.Node) :
         """
         Node.Node.__init__(self, name = name)
 
-        self.AddDecoration(SocialDecoration.BusinessProfileDecoration(biztype))
+        self.AddDecoration(SocialDecoration.BusinessProfileDecoration(biztype, annotations))
         self.AddDecoration(SocialDecoration.EmploymentProfileDecoration(joblist))
 
 ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

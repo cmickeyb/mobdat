@@ -82,7 +82,8 @@ class LocationKeyMap :
             bizlist -- non-empty list of SocialNodes.Business objects
         """
 
-        if not bizlist : raise ValueError("no businesses specified for preference list")
+        if not bizlist :
+            raise ValueError("no businesses specified for preference list for %s" % self.Person.Name)
 
         plist = ValueTypes.WeightedChoice()
         for biz in bizlist :

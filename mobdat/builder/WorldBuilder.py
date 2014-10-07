@@ -149,8 +149,9 @@ class WorldBuilder(WorldInfo.WorldInfo) :
         """
 
         biztype = parent.BusinessProfile.BusinessType
+        annotations = parent.BusinessProfile.Annotations.keys()
         joblist = parent.EmploymentProfile.ScaleProfile(scale, offset)
-        bizprof = SocialNodes.BusinessProfile(name, biztype, joblist)
+        bizprof = SocialNodes.BusinessProfile(name, biztype, joblist, annotations)
 
         WorldInfo.WorldInfo.AddBusinessProfile(self, bizprof)
         WorldInfo.WorldInfo.RelateDerivedProfiles(self, bizprof, parent)
@@ -272,7 +273,7 @@ class WorldBuilder(WorldInfo.WorldInfo) :
     # =================================================================
 
     # -----------------------------------------------------------------
-    def AddRoadType(self, name, lanes = 1, pri = 70, speed = 2.0, wid = 2.5, sig = '1L', render = True, center = False) :
+    def AddRoadType(self, name, lanes = 1, pri = 70, speed = 2.0, wid = 3.5, sig = '1L', render = True, center = False) :
         node = LayoutNodes.RoadType(name, lanes, pri, speed, wid, sig, render, center)
         WorldInfo.WorldInfo.AddRoadType(self, node)
 
