@@ -1,0 +1,133 @@
+#!/bin/bash
+
+# Copyright (c) Intel Corporation
+# All rights reserved.
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+# -- Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# -- Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+# -- Neither the name of the Intel Corporation nor the names of its
+#    contributors may be used to endorse or promote products derived from
+#    this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+# PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE INTEL OR ITS
+# CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+# EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+# PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+# LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+# NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+# SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+F_HOME='/share/opensim/mobdat-git'
+if [ -n "$MOBDAT" ]; then
+    F_HOME=$MOBDAT
+fi
+
+F_COMMAND='status'
+if [ -n "$1" ]; then
+    F_COMMAND=$1
+    shift
+fi
+
+# -----------------------------------------------------------------
+# Define some functions for cross-platform operation
+# -----------------------------------------------------------------
+export PLATFORM=`uname -o`
+function SafePath()
+{
+    if [ $PLATFORM == 'Cygwin' ]; then
+        echo "$(cygpath -m $1)"
+    else
+        echo $1
+    fi
+}
+
+function SafeExe()
+{
+    if [ $PLATFORM == 'Cygwin' ]; then
+        # must use the short path version to avoid
+        # the ' ' in many windows paths
+        echo "$(cygpath -sm $(which $1).exe)"
+    else
+        echo $1
+    fi
+}
+
+# -----------------------------------------------------------------
+# BUILD
+# -----------------------------------------------------------------
+if [ "$F_COMMAND" == 'build' ]; then
+    echo 
+fi
+
+# -----------------------------------------------------------------
+# CONVERT
+# -----------------------------------------------------------------
+if [ "$F_COMMAND" == 'convert' ]; then
+    # run netconvert
+    echo 
+fi
+
+# -----------------------------------------------------------------
+# START
+# -----------------------------------------------------------------
+if [ "$F_COMMAND" == 'start' ]; then
+
+    # Parse the command line arguments
+    TEMP=`getopt -o c:i:n:s: --long config:,interval:,network:,scene: -- "$@"`
+    if [ $? != 0 ] ; then echo "Terminating..." >&2 ; exit 1 ; fi
+
+    eval set -- "$TEMP"
+    while true ; do
+        case "$1" in
+            -c|--config) F_CONFIG="--config=$2" ; shift 2 ;;
+            -i|--interval) F_INTERVAL="--interval=$2"; shift 2 ;;
+            -n|--network) F_CONFIG="--config=networks/$2/settings.js"; shift 2 ;;
+            -s|--scene) F_SCENE="--scene=$2"; shift 2 ;;
+
+	    --) shift ; break ;;
+	    *) echo "Internal error; unknown switch $1" ; exit 1 ;;
+        esac
+    done
+
+    # Build the command line
+    F_COMMAND="$F_HOME/scripts/mobdat $F_SCENE $F_CONFIG $F_INTERVAL"
+
+    # clean up the logs
+    rm -f screenlog.0
+    rm "$F_HOME/logs/mobdat.log*"
+
+    if [ "$PLATFORM" == 'GNU/Linux' ]; then
+        echo screen -L -S mobdat -p - -d -m $F_COMMAND
+        screen -L -S mobdat -p - -d -m $F_COMMAND
+    elif [ "$PLATFORM" == 'Cygwin' ]; then
+	cygstart $F_COMMAND
+    fi
+
+    exit 0
+fi
+
+# -----------------------------------------------------------------
+# RESUME
+# -----------------------------------------------------------------
+if [ "$F_COMMAND" == 'resume' ]; then
+    screen -r mobdat
+    exit 0
+fi
+
+# -----------------------------------------------------------------
+# STATUS
+# -----------------------------------------------------------------
+if [ "$F_COMMAND" == 'status' ]; then
+    screen -list | grep mobdat
+    exit 0
+fi
