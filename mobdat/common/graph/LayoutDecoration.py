@@ -168,6 +168,18 @@ class EdgeMapDecoration(Decoration) :
         return edgemap
 
     # -----------------------------------------------------------------
+    def Widths(self, scale = 1.0) :
+        owidths = []
+        for e in self.OutputEdgeMap() :
+            owidths.append(e.RoadType.Lanes * e.RoadType.Width if e else 0.0)
+
+        iwidths = []
+        for e in self.InputEdgeMap() :
+            iwidths.append(e.RoadType.Lanes * e.RoadType.Width if e else 0.0)
+
+        return map(lambda x, y: scale * (x + y), owidths, iwidths)
+
+    # -----------------------------------------------------------------
     # signature returned is west, north, east, south
     # -----------------------------------------------------------------
     def Signature(self) :

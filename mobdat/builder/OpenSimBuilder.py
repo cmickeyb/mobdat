@@ -48,6 +48,7 @@ sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "
 import uuid
 import OpenSimRemoteControl
 from mobdat.common.graph import Graph
+from mobdat.common.graph.LayoutDecoration import EdgeMapDecoration
 
 import json
 
@@ -133,14 +134,19 @@ class OpenSimBuilder :
             self.Logger.warn('cannot find node %s in the node map' % (enode.Name))
             return False
 
-        sbump = self.NodeMap[snode.Name].Padding
-        ebump = self.NodeMap[enode.Name].Padding
+        #sbump = self.NodeMap[snode.Name].Padding
+        #ebump = self.NodeMap[enode.Name].Padding
     
         deltax = enode.Coord.X - snode.Coord.X
         deltay = enode.Coord.Y - snode.Coord.Y
 
+        swidths = snode.EdgeMap.Widths()
+        ewidths = enode.EdgeMap.Widths()
+
         # west
         if deltax < 0 and deltay == 0 :
+            sbump = max(swidths[EdgeMapDecoration.SOUTH], swidths[EdgeMapDecoration.NORTH]) / 2.0
+            ebump = max(ewidths[EdgeMapDecoration.SOUTH], ewidths[EdgeMapDecoration.NORTH]) / 2.0
             s1x = snode.Coord.X - sbump
             s1y = snode.Coord.Y
             e1x = enode.Coord.X + ebump
@@ -148,6 +154,8 @@ class OpenSimBuilder :
 
         # north
         elif deltax == 0 and deltay > 0 :
+            sbump = max(swidths[EdgeMapDecoration.EAST], swidths[EdgeMapDecoration.WEST]) / 2.0
+            ebump = max(ewidths[EdgeMapDecoration.EAST], ewidths[EdgeMapDecoration.WEST]) / 2.0
             s1x = snode.Coord.X
             s1y = snode.Coord.Y + sbump
             e1x = enode.Coord.X
@@ -155,6 +163,8 @@ class OpenSimBuilder :
 
         # east
         elif deltax > 0 and deltay == 0 :
+            sbump = max(swidths[EdgeMapDecoration.SOUTH], swidths[EdgeMapDecoration.NORTH]) / 2.0
+            ebump = max(ewidths[EdgeMapDecoration.SOUTH], ewidths[EdgeMapDecoration.NORTH]) / 2.0
             s1x = snode.Coord.X + sbump
             s1y = snode.Coord.Y
             e1x = enode.Coord.X - ebump
@@ -162,6 +172,8 @@ class OpenSimBuilder :
 
         # south
         elif deltax == 0 and deltay < 0 :
+            sbump = max(swidths[EdgeMapDecoration.EAST], swidths[EdgeMapDecoration.WEST]) / 2.0
+            ebump = max(ewidths[EdgeMapDecoration.EAST], ewidths[EdgeMapDecoration.WEST]) / 2.0
             s1x = snode.Coord.X
             s1y = snode.Coord.Y - sbump
             e1x = enode.Coord.X
@@ -246,6 +258,8 @@ class OpenSimBuilder :
                 sparms['center'] = '<%f, %f, %f>' % (p1x, p1y, p1z)
                 sparms['angle' ] = 90.0 * rot
                 sparms['type'] = node.IntersectionType.Dump()
+                sparms['width'] = node.EdgeMap.Widths()
+
                 startparms = json.dumps(sparms)
 
                 if node.IntersectionType.Render :
