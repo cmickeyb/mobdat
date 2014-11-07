@@ -171,13 +171,15 @@ class EdgeMapDecoration(Decoration) :
     def Widths(self, scale = 1.0) :
         owidths = []
         for e in self.OutputEdgeMap() :
-            owidths.append(e.RoadType.Lanes * e.RoadType.Width if e else 0.0)
+            owidths.append(e.RoadType.OneWayWidth(scale) if e else 0.0)
+#            owidths.append(e.RoadType.Lanes * e.RoadType.Width if e else 0.0)
 
         iwidths = []
         for e in self.InputEdgeMap() :
-            iwidths.append(e.RoadType.Lanes * e.RoadType.Width if e else 0.0)
+            iwidths.append(e.RoadType.OneWayWidth(scale) if e else 0.0)
+#            iwidths.append(e.RoadType.Lanes * e.RoadType.Width if e else 0.0)
 
-        return map(lambda x, y: scale * (x + y), owidths, iwidths)
+        return map(lambda x, y: (x + y), owidths, iwidths)
 
     # -----------------------------------------------------------------
     # signature returned is west, north, east, south
@@ -258,6 +260,15 @@ class RoadTypeDecoration(Decoration) :
         self.Signature = sig
         self.Render = render
         self.Center = center
+
+    # -----------------------------------------------------------------
+    def OneWayWidth(self, scale = 1.0) :
+        return scale * self.Width * self.Lanes
+
+    # -----------------------------------------------------------------
+    def TotalWidth(self, scale = 1.0) :
+        w = self.OneWayWidth(scale)
+        return w if self.Center else 2 * w
 
     # -----------------------------------------------------------------
     def Dump(self) :

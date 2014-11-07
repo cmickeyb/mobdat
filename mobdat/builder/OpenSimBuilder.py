@@ -76,6 +76,8 @@ class OpenSimBuilder :
             self.WorldCenterY = woffs[1]
             self.WorldCenterZ = woffs[2]
 
+            self.WorldScale = settings["OpenSimConnector"].get("Scale",0.5)
+
         except NameError as detail: 
             self.Logger.warn("Failed processing OpenSim configuration; name error %s", (str(detail)))
             sys.exit(-1)
@@ -140,8 +142,8 @@ class OpenSimBuilder :
         deltax = enode.Coord.X - snode.Coord.X
         deltay = enode.Coord.Y - snode.Coord.Y
 
-        swidths = snode.EdgeMap.Widths()
-        ewidths = enode.EdgeMap.Widths()
+        swidths = snode.EdgeMap.Widths(scale=self.WorldScale)
+        ewidths = enode.EdgeMap.Widths(scale=self.WorldScale)
 
         # west
         if deltax < 0 and deltay == 0 :
@@ -217,6 +219,7 @@ class OpenSimBuilder :
                 sparms = {}
                 sparms['spoint'] = '<%f, %f, %f>' % (p1x, p1y, zoff)
                 sparms['epoint'] = '<%f, %f, %f>' % (p2x, p2y, zoff)
+                sparms['width'] = road.RoadType.TotalWidth(scale=self.WorldScale)
                 sparms['type'] = road.RoadType.Dump()
                 startparms = json.dumps(sparms)
 
@@ -258,7 +261,7 @@ class OpenSimBuilder :
                 sparms['center'] = '<%f, %f, %f>' % (p1x, p1y, p1z)
                 sparms['angle' ] = 90.0 * rot
                 sparms['type'] = node.IntersectionType.Dump()
-                sparms['width'] = node.EdgeMap.Widths()
+                sparms['width'] = node.EdgeMap.Widths(scale=self.WorldScale)
 
                 startparms = json.dumps(sparms)
 
