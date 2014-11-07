@@ -273,7 +273,7 @@ class WorldBuilder(WorldInfo.WorldInfo) :
     # =================================================================
 
     # -----------------------------------------------------------------
-    def AddRoadType(self, name, lanes = 1, pri = 70, speed = 2.0, wid = 3.5, sig = '1L', render = True, center = False) :
+    def AddRoadType(self, name, lanes = 1, pri = 70, speed = 2.0, wid = 3.0, sig = '1L', render = True, center = False) :
         node = LayoutNodes.RoadType(name, lanes, pri, speed, wid, sig, render, center)
         WorldInfo.WorldInfo.AddRoadType(self, node)
 

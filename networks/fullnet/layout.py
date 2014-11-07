@@ -84,15 +84,15 @@ e3oneway = world.AddRoadType('1way3lane', 3, 40, 2.0, sig='3L', center=True)
 
 # driveway
 dntype = world.AddIntersectionType('driveway_node', 'priority_stop') 
-edrv = world.AddRoadType('driveway_road', 1, 10, 0.5, sig='D')
+edrv = world.AddRoadType('driveway_road', 1, 10, 0.5, wid=2.0, sig='D')
 
 # parking lots
 #plotnode  = world.AddIntersectionType('parking_drive_intersection', 'priority', False)
 #plotentry = world.AddRoadType('parking_entry', 1, 20, 1.0, sig='1L', render=False)
 #plotdrive = world.AddRoadType('parking_drive', 1, 10, 0.5, sig='D', render=False)
 plotnode  = world.AddIntersectionType('parking_drive_intersection', 'priority')
-plotentry = world.AddRoadType('parking_entry', 1, 20, 1.0, sig='P')
-plotdrive = world.AddRoadType('parking_drive', 1, 10, 0.5, sig='D')
+plotentry = world.AddRoadType('parking_entry', 1, 20, 1.0, wid=2.0, sig='P')
+plotdrive = world.AddRoadType('parking_drive', 1, 10, 0.5, wid=2.0, sig='D')
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # MAIN GRIDS
