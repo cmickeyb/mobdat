@@ -39,4 +39,4 @@
 # sed -i '/^INFO/d' $*
 # sed -i '/^WARNING/d' $*
 
-grep '^INFO \[mobdat.simulator.StatsConnector\]' $* | sed 's/^INFO \[mobdat.simulator.StatsConnector\] //' 
+grep '^INFO \[mobdat.simulator.StatsConnector\]' $* | sed 's/^.*INFO \[mobdat.simulator.StatsConnector\] //' 
