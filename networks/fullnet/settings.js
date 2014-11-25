@@ -25,8 +25,8 @@
     "OpenSimConnector" :
     {
         "WorldSize" : [810.0, 810.0, 100.0],
-        "WorldOffset" : [363.0, 363.0, 26.0],
-        "WorldCenter" : [768.0, 768.0, 26.0],
+        "WorldOffset" : [363.0, 363.0, 25.50],
+        "WorldCenter" : [768.0, 768.0, 25.50],
         "Scale" : 0.6,
         "PositionDelta" : 0.1,
         "VelocityDelta" : 0.1,
@@ -95,8 +95,8 @@
 	    "Length" : 3,
 	    "MinGap" : 2,
 	    "MaxSpeed" : 2.0,
-            "AssetID" : "65715f46-7dc1-4b4a-ba64-23b9f972bdc4",
-            "StartParameter" : "{ 'terminate' : 0, 'color' : '<0.0, 0.0, 1.0>', 'scale' : '<0.65, 1.5, 0.65>' }"
+            "AssetID" : { "ObjectName" : "SumoAssets Vehicles", "ItemName" : "Blue 01 A" },
+            "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }"
         },
 
         {
@@ -110,8 +110,8 @@
 	    "Length" : 2,
 	    "MinGap" : 2,
 	    "MaxSpeed" : 4.0,
-            "AssetID" : "65715f46-7dc1-4b4a-ba64-23b9f972bdc4",
-            "StartParameter" : "{ 'terminate' : 0, 'color' : '<1.0, 0.5, 0.0>', 'scale' : '<0.65, 1.0, 0.65>' }"
+            "AssetID" : { "ObjectName" : "SumoAssets Vehicles", "ItemName" : "Orange 01 A" },
+            "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }"
         },
         
         {
@@ -125,8 +125,8 @@
 	    "Length" : 2,
 	    "MinGap" : 2,
 	    "MaxSpeed" : 1.2,
-            "AssetID" : "65715f46-7dc1-4b4a-ba64-23b9f972bdc4",
-            "StartParameter" : "{ 'terminate' : 0, 'color' : '<1.0, 0.0, 1.0>', 'scale' : '<0.65, 1.0, 0.65>' }"
+            "AssetID" : { "ObjectName" : "SumoAssets Vehicles", "ItemName" : "Purple 01 A" },
+            "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }"
         },
         
         {
@@ -140,8 +140,8 @@
 	    "Length" : 3,
 	    "MinGap" : 2,
 	    "MaxSpeed" : 3.0,
-            "AssetID" : "65715f46-7dc1-4b4a-ba64-23b9f972bdc4",
-            "StartParameter" : "{ 'terminate' : 0, 'color' : '<1.0, 0.0, 0.0>', 'scale' : '<0.65, 1.75, 0.65>' }"
+            "AssetID" : { "ObjectName" : "SumoAssets Vehicles", "ItemName" : "Red 01 A" },
+            "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }"
         },
 
         {
@@ -155,8 +155,8 @@
 	    "Length" : 4,
 	    "MinGap" : 2,
 	    "MaxSpeed" : 1.0,
-            "AssetID" : "65715f46-7dc1-4b4a-ba64-23b9f972bdc4",
-            "StartParameter" : "{ 'terminate' : 0, 'color' : '<0.0, 1.0, 0.0>', 'scale' : '<1.0, 2.0, 1.0>' }"
+            "AssetID" : { "ObjectName" : "SumoAssets Vehicles", "ItemName" : "Black 01 A" },
+            "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }"
         }
     ]
 }
