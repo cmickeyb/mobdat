@@ -49,21 +49,23 @@ from mobdat.simulator import Controller
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
-def ParseConfigurationFile(cfile) :
-    try :
-        config = json.load(open(cfile))
-    except IOError as detail :
-        warnings.warn("Error parsing configuration file %s; IO error %s" % (cfile, str(detail)))
-        sys.exit(-1)
-    except ValueError as detail :
-        warnings.warn("Error parsing configuration file %s; value error %s" % (cfile, str(detail)))
-        sys.exit(-1)
-    except NameError as detail : 
-        warnings.warn("Error parsing configuration file %s; name error %s" % (cfile, str(detail)))
-        sys.exit(-1)
-    except :
-        warnings.warn('Error parsing configuration file %s; %s' % (cfile, sys.exc_info()[0]))
-        sys.exit(-1)
+def ParseConfigurationFiles(cfiles) :
+    config = {}
+    for cfile in cfiles :
+        try :
+            config.update(json.load(open(cfile)))
+        except IOError as detail :
+            warnings.warn("Error parsing configuration file %s; IO error %s" % (cfile, str(detail)))
+            sys.exit(-1)
+        except ValueError as detail :
+            warnings.warn("Error parsing configuration file %s; value error %s" % (cfile, str(detail)))
+            sys.exit(-1)
+        except NameError as detail : 
+            warnings.warn("Error parsing configuration file %s; name error %s" % (cfile, str(detail)))
+            sys.exit(-1)
+        except :
+            warnings.warn('Error parsing configuration file %s; %s' % (cfile, sys.exc_info()[0]))
+            sys.exit(-1)
 
     return config
 
@@ -170,10 +172,10 @@ def Main() :
 
     # parse out the configuration file first
     parser = argparse.ArgumentParser()
-    parser.add_argument('--config', help='configuration file for simulation settings', default='settings.js')
+    parser.add_argument('--config', help='configuration file for simulation settings', default=['settings.js'], nargs = '+')
     (options, remainder) = parser.parse_known_args()
     
-    settings = ParseConfigurationFile(options.config)
+    settings = ParseConfigurationFiles(options.config)
     ParseEnvironment(settings)
     ParseCommandLine(settings,remainder)
 

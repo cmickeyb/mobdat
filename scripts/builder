@@ -40,7 +40,7 @@ for the specified connectors (opensim, sumo or social)
 """
 
 import os, sys
-import logging
+import logging, logging.handlers, warnings
 
 # we need to import python modules from the $SUMO_HOME/tools directory
 sys.path.append(os.path.join(os.environ.get("OPENSIM","/share/opensim"),"lib","python"))
@@ -54,22 +54,23 @@ logger = logging.getLogger()
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
-def ParseConfigurationFile(cfile) :
-    try :
-        config = json.load(open(cfile))
-    except IOError as detail :
-        logger.warn("Error parsing configuration file %s; IO error %s" % (cfile, str(detail)))
-        sys.exit(-1)
-    except ValueError as detail:
-        logger.warn("Error parsing configuration file %s; value error %s" % (cfile, str(detail)))
-        sys.exit(-1)
-    except NameError as detail: 
-        logger.warn("Error parsing configuration file %s; name error %s" % (cfile, str(detail)))
-        sys.exit(-1)
-    except :
-        exctype, value =  sys.exc_info()[:2]
-        logger.warn('error parsing configuation file %s (%s/%s)', cfile, exctype, str(value))
-        sys.exit(-1)
+def ParseConfigurationFiles(cfiles) :
+    config = {}
+    for cfile in cfiles :
+        try :
+            config.update(json.load(open(cfile)))
+        except IOError as detail :
+            warnings.warn("Error parsing configuration file %s; IO error %s" % (cfile, str(detail)))
+            sys.exit(-1)
+        except ValueError as detail :
+            warnings.warn("Error parsing configuration file %s; value error %s" % (cfile, str(detail)))
+            sys.exit(-1)
+        except NameError as detail : 
+            warnings.warn("Error parsing configuration file %s; name error %s" % (cfile, str(detail)))
+            sys.exit(-1)
+        except :
+            warnings.warn('Error parsing configuration file %s; %s' % (cfile, sys.exc_info()[0]))
+            sys.exit(-1)
 
     return config
 
@@ -158,10 +159,10 @@ def Main() :
 
     # parse out the configuration file first
     parser = argparse.ArgumentParser()
-    parser.add_argument('--config', help='configuration file for simulation settings', default='settings.js')
+    parser.add_argument('--config', help='configuration file for simulation settings', default=['settings.js'], nargs = '+')
     (options, remainder) = parser.parse_known_args()
     
-    settings = ParseConfigurationFile(options.config)
+    settings = ParseConfigurationFiles(options.config)
     ParseEnvironment(settings)
     pushlist = ParseCommandLine(settings,remainder)
 
