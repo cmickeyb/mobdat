@@ -40,7 +40,7 @@ for the specified connectors (opensim, sumo or social)
 """
 
 import os, sys
-import logging
+import logging, logging.handlers, warnings
 
 # we need to import python modules from the $SUMO_HOME/tools directory
 sys.path.append(os.path.join(os.environ.get("OPENSIM","/share/opensim"),"lib","python"))
