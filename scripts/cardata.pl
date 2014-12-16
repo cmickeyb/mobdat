@@ -3,6 +3,8 @@
 use JSON;
 use Text::CSV;
 
+my $scale = 0.6;
+
 my @cars = ();
 my @header = ();
 
@@ -26,7 +28,7 @@ while (<>)
 
     my @cardata = $parser->fields();
     my %car = {};
-    for (my $i = 0; $i < $#header; $i++)
+    for (my $i = 0; $i <= $#header; $i++)
     {
         $car{$header[$i]} = $cardata[$i];
     }
@@ -34,7 +36,7 @@ while (<>)
     $data = {};
 
     $data->{'Name'} = sprintf("%s %s", $car{'Name'}, $car{'Color'});
-    $data->{'Description'} = $data->{'Description'};
+    $data->{'Description'} = $car{'Description'};
     @profiles = split(/, */, $car{'ProfileTypes'});
     $data->{'ProfileTypes'} = \@profiles;
     $data->{'Rate'} = $car{'Rate'} + 0;
@@ -47,7 +49,7 @@ while (<>)
     $data->{'AssetID'} = {};
     $data->{'AssetID'}{'ObjectName'} = $car{'Name'};
     $data->{'AssetID'}{'ItemName'} = $data->{'Name'};
-    $data->{'StartParameter'} = "{ 'terminate' : 0, 'scale' : 0.5 }";
+    $data->{'StartParameter'} = "{ 'terminate' : 1, 'scale' : $scale }";
 
     push(@cars, $data);
 }

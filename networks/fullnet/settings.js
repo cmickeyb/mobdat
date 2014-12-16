@@ -25,7 +25,7 @@
     "OpenSimConnector" :
     {
         "WorldSize" : [810.0, 810.0, 100.0],
-        "WorldOffset" : [363.0, 363.0, 26.0],
+        "WorldOffset" : [363.0, 363.0, 25.5],
         "WorldCenter" : [768.0, 768.0, 26.0],
         "Scale" : 0.6,
         "PositionDelta" : 0.1,
@@ -52,7 +52,7 @@
     "StatsConnector" :
     {
         "CollectObjectDynamics" : true,
-        "CollectObjectPattern" : "worker[357]+_trip.*"
+        "CollectObjectPattern" : "worker[0123456789]+_trip.*"
     },
 
     "RoadTypes" :

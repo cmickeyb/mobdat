@@ -1,167 +1,62 @@
 {
    "VehicleTypes" : [
       {
-         "Deceleration" : 2,
+         "Acceleration" : 0.8,
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
          "MinGap" : 2,
          "AssetID" : {
-            "ItemName" : "Model A BLACK",
-            "ObjectName" : "Model A"
+            "ObjectName" : "Model A",
+            "ItemName" : "Model A BLACK"
          },
+         "Sigma" : 0.5,
+         "Description" : "Yugo",
+         "Rate" : 15,
+         "Name" : "Model A BLACK",
+         "Length" : 2.85,
+         "MaxSpeed" : 1.2,
          "ProfileTypes" : [
             "worker",
             "student",
             "homemaker"
          ],
-         "Acceleration" : 0.8,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "Name" : "Model A BLACK",
-         "Rate" : 15,
-         "MaxSpeed" : 0,
-         "Length" : 2.85,
-         "Sigma" : 0.5,
-         "Description" : null
+         "Deceleration" : 2
       },
       {
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "Acceleration" : 0.8,
+         "Rate" : 15,
+         "Length" : 2.85,
+         "Name" : "Model A BLUE",
+         "MaxSpeed" : 1.2,
+         "Deceleration" : 2,
          "ProfileTypes" : [
             "worker",
             "student",
             "homemaker"
          ],
+         "Sigma" : 0.5,
+         "Description" : "Yugo",
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "MinGap" : 2,
+         "Acceleration" : 0.8,
          "AssetID" : {
             "ObjectName" : "Model A",
             "ItemName" : "Model A BLUE"
-         },
-         "MinGap" : 2,
-         "Deceleration" : 2,
-         "Description" : null,
-         "Sigma" : 0.5,
-         "Length" : 2.85,
-         "MaxSpeed" : 0,
-         "Rate" : 15,
-         "Name" : "Model A BLUE"
+         }
       },
       {
+         "MinGap" : 2,
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "Acceleration" : 0.8,
          "AssetID" : {
             "ItemName" : "Model A GRAY",
             "ObjectName" : "Model A"
          },
-         "MinGap" : 2,
-         "Deceleration" : 2,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "Acceleration" : 0.8,
-         "ProfileTypes" : [
-            "worker",
-            "student",
-            "homemaker"
-         ],
-         "MaxSpeed" : 0,
+         "Sigma" : 0.5,
+         "Description" : "Yugo",
          "Rate" : 15,
+         "Length" : 2.85,
          "Name" : "Model A GRAY",
-         "Description" : null,
-         "Sigma" : 0.5,
-         "Length" : 2.85
-      },
-      {
          "Deceleration" : 2,
-         "AssetID" : {
-            "ItemName" : "Model A GREEN",
-            "ObjectName" : "Model A"
-         },
-         "MinGap" : 2,
-         "ProfileTypes" : [
-            "worker",
-            "student",
-            "homemaker"
-         ],
-         "Acceleration" : 0.8,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "Name" : "Model A GREEN",
-         "Rate" : 15,
-         "MaxSpeed" : 0,
-         "Length" : 2.85,
-         "Sigma" : 0.5,
-         "Description" : null
-      },
-      {
-         "AssetID" : {
-            "ObjectName" : "Model A",
-            "ItemName" : "Model A ORANGE"
-         },
-         "MinGap" : 2,
-         "Deceleration" : 2,
-         "Acceleration" : 0.8,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "ProfileTypes" : [
-            "worker",
-            "student",
-            "homemaker"
-         ],
-         "MaxSpeed" : 0,
-         "Rate" : 15,
-         "Name" : "Model A ORANGE",
-         "Description" : null,
-         "Sigma" : 0.5,
-         "Length" : 2.85
-      },
-      {
-         "Description" : null,
-         "Sigma" : 0.5,
-         "Length" : 2.85,
-         "Rate" : 15,
-         "MaxSpeed" : 0,
-         "Name" : "Model A PURPLE",
-         "ProfileTypes" : [
-            "worker",
-            "student",
-            "homemaker"
-         ],
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "Acceleration" : 0.8,
-         "Deceleration" : 2,
-         "AssetID" : {
-            "ItemName" : "Model A PURPLE",
-            "ObjectName" : "Model A"
-         },
-         "MinGap" : 2
-      },
-      {
-         "AssetID" : {
-            "ItemName" : "Model A RED",
-            "ObjectName" : "Model A"
-         },
-         "MinGap" : 2,
-         "Deceleration" : 2,
-         "Acceleration" : 0.8,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "ProfileTypes" : [
-            "worker",
-            "student",
-            "homemaker"
-         ],
-         "MaxSpeed" : 0,
-         "Rate" : 15,
-         "Name" : "Model A RED",
-         "Description" : null,
-         "Length" : 2.85,
-         "Sigma" : 0.5
-      },
-      {
-         "MaxSpeed" : 0,
-         "Rate" : 15,
-         "Name" : "Model A WHITE",
-         "Description" : null,
-         "Sigma" : 0.5,
-         "Length" : 2.85,
-         "MinGap" : 2,
-         "AssetID" : {
-            "ItemName" : "Model A WHITE",
-            "ObjectName" : "Model A"
-         },
-         "Deceleration" : 2,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "Acceleration" : 0.8,
+         "MaxSpeed" : 1.2,
          "ProfileTypes" : [
             "worker",
             "student",
@@ -169,587 +64,545 @@
          ]
       },
       {
-         "Length" : 2.85,
          "Sigma" : 0.5,
-         "Description" : null,
-         "Name" : "Model A YELLOW",
-         "MaxSpeed" : 0,
-         "Rate" : 15,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
+         "Description" : "Yugo",
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
          "Acceleration" : 0.8,
+         "MinGap" : 2,
+         "AssetID" : {
+            "ItemName" : "Model A GREEN",
+            "ObjectName" : "Model A"
+         },
+         "Rate" : 15,
+         "Name" : "Model A GREEN",
+         "Length" : 2.85,
+         "Deceleration" : 2,
+         "MaxSpeed" : 1.2,
+         "ProfileTypes" : [
+            "worker",
+            "student",
+            "homemaker"
+         ]
+      },
+      {
+         "Rate" : 15,
+         "Deceleration" : 2,
+         "MaxSpeed" : 1.2,
          "ProfileTypes" : [
             "worker",
             "student",
             "homemaker"
          ],
+         "Name" : "Model A ORANGE",
+         "Length" : 2.85,
+         "AssetID" : {
+            "ObjectName" : "Model A",
+            "ItemName" : "Model A ORANGE"
+         },
          "MinGap" : 2,
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "Acceleration" : 0.8,
+         "Sigma" : 0.5,
+         "Description" : "Yugo"
+      },
+      {
+         "AssetID" : {
+            "ObjectName" : "Model A",
+            "ItemName" : "Model A PURPLE"
+         },
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "MinGap" : 2,
+         "Acceleration" : 0.8,
+         "Sigma" : 0.5,
+         "Description" : "Yugo",
+         "Rate" : 15,
+         "Deceleration" : 2,
+         "MaxSpeed" : 1.2,
+         "ProfileTypes" : [
+            "worker",
+            "student",
+            "homemaker"
+         ],
+         "Name" : "Model A PURPLE",
+         "Length" : 2.85
+      },
+      {
+         "ProfileTypes" : [
+            "worker",
+            "student",
+            "homemaker"
+         ],
+         "MaxSpeed" : 1.2,
+         "Deceleration" : 2,
+         "Name" : "Model A RED",
+         "Length" : 2.85,
+         "Rate" : 15,
+         "Sigma" : 0.5,
+         "Description" : "Yugo",
+         "AssetID" : {
+            "ObjectName" : "Model A",
+            "ItemName" : "Model A RED"
+         },
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "MinGap" : 2,
+         "Acceleration" : 0.8
+      },
+      {
+         "Sigma" : 0.5,
+         "Description" : "Yugo",
+         "Acceleration" : 0.8,
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "MinGap" : 2,
+         "AssetID" : {
+            "ItemName" : "Model A WHITE",
+            "ObjectName" : "Model A"
+         },
+         "Length" : 2.85,
+         "Name" : "Model A WHITE",
+         "MaxSpeed" : 1.2,
+         "Deceleration" : 2,
+         "ProfileTypes" : [
+            "worker",
+            "student",
+            "homemaker"
+         ],
+         "Rate" : 15
+      },
+      {
+         "Deceleration" : 2,
+         "MaxSpeed" : 1.2,
+         "ProfileTypes" : [
+            "worker",
+            "student",
+            "homemaker"
+         ],
+         "Name" : "Model A YELLOW",
+         "Length" : 2.85,
+         "Rate" : 15,
          "AssetID" : {
             "ObjectName" : "Model A",
             "ItemName" : "Model A YELLOW"
          },
-         "Deceleration" : 2
-      },
-      {
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "Acceleration" : 2,
-         "ProfileTypes" : [
-            "worker",
-            "student",
-            "homemaker"
-         ],
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
          "MinGap" : 2,
-         "AssetID" : {
-            "ItemName" : "Model B BLACK",
-            "ObjectName" : "Model B"
-         },
-         "Deceleration" : 2,
-         "Description" : null,
-         "Length" : 3.65,
+         "Acceleration" : 0.8,
          "Sigma" : 0.5,
-         "MaxSpeed" : 0,
-         "Rate" : 35,
-         "Name" : "Model B BLACK"
+         "Description" : "Yugo"
       },
       {
+         "MaxSpeed" : 3,
          "ProfileTypes" : [
             "worker",
             "student",
             "homemaker"
          ],
-         "Acceleration" : 2,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
          "Deceleration" : 2,
-         "MinGap" : 2,
+         "Length" : 3.65,
+         "Name" : "Model B BLACK",
+         "Rate" : 35,
+         "Sigma" : 0.5,
+         "Description" : "Sedan",
          "AssetID" : {
-            "ItemName" : "Model B BLUE",
-            "ObjectName" : "Model B"
+            "ObjectName" : "Model B",
+            "ItemName" : "Model B BLACK"
          },
-         "Description" : null,
-         "Length" : 3.65,
-         "Sigma" : 0.5,
-         "Rate" : 35,
-         "MaxSpeed" : 0,
-         "Name" : "Model B BLUE"
-      },
-      {
-         "Sigma" : 0.5,
-         "Length" : 3.65,
-         "Description" : null,
-         "Name" : "Model B GRAY",
-         "Rate" : 35,
-         "MaxSpeed" : 0,
-         "ProfileTypes" : [
-            "worker",
-            "student",
-            "homemaker"
-         ],
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
          "Acceleration" : 2,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "Deceleration" : 2,
-         "AssetID" : {
-            "ItemName" : "Model B GRAY",
-            "ObjectName" : "Model B"
-         },
          "MinGap" : 2
       },
       {
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
+         "Sigma" : 0.5,
+         "Description" : "Sedan",
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "MinGap" : 2,
          "Acceleration" : 2,
+         "AssetID" : {
+            "ObjectName" : "Model B",
+            "ItemName" : "Model B BLUE"
+         },
+         "Rate" : 35,
+         "Length" : 3.65,
+         "Name" : "Model B BLUE",
+         "MaxSpeed" : 3,
+         "Deceleration" : 2,
+         "ProfileTypes" : [
+            "worker",
+            "student",
+            "homemaker"
+         ]
+      },
+      {
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "Acceleration" : 2,
+         "MinGap" : 2,
+         "AssetID" : {
+            "ObjectName" : "Model B",
+            "ItemName" : "Model B GRAY"
+         },
+         "Sigma" : 0.5,
+         "Description" : "Sedan",
+         "Length" : 3.65,
+         "Name" : "Model B GRAY",
+         "Deceleration" : 2,
+         "MaxSpeed" : 3,
          "ProfileTypes" : [
             "worker",
             "student",
             "homemaker"
          ],
+         "Rate" : 35
+      },
+      {
+         "Rate" : 35,
+         "Deceleration" : 2,
+         "MaxSpeed" : 3,
+         "ProfileTypes" : [
+            "worker",
+            "student",
+            "homemaker"
+         ],
+         "Name" : "Model B GREEN",
+         "Length" : 3.65,
          "AssetID" : {
             "ItemName" : "Model B GREEN",
             "ObjectName" : "Model B"
          },
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
          "MinGap" : 2,
-         "Deceleration" : 2,
-         "Description" : null,
+         "Acceleration" : 2,
          "Sigma" : 0.5,
-         "Length" : 3.65,
-         "MaxSpeed" : 0,
-         "Rate" : 35,
-         "Name" : "Model B GREEN"
+         "Description" : "Sedan"
       },
       {
          "AssetID" : {
             "ItemName" : "Model B ORANGE",
             "ObjectName" : "Model B"
          },
-         "MinGap" : 2,
-         "Deceleration" : 2,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
          "Acceleration" : 2,
+         "MinGap" : 2,
+         "Sigma" : 0.5,
+         "Description" : "Sedan",
+         "Rate" : 35,
+         "MaxSpeed" : 3,
+         "Deceleration" : 2,
          "ProfileTypes" : [
             "worker",
             "student",
             "homemaker"
          ],
-         "Name" : "Model B ORANGE",
-         "MaxSpeed" : 0,
-         "Rate" : 35,
-         "Sigma" : 0.5,
          "Length" : 3.65,
-         "Description" : null
+         "Name" : "Model B ORANGE"
       },
       {
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "MinGap" : 2,
+         "Acceleration" : 2,
+         "AssetID" : {
+            "ItemName" : "Model B PURPLE",
+            "ObjectName" : "Model B"
+         },
+         "Sigma" : 0.5,
+         "Description" : "Sedan",
+         "Length" : 3.65,
          "Name" : "Model B PURPLE",
-         "Rate" : 35,
-         "MaxSpeed" : 0,
-         "Sigma" : 0.5,
-         "Length" : 3.65,
-         "Description" : null,
          "Deceleration" : 2,
-         "AssetID" : {
-            "ObjectName" : "Model B",
-            "ItemName" : "Model B PURPLE"
-         },
-         "MinGap" : 2,
+         "MaxSpeed" : 3,
          "ProfileTypes" : [
             "worker",
             "student",
             "homemaker"
          ],
-         "Acceleration" : 2,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }"
-      },
-      {
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "Acceleration" : 2,
-         "ProfileTypes" : [
-            "worker",
-            "student",
-            "homemaker"
-         ],
-         "MinGap" : 2,
-         "AssetID" : {
-            "ObjectName" : "Model B",
-            "ItemName" : "Model B RED"
-         },
-         "Deceleration" : 2,
-         "Sigma" : 0.5,
-         "Length" : 3.65,
-         "Description" : null,
-         "Name" : "Model B RED",
-         "MaxSpeed" : 0,
          "Rate" : 35
       },
       {
          "Sigma" : 0.5,
-         "Length" : 3.65,
-         "Description" : null,
-         "Name" : "Model B WHITE",
-         "Rate" : 35,
-         "MaxSpeed" : 0,
+         "Description" : "Sedan",
+         "AssetID" : {
+            "ItemName" : "Model B RED",
+            "ObjectName" : "Model B"
+         },
+         "Acceleration" : 2,
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "MinGap" : 2,
+         "MaxSpeed" : 3,
+         "Deceleration" : 2,
          "ProfileTypes" : [
             "worker",
             "student",
             "homemaker"
          ],
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "Acceleration" : 2,
-         "Deceleration" : 2,
-         "MinGap" : 2,
+         "Length" : 3.65,
+         "Name" : "Model B RED",
+         "Rate" : 35
+      },
+      {
+         "Sigma" : 0.5,
+         "Description" : "Sedan",
          "AssetID" : {
             "ItemName" : "Model B WHITE",
             "ObjectName" : "Model B"
-         }
-      },
-      {
-         "Name" : "Model B YELLOW",
-         "MaxSpeed" : 0,
-         "Rate" : 35,
-         "Sigma" : 0.5,
-         "Length" : 3.65,
-         "Description" : null,
-         "MinGap" : 2,
-         "AssetID" : {
-            "ObjectName" : "Model B",
-            "ItemName" : "Model B YELLOW"
          },
-         "Deceleration" : 2,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
          "Acceleration" : 2,
-         "ProfileTypes" : [
-            "worker",
-            "student",
-            "homemaker"
-         ]
-      },
-      {
-         "MaxSpeed" : 0,
-         "Rate" : 10,
-         "Name" : "Model C BLACK",
-         "Description" : null,
-         "Length" : 4,
-         "Sigma" : 0.5,
-         "AssetID" : {
-            "ItemName" : "Model C BLACK",
-            "ObjectName" : "Model C"
-         },
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
          "MinGap" : 2,
-         "Deceleration" : 2,
-         "Acceleration" : 3,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "ProfileTypes" : [
-            "worker",
-            "student",
-            "homemaker"
-         ]
-      },
-      {
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "Acceleration" : 3,
+         "Rate" : 35,
          "ProfileTypes" : [
             "worker",
             "student",
             "homemaker"
          ],
+         "MaxSpeed" : 3,
+         "Deceleration" : 2,
+         "Name" : "Model B WHITE",
+         "Length" : 3.65
+      },
+      {
+         "Rate" : 35,
+         "Name" : "Model B YELLOW",
+         "Length" : 3.65,
+         "ProfileTypes" : [
+            "worker",
+            "student",
+            "homemaker"
+         ],
+         "MaxSpeed" : 3,
+         "Deceleration" : 2,
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "MinGap" : 2,
+         "Acceleration" : 2,
+         "AssetID" : {
+            "ItemName" : "Model B YELLOW",
+            "ObjectName" : "Model B"
+         },
+         "Sigma" : 0.5,
+         "Description" : "Sedan"
+      },
+      {
+         "Sigma" : 0.5,
+         "Description" : "Sports Car",
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "MinGap" : 2,
+         "Acceleration" : 3,
+         "AssetID" : {
+            "ObjectName" : "Model C",
+            "ItemName" : "Model C BLACK"
+         },
+         "Name" : "Model C BLACK",
+         "Length" : 4,
+         "Deceleration" : 2,
+         "MaxSpeed" : 4,
+         "ProfileTypes" : [
+            "worker",
+            "student",
+            "homemaker"
+         ],
+         "Rate" : 10
+      },
+      {
          "AssetID" : {
             "ItemName" : "Model C BLUE",
             "ObjectName" : "Model C"
          },
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
          "MinGap" : 2,
+         "Acceleration" : 3,
+         "Sigma" : 0.5,
+         "Description" : "Sports Car",
+         "Rate" : 10,
+         "MaxSpeed" : 4,
+         "ProfileTypes" : [
+            "worker",
+            "student",
+            "homemaker"
+         ],
          "Deceleration" : 2,
          "Length" : 4,
-         "Sigma" : 0.5,
-         "Description" : null,
-         "Name" : "Model C BLUE",
-         "MaxSpeed" : 0,
-         "Rate" : 10
+         "Name" : "Model C BLUE"
       },
       {
+         "Sigma" : 0.5,
+         "Description" : "Sports Car",
+         "Acceleration" : 3,
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "MinGap" : 2,
          "AssetID" : {
             "ItemName" : "Model C GRAY",
             "ObjectName" : "Model C"
          },
-         "MinGap" : 2,
-         "Deceleration" : 2,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "Acceleration" : 3,
-         "ProfileTypes" : [
-            "worker",
-            "student",
-            "homemaker"
-         ],
-         "MaxSpeed" : 0,
          "Rate" : 10,
          "Name" : "Model C GRAY",
-         "Description" : null,
          "Length" : 4,
-         "Sigma" : 0.5
+         "Deceleration" : 2,
+         "MaxSpeed" : 4,
+         "ProfileTypes" : [
+            "worker",
+            "student",
+            "homemaker"
+         ]
       },
       {
+         "Name" : "Model C GREEN",
+         "Length" : 4,
+         "MaxSpeed" : 4,
+         "Deceleration" : 2,
          "ProfileTypes" : [
             "worker",
             "student",
             "homemaker"
          ],
+         "Rate" : 10,
+         "Sigma" : 0.5,
+         "Description" : "Sports Car",
          "Acceleration" : 3,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "Deceleration" : 2,
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
          "MinGap" : 2,
          "AssetID" : {
             "ObjectName" : "Model C",
             "ItemName" : "Model C GREEN"
-         },
-         "Sigma" : 0.5,
-         "Length" : 4,
-         "Description" : null,
-         "Name" : "Model C GREEN",
-         "Rate" : 10,
-         "MaxSpeed" : 0
+         }
       },
       {
+         "Rate" : 10,
+         "Length" : 4,
+         "Name" : "Model C ORANGE",
+         "MaxSpeed" : 4,
+         "ProfileTypes" : [
+            "worker",
+            "student",
+            "homemaker"
+         ],
+         "Deceleration" : 2,
+         "Description" : "Sports Car",
+         "Sigma" : 0.5,
+         "Acceleration" : 3,
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
          "MinGap" : 2,
          "AssetID" : {
             "ObjectName" : "Model C",
             "ItemName" : "Model C ORANGE"
-         },
-         "Deceleration" : 2,
-         "Acceleration" : 3,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "ProfileTypes" : [
-            "worker",
-            "student",
-            "homemaker"
-         ],
-         "Name" : "Model C ORANGE",
-         "MaxSpeed" : 0,
-         "Rate" : 10,
-         "Length" : 4,
-         "Sigma" : 0.5,
-         "Description" : null
-      },
-      {
-         "Deceleration" : 2,
-         "AssetID" : {
-            "ObjectName" : "Model C",
-            "ItemName" : "Model C PURPLE"
-         },
-         "MinGap" : 2,
-         "ProfileTypes" : [
-            "worker",
-            "student",
-            "homemaker"
-         ],
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "Acceleration" : 3,
-         "Rate" : 10,
-         "MaxSpeed" : 0,
-         "Name" : "Model C PURPLE",
-         "Description" : null,
-         "Length" : 4,
-         "Sigma" : 0.5
-      },
-      {
-         "Deceleration" : 2,
-         "MinGap" : 2,
-         "AssetID" : {
-            "ItemName" : "Model C RED",
-            "ObjectName" : "Model C"
-         },
-         "ProfileTypes" : [
-            "worker",
-            "student",
-            "homemaker"
-         ],
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "Acceleration" : 3,
-         "Rate" : 10,
-         "MaxSpeed" : 0,
-         "Name" : "Model C RED",
-         "Description" : null,
-         "Length" : 4,
-         "Sigma" : 0.5
-      },
-      {
-         "Rate" : 10,
-         "MaxSpeed" : 0,
-         "Name" : "Model C WHITE",
-         "Description" : null,
-         "Length" : 4,
-         "Sigma" : 0.5,
-         "Deceleration" : 2,
-         "AssetID" : {
-            "ObjectName" : "Model C",
-            "ItemName" : "Model C WHITE"
-         },
-         "MinGap" : 2,
-         "ProfileTypes" : [
-            "worker",
-            "student",
-            "homemaker"
-         ],
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "Acceleration" : 3
-      },
-      {
-         "MaxSpeed" : 0,
-         "Rate" : 10,
-         "Name" : "Model C YELLOW",
-         "Description" : null,
-         "Sigma" : 0.5,
-         "Length" : 4,
-         "MinGap" : 2,
-         "AssetID" : {
-            "ItemName" : "Model C YELLOW",
-            "ObjectName" : "Model C"
-         },
-         "Deceleration" : 2,
-         "Acceleration" : 3,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "ProfileTypes" : [
-            "worker",
-            "student",
-            "homemaker"
-         ]
-      },
-      {
-         "AssetID" : {
-            "ItemName" : "Model D BLACK",
-            "ObjectName" : "Model D"
-         },
-         "MinGap" : 2,
-         "Deceleration" : 2,
-         "Acceleration" : 1.75,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "ProfileTypes" : [
-            "worker",
-            "student",
-            "homemaker"
-         ],
-         "MaxSpeed" : 0,
-         "Rate" : 35,
-         "Name" : "Model D BLACK",
-         "Description" : null,
-         "Length" : 3.65,
-         "Sigma" : 0.5
-      },
-      {
-         "Sigma" : 0.5,
-         "Length" : 3.65,
-         "Description" : null,
-         "Name" : "Model D BLUE",
-         "Rate" : 35,
-         "MaxSpeed" : 0,
-         "ProfileTypes" : [
-            "worker",
-            "student",
-            "homemaker"
-         ],
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "Acceleration" : 1.75,
-         "Deceleration" : 2,
-         "AssetID" : {
-            "ItemName" : "Model D BLUE",
-            "ObjectName" : "Model D"
-         },
-         "MinGap" : 2
-      },
-      {
-         "Name" : "Model D GRAY",
-         "Rate" : 35,
-         "MaxSpeed" : 0,
-         "Length" : 3.65,
-         "Sigma" : 0.5,
-         "Description" : null,
-         "Deceleration" : 2,
-         "AssetID" : {
-            "ObjectName" : "Model D",
-            "ItemName" : "Model D GRAY"
-         },
-         "MinGap" : 2,
-         "ProfileTypes" : [
-            "worker",
-            "student",
-            "homemaker"
-         ],
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "Acceleration" : 1.75
-      },
-      {
-         "ProfileTypes" : [
-            "worker",
-            "student",
-            "homemaker"
-         ],
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "Acceleration" : 1.75,
-         "Deceleration" : 2,
-         "AssetID" : {
-            "ItemName" : "Model D GREEN",
-            "ObjectName" : "Model D"
-         },
-         "MinGap" : 2,
-         "Description" : null,
-         "Length" : 3.65,
-         "Sigma" : 0.5,
-         "Rate" : 35,
-         "MaxSpeed" : 0,
-         "Name" : "Model D GREEN"
-      },
-      {
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "Acceleration" : 1.75,
-         "ProfileTypes" : [
-            "worker",
-            "student",
-            "homemaker"
-         ],
-         "AssetID" : {
-            "ItemName" : "Model D ORANGE",
-            "ObjectName" : "Model D"
-         },
-         "MinGap" : 2,
-         "Deceleration" : 2,
-         "Sigma" : 0.5,
-         "Length" : 3.65,
-         "Description" : null,
-         "Name" : "Model D ORANGE",
-         "MaxSpeed" : 0,
-         "Rate" : 35
-      },
-      {
-         "MaxSpeed" : 0,
-         "Rate" : 35,
-         "Name" : "Model D PURPLE",
-         "Description" : null,
-         "Length" : 3.65,
-         "Sigma" : 0.5,
-         "AssetID" : {
-            "ObjectName" : "Model D",
-            "ItemName" : "Model D PURPLE"
-         },
-         "MinGap" : 2,
-         "Deceleration" : 2,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "Acceleration" : 1.75,
-         "ProfileTypes" : [
-            "worker",
-            "student",
-            "homemaker"
-         ]
-      },
-      {
-         "Description" : null,
-         "Sigma" : 0.5,
-         "Length" : 3.65,
-         "Rate" : 35,
-         "MaxSpeed" : 0,
-         "Name" : "Model D RED",
-         "ProfileTypes" : [
-            "worker",
-            "student",
-            "homemaker"
-         ],
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "Acceleration" : 1.75,
-         "Deceleration" : 2,
-         "MinGap" : 2,
-         "AssetID" : {
-            "ObjectName" : "Model D",
-            "ItemName" : "Model D RED"
          }
       },
       {
          "AssetID" : {
-            "ItemName" : "Model D WHITE",
-            "ObjectName" : "Model D"
+            "ItemName" : "Model C PURPLE",
+            "ObjectName" : "Model C"
          },
          "MinGap" : 2,
-         "Deceleration" : 2,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "Acceleration" : 1.75,
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "Acceleration" : 3,
+         "Sigma" : 0.5,
+         "Description" : "Sports Car",
+         "MaxSpeed" : 4,
          "ProfileTypes" : [
             "worker",
             "student",
             "homemaker"
          ],
-         "Name" : "Model D WHITE",
-         "MaxSpeed" : 0,
-         "Rate" : 35,
-         "Sigma" : 0.5,
-         "Length" : 3.65,
-         "Description" : null
+         "Deceleration" : 2,
+         "Length" : 4,
+         "Name" : "Model C PURPLE",
+         "Rate" : 10
       },
       {
-         "MaxSpeed" : 0,
-         "Rate" : 35,
-         "Name" : "Model D YELLOW",
-         "Description" : null,
-         "Length" : 3.65,
+         "Rate" : 10,
+         "Deceleration" : 2,
+         "MaxSpeed" : 4,
+         "ProfileTypes" : [
+            "worker",
+            "student",
+            "homemaker"
+         ],
+         "Name" : "Model C RED",
+         "Length" : 4,
+         "AssetID" : {
+            "ObjectName" : "Model C",
+            "ItemName" : "Model C RED"
+         },
+         "Acceleration" : 3,
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "MinGap" : 2,
          "Sigma" : 0.5,
+         "Description" : "Sports Car"
+      },
+      {
+         "MinGap" : 2,
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "Acceleration" : 3,
+         "AssetID" : {
+            "ObjectName" : "Model C",
+            "ItemName" : "Model C WHITE"
+         },
+         "Sigma" : 0.5,
+         "Description" : "Sports Car",
+         "Name" : "Model C WHITE",
+         "Length" : 4,
+         "MaxSpeed" : 4,
+         "Deceleration" : 2,
+         "ProfileTypes" : [
+            "worker",
+            "student",
+            "homemaker"
+         ],
+         "Rate" : 10
+      },
+      {
+         "AssetID" : {
+            "ObjectName" : "Model C",
+            "ItemName" : "Model C YELLOW"
+         },
+         "MinGap" : 2,
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "Acceleration" : 3,
+         "Sigma" : 0.5,
+         "Description" : "Sports Car",
+         "ProfileTypes" : [
+            "worker",
+            "student",
+            "homemaker"
+         ],
+         "MaxSpeed" : 4,
+         "Deceleration" : 2,
+         "Length" : 4,
+         "Name" : "Model C YELLOW",
+         "Rate" : 10
+      },
+      {
+         "Rate" : 35,
+         "Length" : 3.65,
+         "Name" : "Model D BLACK",
+         "MaxSpeed" : 2,
+         "ProfileTypes" : [
+            "worker",
+            "student",
+            "homemaker"
+         ],
+         "Deceleration" : 2,
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "Acceleration" : 1.75,
          "MinGap" : 2,
          "AssetID" : {
-            "ItemName" : "Model D YELLOW",
+            "ItemName" : "Model D BLACK",
             "ObjectName" : "Model D"
          },
-         "Deceleration" : 2,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
+         "Sigma" : 0.5,
+         "Description" : "Hatchback"
+      },
+      {
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
          "Acceleration" : 1.75,
+         "MinGap" : 2,
+         "AssetID" : {
+            "ObjectName" : "Model D",
+            "ItemName" : "Model D BLUE"
+         },
+         "Sigma" : 0.5,
+         "Description" : "Hatchback",
+         "Rate" : 35,
+         "Name" : "Model D BLUE",
+         "Length" : 3.65,
+         "Deceleration" : 2,
+         "MaxSpeed" : 2,
          "ProfileTypes" : [
             "worker",
             "student",
@@ -757,293 +610,440 @@
          ]
       },
       {
-         "Name" : "Model E BLACK",
-         "MaxSpeed" : 0,
-         "Rate" : 15,
+         "MinGap" : 2,
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "Acceleration" : 1.75,
+         "AssetID" : {
+            "ItemName" : "Model D GRAY",
+            "ObjectName" : "Model D"
+         },
          "Sigma" : 0.5,
+         "Description" : "Hatchback",
          "Length" : 3.65,
-         "Description" : null,
+         "Name" : "Model D GRAY",
+         "MaxSpeed" : 2,
+         "ProfileTypes" : [
+            "worker",
+            "student",
+            "homemaker"
+         ],
+         "Deceleration" : 2,
+         "Rate" : 35
+      },
+      {
+         "Name" : "Model D GREEN",
+         "Length" : 3.65,
+         "MaxSpeed" : 2,
+         "Deceleration" : 2,
+         "ProfileTypes" : [
+            "worker",
+            "student",
+            "homemaker"
+         ],
+         "Rate" : 35,
+         "Sigma" : 0.5,
+         "Description" : "Hatchback",
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "MinGap" : 2,
+         "Acceleration" : 1.75,
+         "AssetID" : {
+            "ObjectName" : "Model D",
+            "ItemName" : "Model D GREEN"
+         }
+      },
+      {
+         "ProfileTypes" : [
+            "worker",
+            "student",
+            "homemaker"
+         ],
+         "MaxSpeed" : 2,
+         "Deceleration" : 2,
+         "Name" : "Model D ORANGE",
+         "Length" : 3.65,
+         "Rate" : 35,
+         "AssetID" : {
+            "ObjectName" : "Model D",
+            "ItemName" : "Model D ORANGE"
+         },
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "MinGap" : 2,
+         "Acceleration" : 1.75,
+         "Sigma" : 0.5,
+         "Description" : "Hatchback"
+      },
+      {
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "Acceleration" : 1.75,
+         "MinGap" : 2,
+         "AssetID" : {
+            "ObjectName" : "Model D",
+            "ItemName" : "Model D PURPLE"
+         },
+         "Sigma" : 0.5,
+         "Description" : "Hatchback",
+         "Name" : "Model D PURPLE",
+         "Length" : 3.65,
+         "ProfileTypes" : [
+            "worker",
+            "student",
+            "homemaker"
+         ],
+         "MaxSpeed" : 2,
+         "Deceleration" : 2,
+         "Rate" : 35
+      },
+      {
+         "AssetID" : {
+            "ObjectName" : "Model D",
+            "ItemName" : "Model D RED"
+         },
+         "Acceleration" : 1.75,
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "MinGap" : 2,
+         "Sigma" : 0.5,
+         "Description" : "Hatchback",
+         "ProfileTypes" : [
+            "worker",
+            "student",
+            "homemaker"
+         ],
+         "MaxSpeed" : 2,
+         "Deceleration" : 2,
+         "Name" : "Model D RED",
+         "Length" : 3.65,
+         "Rate" : 35
+      },
+      {
+         "Rate" : 35,
+         "Deceleration" : 2,
+         "MaxSpeed" : 2,
+         "ProfileTypes" : [
+            "worker",
+            "student",
+            "homemaker"
+         ],
+         "Length" : 3.65,
+         "Name" : "Model D WHITE",
+         "Sigma" : 0.5,
+         "Description" : "Hatchback",
+         "AssetID" : {
+            "ObjectName" : "Model D",
+            "ItemName" : "Model D WHITE"
+         },
+         "Acceleration" : 1.75,
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "MinGap" : 2
+      },
+      {
+         "MaxSpeed" : 2,
+         "Deceleration" : 2,
+         "ProfileTypes" : [
+            "worker",
+            "student",
+            "homemaker"
+         ],
+         "Name" : "Model D YELLOW",
+         "Length" : 3.65,
+         "Rate" : 35,
+         "Description" : "Hatchback",
+         "Sigma" : 0.5,
+         "AssetID" : {
+            "ObjectName" : "Model D",
+            "ItemName" : "Model D YELLOW"
+         },
+         "Acceleration" : 1.75,
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "MinGap" : 2
+      },
+      {
+         "Rate" : 15,
+         "MaxSpeed" : 2.5,
+         "Deceleration" : 1.5,
+         "ProfileTypes" : [
+            "worker",
+            "student",
+            "homemaker"
+         ],
+         "Length" : 3.65,
+         "Name" : "Model E BLACK",
+         "Sigma" : 0.5,
+         "Description" : "Sport Utility",
          "AssetID" : {
             "ItemName" : "Model E BLACK",
             "ObjectName" : "Model E"
          },
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
          "MinGap" : 2,
-         "Deceleration" : 1.5,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "Acceleration" : 1.5,
+         "Acceleration" : 1.5
+      },
+      {
+         "Rate" : 15,
+         "MaxSpeed" : 2.5,
          "ProfileTypes" : [
             "worker",
             "student",
             "homemaker"
-         ]
-      },
-      {
-         "Name" : "Model E BLUE",
-         "Rate" : 15,
-         "MaxSpeed" : 0,
-         "Length" : 3.65,
-         "Sigma" : 0.5,
-         "Description" : null,
+         ],
          "Deceleration" : 1.5,
-         "MinGap" : 2,
+         "Length" : 3.65,
+         "Name" : "Model E BLUE",
+         "Sigma" : 0.5,
+         "Description" : "Sport Utility",
          "AssetID" : {
             "ObjectName" : "Model E",
             "ItemName" : "Model E BLUE"
          },
-         "ProfileTypes" : [
-            "worker",
-            "student",
-            "homemaker"
-         ],
-         "Acceleration" : 1.5,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }"
-      },
-      {
-         "Name" : "Model E GRAY",
-         "MaxSpeed" : 0,
-         "Rate" : 15,
-         "Length" : 3.65,
-         "Sigma" : 0.5,
-         "Description" : null,
-         "AssetID" : {
-            "ItemName" : "Model E GRAY",
-            "ObjectName" : "Model E"
-         },
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
          "MinGap" : 2,
-         "Deceleration" : 1.5,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "Acceleration" : 1.5,
-         "ProfileTypes" : [
-            "worker",
-            "student",
-            "homemaker"
-         ]
+         "Acceleration" : 1.5
       },
       {
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "Acceleration" : 1.5,
+         "Length" : 3.65,
+         "Name" : "Model E GRAY",
          "ProfileTypes" : [
             "worker",
             "student",
             "homemaker"
          ],
+         "MaxSpeed" : 2.5,
+         "Deceleration" : 1.5,
+         "Rate" : 15,
+         "Sigma" : 0.5,
+         "Description" : "Sport Utility",
+         "MinGap" : 2,
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "Acceleration" : 1.5,
+         "AssetID" : {
+            "ObjectName" : "Model E",
+            "ItemName" : "Model E GRAY"
+         }
+      },
+      {
+         "Sigma" : 0.5,
+         "Description" : "Sport Utility",
+         "MinGap" : 2,
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "Acceleration" : 1.5,
          "AssetID" : {
             "ObjectName" : "Model E",
             "ItemName" : "Model E GREEN"
          },
-         "MinGap" : 2,
-         "Deceleration" : 1.5,
-         "Sigma" : 0.5,
+         "Rate" : 15,
          "Length" : 3.65,
-         "Description" : null,
          "Name" : "Model E GREEN",
-         "MaxSpeed" : 0,
-         "Rate" : 15
+         "ProfileTypes" : [
+            "worker",
+            "student",
+            "homemaker"
+         ],
+         "MaxSpeed" : 2.5,
+         "Deceleration" : 1.5
       },
       {
+         "Name" : "Model E ORANGE",
+         "Length" : 3.65,
+         "Deceleration" : 1.5,
+         "MaxSpeed" : 2.5,
+         "ProfileTypes" : [
+            "worker",
+            "student",
+            "homemaker"
+         ],
+         "Rate" : 15,
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "MinGap" : 2,
+         "Acceleration" : 1.5,
          "AssetID" : {
             "ItemName" : "Model E ORANGE",
             "ObjectName" : "Model E"
          },
+         "Description" : "Sport Utility",
+         "Sigma" : 0.5
+      },
+      {
+         "Sigma" : 0.5,
+         "Description" : "Sport Utility",
+         "AssetID" : {
+            "ItemName" : "Model E PURPLE",
+            "ObjectName" : "Model E"
+         },
+         "Acceleration" : 1.5,
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
          "MinGap" : 2,
          "Deceleration" : 1.5,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "Acceleration" : 1.5,
+         "MaxSpeed" : 2.5,
          "ProfileTypes" : [
             "worker",
             "student",
             "homemaker"
          ],
-         "MaxSpeed" : 0,
-         "Rate" : 15,
-         "Name" : "Model E ORANGE",
-         "Description" : null,
          "Length" : 3.65,
-         "Sigma" : 0.5
+         "Name" : "Model E PURPLE",
+         "Rate" : 15
       },
       {
-         "MaxSpeed" : 0,
-         "Rate" : 15,
-         "Name" : "Model E PURPLE",
-         "Description" : null,
-         "Sigma" : 0.5,
          "Length" : 3.65,
-         "MinGap" : 2,
-         "AssetID" : {
-            "ObjectName" : "Model E",
-            "ItemName" : "Model E PURPLE"
-         },
-         "Deceleration" : 1.5,
-         "Acceleration" : 1.5,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
+         "Name" : "Model E RED",
+         "MaxSpeed" : 2.5,
          "ProfileTypes" : [
             "worker",
             "student",
             "homemaker"
-         ]
-      },
-      {
+         ],
+         "Deceleration" : 1.5,
+         "Rate" : 15,
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "Acceleration" : 1.5,
+         "MinGap" : 2,
          "AssetID" : {
             "ItemName" : "Model E RED",
             "ObjectName" : "Model E"
          },
-         "MinGap" : 2,
-         "Deceleration" : 1.5,
-         "Acceleration" : 1.5,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "ProfileTypes" : [
-            "worker",
-            "student",
-            "homemaker"
-         ],
-         "Name" : "Model E RED",
-         "MaxSpeed" : 0,
-         "Rate" : 15,
          "Sigma" : 0.5,
-         "Length" : 3.65,
-         "Description" : null
+         "Description" : "Sport Utility"
       },
       {
-         "Rate" : 15,
-         "MaxSpeed" : 0,
-         "Name" : "Model E WHITE",
-         "Description" : null,
          "Sigma" : 0.5,
-         "Length" : 3.65,
-         "Deceleration" : 1.5,
+         "Description" : "Sport Utility",
+         "MinGap" : 2,
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "Acceleration" : 1.5,
          "AssetID" : {
-            "ObjectName" : "Model E",
-            "ItemName" : "Model E WHITE"
+            "ItemName" : "Model E WHITE",
+            "ObjectName" : "Model E"
          },
-         "MinGap" : 2,
+         "Name" : "Model E WHITE",
+         "Length" : 3.65,
+         "Deceleration" : 1.5,
+         "MaxSpeed" : 2.5,
          "ProfileTypes" : [
             "worker",
             "student",
             "homemaker"
          ],
-         "Acceleration" : 1.5,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }"
+         "Rate" : 15
       },
       {
-         "MinGap" : 2,
+         "MaxSpeed" : 2.5,
+         "Deceleration" : 1.5,
+         "ProfileTypes" : [
+            "worker",
+            "student",
+            "homemaker"
+         ],
+         "Length" : 3.65,
+         "Name" : "Model E YELLOW",
+         "Rate" : 15,
+         "Sigma" : 0.5,
+         "Description" : "Sport Utility",
          "AssetID" : {
             "ItemName" : "Model E YELLOW",
             "ObjectName" : "Model E"
          },
-         "Deceleration" : 1.5,
          "Acceleration" : 1.5,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "ProfileTypes" : [
-            "worker",
-            "student",
-            "homemaker"
-         ],
-         "Name" : "Model E YELLOW",
-         "MaxSpeed" : 0,
-         "Rate" : 15,
-         "Sigma" : 0.5,
-         "Length" : 3.65,
-         "Description" : null
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "MinGap" : 2
       },
       {
-         "Deceleration" : 1.5,
-         "AssetID" : {
-            "ObjectName" : "Model F",
-            "ItemName" : "Model F BLACK"
-         },
-         "MinGap" : 2,
+         "Rate" : 15,
+         "MaxSpeed" : 2.5,
          "ProfileTypes" : [
             "worker",
             "student",
             "homemaker"
          ],
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "Acceleration" : 1.5,
+         "Deceleration" : 1.5,
+         "Length" : 3.65,
          "Name" : "Model F BLACK",
-         "Rate" : 15,
-         "MaxSpeed" : 0,
          "Sigma" : 0.5,
-         "Length" : 3.65,
-         "Description" : null
-      },
-      {
-         "Deceleration" : 1.5,
+         "Description" : "Sport Utility",
          "AssetID" : {
-            "ObjectName" : "Model F",
-            "ItemName" : "Model F BLUE"
+            "ItemName" : "Model F BLACK",
+            "ObjectName" : "Model F"
          },
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
          "MinGap" : 2,
-         "ProfileTypes" : [
-            "worker",
-            "student",
-            "homemaker"
-         ],
-         "Acceleration" : 1.5,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "Rate" : 15,
-         "MaxSpeed" : 0,
-         "Name" : "Model F BLUE",
-         "Description" : null,
-         "Sigma" : 0.5,
-         "Length" : 3.65
+         "Acceleration" : 1.5
       },
       {
+         "Rate" : 15,
+         "MaxSpeed" : 2.5,
          "ProfileTypes" : [
             "worker",
             "student",
             "homemaker"
          ],
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "Acceleration" : 1.5,
          "Deceleration" : 1.5,
+         "Name" : "Model F BLUE",
+         "Length" : 3.65,
+         "AssetID" : {
+            "ItemName" : "Model F BLUE",
+            "ObjectName" : "Model F"
+         },
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "MinGap" : 2,
+         "Acceleration" : 1.5,
+         "Sigma" : 0.5,
+         "Description" : "Sport Utility"
+      },
+      {
+         "Sigma" : 0.5,
+         "Description" : "Sport Utility",
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "MinGap" : 2,
+         "Acceleration" : 1.5,
          "AssetID" : {
             "ItemName" : "Model F GRAY",
             "ObjectName" : "Model F"
          },
-         "MinGap" : 2,
-         "Description" : null,
-         "Sigma" : 0.5,
-         "Length" : 3.65,
          "Rate" : 15,
-         "MaxSpeed" : 0,
-         "Name" : "Model F GRAY"
-      },
-      {
-         "Description" : null,
+         "Name" : "Model F GRAY",
          "Length" : 3.65,
-         "Sigma" : 0.5,
-         "MaxSpeed" : 0,
-         "Rate" : 15,
-         "Name" : "Model F GREEN",
-         "Acceleration" : 1.5,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
+         "MaxSpeed" : 2.5,
          "ProfileTypes" : [
             "worker",
             "student",
             "homemaker"
          ],
-         "MinGap" : 2,
-         "AssetID" : {
-            "ItemName" : "Model F GREEN",
-            "ObjectName" : "Model F"
-         },
          "Deceleration" : 1.5
       },
       {
-         "Name" : "Model F ORANGE",
-         "MaxSpeed" : 0,
-         "Rate" : 15,
          "Length" : 3.65,
-         "Sigma" : 0.5,
-         "Description" : null,
+         "Name" : "Model F GREEN",
+         "MaxSpeed" : 2.5,
+         "ProfileTypes" : [
+            "worker",
+            "student",
+            "homemaker"
+         ],
+         "Deceleration" : 1.5,
+         "Rate" : 15,
+         "Acceleration" : 1.5,
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "MinGap" : 2,
          "AssetID" : {
             "ObjectName" : "Model F",
-            "ItemName" : "Model F ORANGE"
+            "ItemName" : "Model F GREEN"
          },
+         "Sigma" : 0.5,
+         "Description" : "Sport Utility"
+      },
+      {
+         "Sigma" : 0.5,
+         "Description" : "Sport Utility",
          "MinGap" : 2,
-         "Deceleration" : 1.5,
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
          "Acceleration" : 1.5,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
+         "AssetID" : {
+            "ItemName" : "Model F ORANGE",
+            "ObjectName" : "Model F"
+         },
+         "Rate" : 15,
+         "Name" : "Model F ORANGE",
+         "Length" : 3.65,
+         "Deceleration" : 1.5,
+         "MaxSpeed" : 2.5,
          "ProfileTypes" : [
             "worker",
             "student",
@@ -1051,881 +1051,881 @@
          ]
       },
       {
-         "MaxSpeed" : 0,
          "Rate" : 15,
-         "Name" : "Model F PURPLE",
-         "Description" : null,
-         "Sigma" : 0.5,
+         "Deceleration" : 1.5,
+         "MaxSpeed" : 2.5,
+         "ProfileTypes" : [
+            "worker",
+            "student",
+            "homemaker"
+         ],
          "Length" : 3.65,
-         "MinGap" : 2,
+         "Name" : "Model F PURPLE",
          "AssetID" : {
             "ItemName" : "Model F PURPLE",
             "ObjectName" : "Model F"
          },
-         "Deceleration" : 1.5,
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "MinGap" : 2,
          "Acceleration" : 1.5,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
+         "Sigma" : 0.5,
+         "Description" : "Sport Utility"
+      },
+      {
+         "Length" : 3.65,
+         "Name" : "Model F RED",
+         "Deceleration" : 1.5,
+         "MaxSpeed" : 2.5,
          "ProfileTypes" : [
             "worker",
             "student",
             "homemaker"
-         ]
-      },
-      {
-         "Deceleration" : 1.5,
+         ],
+         "Rate" : 15,
+         "Sigma" : 0.5,
+         "Description" : "Sport Utility",
+         "MinGap" : 2,
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "Acceleration" : 1.5,
          "AssetID" : {
             "ObjectName" : "Model F",
             "ItemName" : "Model F RED"
-         },
-         "MinGap" : 2,
-         "ProfileTypes" : [
-            "worker",
-            "student",
-            "homemaker"
-         ],
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "Acceleration" : 1.5,
-         "Name" : "Model F RED",
-         "Rate" : 15,
-         "MaxSpeed" : 0,
-         "Length" : 3.65,
-         "Sigma" : 0.5,
-         "Description" : null
+         }
       },
       {
-         "Description" : null,
-         "Length" : 3.65,
          "Sigma" : 0.5,
-         "MaxSpeed" : 0,
-         "Rate" : 15,
-         "Name" : "Model F WHITE",
-         "Acceleration" : 1.5,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "ProfileTypes" : [
-            "worker",
-            "student",
-            "homemaker"
-         ],
+         "Description" : "Sport Utility",
          "AssetID" : {
             "ObjectName" : "Model F",
             "ItemName" : "Model F WHITE"
          },
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
          "MinGap" : 2,
-         "Deceleration" : 1.5
-      },
-      {
-         "Rate" : 15,
-         "MaxSpeed" : 0,
-         "Name" : "Model F YELLOW",
-         "Description" : null,
-         "Sigma" : 0.5,
-         "Length" : 3.65,
-         "Deceleration" : 1.5,
-         "AssetID" : {
-            "ObjectName" : "Model F",
-            "ItemName" : "Model F YELLOW"
-         },
-         "MinGap" : 2,
-         "ProfileTypes" : [
-            "worker",
-            "student",
-            "homemaker"
-         ],
          "Acceleration" : 1.5,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }"
-      },
-      {
-         "Sigma" : 0.5,
-         "Length" : 4.25,
-         "Description" : null,
-         "Name" : "Model G BLACK",
-         "MaxSpeed" : 0,
-         "Rate" : 10,
-         "Acceleration" : 1.25,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
+         "MaxSpeed" : 2.5,
          "ProfileTypes" : [
             "worker",
             "student",
             "homemaker"
          ],
+         "Deceleration" : 1.5,
+         "Name" : "Model F WHITE",
+         "Length" : 3.65,
+         "Rate" : 15
+      },
+      {
+         "Sigma" : 0.5,
+         "Description" : "Sport Utility",
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "Acceleration" : 1.5,
+         "MinGap" : 2,
+         "AssetID" : {
+            "ItemName" : "Model F YELLOW",
+            "ObjectName" : "Model F"
+         },
+         "Name" : "Model F YELLOW",
+         "Length" : 3.65,
+         "MaxSpeed" : 2.5,
+         "Deceleration" : 1.5,
+         "ProfileTypes" : [
+            "worker",
+            "student",
+            "homemaker"
+         ],
+         "Rate" : 15
+      },
+      {
+         "ProfileTypes" : [
+            "worker",
+            "student",
+            "homemaker"
+         ],
+         "MaxSpeed" : 2,
+         "Deceleration" : 1.25,
+         "Length" : 4.25,
+         "Name" : "Model G BLACK",
+         "Rate" : 10,
          "AssetID" : {
             "ItemName" : "Model G BLACK",
             "ObjectName" : "Model G"
          },
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "Acceleration" : 1.25,
          "MinGap" : 2,
-         "Deceleration" : 1.25
+         "Sigma" : 0.5,
+         "Description" : "Big Sport Utility"
       },
       {
-         "MinGap" : 2,
+         "MaxSpeed" : 2,
+         "ProfileTypes" : [
+            "worker",
+            "student",
+            "homemaker"
+         ],
+         "Deceleration" : 1.25,
+         "Name" : "Model G BLUE",
+         "Length" : 4.25,
+         "Rate" : 10,
+         "Sigma" : 0.5,
+         "Description" : "Big Sport Utility",
          "AssetID" : {
             "ObjectName" : "Model G",
             "ItemName" : "Model G BLUE"
          },
-         "Deceleration" : 1.25,
-         "Acceleration" : 1.25,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "ProfileTypes" : [
-            "worker",
-            "student",
-            "homemaker"
-         ],
-         "Name" : "Model G BLUE",
-         "MaxSpeed" : 0,
-         "Rate" : 10,
-         "Sigma" : 0.5,
-         "Length" : 4.25,
-         "Description" : null
-      },
-      {
-         "Name" : "Model G GRAY",
-         "Rate" : 10,
-         "MaxSpeed" : 0,
-         "Sigma" : 0.5,
-         "Length" : 4.25,
-         "Description" : null,
-         "Deceleration" : 1.25,
          "MinGap" : 2,
-         "AssetID" : {
-            "ItemName" : "Model G GRAY",
-            "ObjectName" : "Model G"
-         },
-         "ProfileTypes" : [
-            "worker",
-            "student",
-            "homemaker"
-         ],
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
          "Acceleration" : 1.25
       },
       {
-         "Length" : 4.25,
-         "Sigma" : 0.5,
-         "Description" : null,
-         "Name" : "Model G GREEN",
-         "MaxSpeed" : 0,
-         "Rate" : 10,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "Acceleration" : 1.25,
          "ProfileTypes" : [
             "worker",
             "student",
             "homemaker"
          ],
-         "MinGap" : 2,
+         "MaxSpeed" : 2,
+         "Deceleration" : 1.25,
+         "Length" : 4.25,
+         "Name" : "Model G GRAY",
+         "Rate" : 10,
          "AssetID" : {
-            "ItemName" : "Model G GREEN",
-            "ObjectName" : "Model G"
+            "ObjectName" : "Model G",
+            "ItemName" : "Model G GRAY"
          },
-         "Deceleration" : 1.25
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "MinGap" : 2,
+         "Acceleration" : 1.25,
+         "Sigma" : 0.5,
+         "Description" : "Big Sport Utility"
       },
       {
-         "Rate" : 10,
-         "MaxSpeed" : 0,
-         "Name" : "Model G ORANGE",
-         "Description" : null,
-         "Sigma" : 0.5,
          "Length" : 4.25,
+         "Name" : "Model G GREEN",
          "Deceleration" : 1.25,
+         "MaxSpeed" : 2,
+         "ProfileTypes" : [
+            "worker",
+            "student",
+            "homemaker"
+         ],
+         "Rate" : 10,
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "MinGap" : 2,
+         "Acceleration" : 1.25,
+         "AssetID" : {
+            "ObjectName" : "Model G",
+            "ItemName" : "Model G GREEN"
+         },
+         "Sigma" : 0.5,
+         "Description" : "Big Sport Utility"
+      },
+      {
+         "Description" : "Big Sport Utility",
+         "Sigma" : 0.5,
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "MinGap" : 2,
+         "Acceleration" : 1.25,
          "AssetID" : {
             "ObjectName" : "Model G",
             "ItemName" : "Model G ORANGE"
          },
-         "MinGap" : 2,
+         "Rate" : 10,
+         "Name" : "Model G ORANGE",
+         "Length" : 4.25,
+         "MaxSpeed" : 2,
          "ProfileTypes" : [
             "worker",
             "student",
             "homemaker"
          ],
-         "Acceleration" : 1.25,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }"
+         "Deceleration" : 1.25
       },
       {
+         "ProfileTypes" : [
+            "worker",
+            "student",
+            "homemaker"
+         ],
+         "MaxSpeed" : 2,
          "Deceleration" : 1.25,
-         "MinGap" : 2,
+         "Name" : "Model G PURPLE",
+         "Length" : 4.25,
+         "Rate" : 10,
          "AssetID" : {
             "ItemName" : "Model G PURPLE",
             "ObjectName" : "Model G"
          },
-         "ProfileTypes" : [
-            "worker",
-            "student",
-            "homemaker"
-         ],
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
          "Acceleration" : 1.25,
-         "Rate" : 10,
-         "MaxSpeed" : 0,
-         "Name" : "Model G PURPLE",
-         "Description" : null,
-         "Length" : 4.25,
-         "Sigma" : 0.5
+         "MinGap" : 2,
+         "Sigma" : 0.5,
+         "Description" : "Big Sport Utility"
       },
       {
-         "Deceleration" : 1.25,
+         "Sigma" : 0.5,
+         "Description" : "Big Sport Utility",
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "MinGap" : 2,
+         "Acceleration" : 1.25,
          "AssetID" : {
-            "ObjectName" : "Model G",
-            "ItemName" : "Model G RED"
+            "ItemName" : "Model G RED",
+            "ObjectName" : "Model G"
          },
-         "MinGap" : 2,
+         "Rate" : 10,
+         "Length" : 4.25,
+         "Name" : "Model G RED",
+         "MaxSpeed" : 2,
          "ProfileTypes" : [
             "worker",
             "student",
             "homemaker"
          ],
-         "Acceleration" : 1.25,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "Name" : "Model G RED",
-         "Rate" : 10,
-         "MaxSpeed" : 0,
-         "Sigma" : 0.5,
-         "Length" : 4.25,
-         "Description" : null
+         "Deceleration" : 1.25
       },
       {
-         "Name" : "Model G WHITE",
-         "MaxSpeed" : 0,
-         "Rate" : 10,
          "Sigma" : 0.5,
-         "Length" : 4.25,
-         "Description" : null,
-         "MinGap" : 2,
+         "Description" : "Big Sport Utility",
          "AssetID" : {
             "ObjectName" : "Model G",
             "ItemName" : "Model G WHITE"
          },
-         "Deceleration" : 1.25,
          "Acceleration" : 1.25,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "ProfileTypes" : [
-            "worker",
-            "student",
-            "homemaker"
-         ]
-      },
-      {
-         "ProfileTypes" : [
-            "worker",
-            "student",
-            "homemaker"
-         ],
-         "Acceleration" : 1.25,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "Deceleration" : 1.25,
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
          "MinGap" : 2,
-         "AssetID" : {
-            "ObjectName" : "Model G",
-            "ItemName" : "Model G YELLOW"
-         },
-         "Description" : null,
-         "Sigma" : 0.5,
-         "Length" : 4.25,
          "Rate" : 10,
-         "MaxSpeed" : 0,
-         "Name" : "Model G YELLOW"
-      },
-      {
-         "Deceleration" : 1.5,
-         "MinGap" : 2,
-         "AssetID" : {
-            "ItemName" : "Model H BLACK",
-            "ObjectName" : "Model H"
-         },
          "ProfileTypes" : [
             "worker",
             "student",
             "homemaker"
          ],
-         "Acceleration" : 1.5,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "Rate" : 25,
-         "MaxSpeed" : 0,
-         "Name" : "Model H BLACK",
-         "Description" : null,
+         "MaxSpeed" : 2,
+         "Deceleration" : 1.25,
+         "Length" : 4.25,
+         "Name" : "Model G WHITE"
+      },
+      {
          "Sigma" : 0.5,
+         "Description" : "Big Sport Utility",
+         "AssetID" : {
+            "ItemName" : "Model G YELLOW",
+            "ObjectName" : "Model G"
+         },
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "MinGap" : 2,
+         "Acceleration" : 1.25,
+         "Rate" : 10,
+         "ProfileTypes" : [
+            "worker",
+            "student",
+            "homemaker"
+         ],
+         "MaxSpeed" : 2,
+         "Deceleration" : 1.25,
+         "Name" : "Model G YELLOW",
+         "Length" : 4.25
+      },
+      {
+         "AssetID" : {
+            "ObjectName" : "Model H",
+            "ItemName" : "Model H BLACK"
+         },
+         "MinGap" : 2,
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "Acceleration" : 1.5,
+         "Sigma" : 0.5,
+         "Description" : "Minivan",
+         "Rate" : 25,
+         "MaxSpeed" : 2,
+         "Deceleration" : 1.5,
+         "ProfileTypes" : [
+            "worker",
+            "student",
+            "homemaker"
+         ],
+         "Name" : "Model H BLACK",
          "Length" : 4
       },
       {
-         "Length" : 4,
-         "Sigma" : 0.5,
-         "Description" : null,
-         "Name" : "Model H BLUE",
-         "MaxSpeed" : 0,
-         "Rate" : 25,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "Acceleration" : 1.5,
-         "ProfileTypes" : [
-            "worker",
-            "student",
-            "homemaker"
-         ],
          "AssetID" : {
             "ObjectName" : "Model H",
             "ItemName" : "Model H BLUE"
          },
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
          "MinGap" : 2,
-         "Deceleration" : 1.5
-      },
-      {
-         "Deceleration" : 1.5,
-         "AssetID" : {
-            "ItemName" : "Model H GRAY",
-            "ObjectName" : "Model H"
-         },
-         "MinGap" : 2,
-         "ProfileTypes" : [
-            "worker",
-            "student",
-            "homemaker"
-         ],
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
          "Acceleration" : 1.5,
-         "Name" : "Model H GRAY",
-         "Rate" : 25,
-         "MaxSpeed" : 0,
          "Sigma" : 0.5,
-         "Length" : 4,
-         "Description" : null
-      },
-      {
+         "Description" : "Minivan",
+         "MaxSpeed" : 2,
          "Deceleration" : 1.5,
-         "AssetID" : {
-            "ItemName" : "Model H GREEN",
-            "ObjectName" : "Model H"
-         },
-         "MinGap" : 2,
          "ProfileTypes" : [
             "worker",
             "student",
             "homemaker"
          ],
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
+         "Length" : 4,
+         "Name" : "Model H BLUE",
+         "Rate" : 25
+      },
+      {
+         "Description" : "Minivan",
+         "Sigma" : 0.5,
+         "AssetID" : {
+            "ObjectName" : "Model H",
+            "ItemName" : "Model H GRAY"
+         },
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "MinGap" : 2,
          "Acceleration" : 1.5,
+         "Rate" : 25,
+         "MaxSpeed" : 2,
+         "ProfileTypes" : [
+            "worker",
+            "student",
+            "homemaker"
+         ],
+         "Deceleration" : 1.5,
+         "Length" : 4,
+         "Name" : "Model H GRAY"
+      },
+      {
+         "Sigma" : 0.5,
+         "Description" : "Minivan",
+         "AssetID" : {
+            "ObjectName" : "Model H",
+            "ItemName" : "Model H GREEN"
+         },
+         "Acceleration" : 1.5,
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "MinGap" : 2,
+         "Rate" : 25,
+         "MaxSpeed" : 2,
+         "ProfileTypes" : [
+            "worker",
+            "student",
+            "homemaker"
+         ],
+         "Deceleration" : 1.5,
          "Name" : "Model H GREEN",
-         "Rate" : 25,
-         "MaxSpeed" : 0,
-         "Length" : 4,
-         "Sigma" : 0.5,
-         "Description" : null
+         "Length" : 4
       },
       {
+         "Rate" : 25,
+         "ProfileTypes" : [
+            "worker",
+            "student",
+            "homemaker"
+         ],
+         "MaxSpeed" : 2,
+         "Deceleration" : 1.5,
          "Length" : 4,
-         "Sigma" : 0.5,
-         "Description" : null,
          "Name" : "Model H ORANGE",
-         "MaxSpeed" : 0,
-         "Rate" : 25,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "Acceleration" : 1.5,
-         "ProfileTypes" : [
-            "worker",
-            "student",
-            "homemaker"
-         ],
-         "MinGap" : 2,
-         "AssetID" : {
-            "ObjectName" : "Model H",
-            "ItemName" : "Model H ORANGE"
-         },
-         "Deceleration" : 1.5
-      },
-      {
-         "ProfileTypes" : [
-            "worker",
-            "student",
-            "homemaker"
-         ],
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "Acceleration" : 1.5,
-         "Deceleration" : 1.5,
-         "AssetID" : {
-            "ObjectName" : "Model H",
-            "ItemName" : "Model H PURPLE"
-         },
-         "MinGap" : 2,
-         "Length" : 4,
          "Sigma" : 0.5,
-         "Description" : null,
-         "Name" : "Model H PURPLE",
-         "Rate" : 25,
-         "MaxSpeed" : 0
-      },
-      {
-         "Sigma" : 0.5,
-         "Length" : 4,
-         "Description" : null,
-         "Name" : "Model H RED",
-         "Rate" : 25,
-         "MaxSpeed" : 0,
-         "ProfileTypes" : [
-            "worker",
-            "student",
-            "homemaker"
-         ],
-         "Acceleration" : 1.5,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "Deceleration" : 1.5,
+         "Description" : "Minivan",
          "AssetID" : {
-            "ItemName" : "Model H RED",
+            "ItemName" : "Model H ORANGE",
             "ObjectName" : "Model H"
          },
-         "MinGap" : 2
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "MinGap" : 2,
+         "Acceleration" : 1.5
       },
       {
+         "Rate" : 25,
+         "Length" : 4,
+         "Name" : "Model H PURPLE",
+         "MaxSpeed" : 2,
          "ProfileTypes" : [
             "worker",
             "student",
             "homemaker"
          ],
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "Acceleration" : 1.5,
          "Deceleration" : 1.5,
+         "Sigma" : 0.5,
+         "Description" : "Minivan",
+         "Acceleration" : 1.5,
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "MinGap" : 2,
+         "AssetID" : {
+            "ItemName" : "Model H PURPLE",
+            "ObjectName" : "Model H"
+         }
+      },
+      {
+         "Name" : "Model H RED",
+         "Length" : 4,
+         "MaxSpeed" : 2,
+         "Deceleration" : 1.5,
+         "ProfileTypes" : [
+            "worker",
+            "student",
+            "homemaker"
+         ],
+         "Rate" : 25,
+         "Sigma" : 0.5,
+         "Description" : "Minivan",
+         "MinGap" : 2,
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "Acceleration" : 1.5,
+         "AssetID" : {
+            "ObjectName" : "Model H",
+            "ItemName" : "Model H RED"
+         }
+      },
+      {
+         "Acceleration" : 1.5,
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "MinGap" : 2,
          "AssetID" : {
             "ItemName" : "Model H WHITE",
             "ObjectName" : "Model H"
          },
-         "MinGap" : 2,
-         "Length" : 4,
          "Sigma" : 0.5,
-         "Description" : null,
+         "Description" : "Minivan",
+         "Length" : 4,
          "Name" : "Model H WHITE",
-         "Rate" : 25,
-         "MaxSpeed" : 0
+         "MaxSpeed" : 2,
+         "ProfileTypes" : [
+            "worker",
+            "student",
+            "homemaker"
+         ],
+         "Deceleration" : 1.5,
+         "Rate" : 25
       },
       {
-         "Deceleration" : 1.5,
-         "MinGap" : 2,
          "AssetID" : {
             "ItemName" : "Model H YELLOW",
             "ObjectName" : "Model H"
          },
+         "MinGap" : 2,
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "Acceleration" : 1.5,
+         "Sigma" : 0.5,
+         "Description" : "Minivan",
+         "Rate" : 25,
+         "Deceleration" : 1.5,
+         "MaxSpeed" : 2,
          "ProfileTypes" : [
             "worker",
             "student",
             "homemaker"
          ],
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "Acceleration" : 1.5,
          "Name" : "Model H YELLOW",
-         "Rate" : 25,
-         "MaxSpeed" : 0,
-         "Sigma" : 0.5,
-         "Length" : 4,
-         "Description" : null
+         "Length" : 4
       },
       {
-         "Deceleration" : 1.25,
-         "MinGap" : 2,
          "AssetID" : {
             "ObjectName" : "Model I",
             "ItemName" : "Model I BLACK"
          },
+         "MinGap" : 2,
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "Acceleration" : 1.25,
+         "Sigma" : 0.5,
+         "Description" : "Van",
+         "Deceleration" : 1.25,
+         "MaxSpeed" : 1.5,
          "ProfileTypes" : [
             "worker",
             "student",
             "homemaker"
          ],
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "Acceleration" : 1.25,
-         "Name" : "Model I BLACK",
-         "Rate" : 10,
-         "MaxSpeed" : 0,
-         "Sigma" : 0.5,
          "Length" : 4.35,
-         "Description" : null
+         "Name" : "Model I BLACK",
+         "Rate" : 10
       },
       {
-         "Description" : null,
-         "Sigma" : 0.5,
-         "Length" : 4.35,
          "Rate" : 10,
-         "MaxSpeed" : 0,
-         "Name" : "Model I BLUE",
          "ProfileTypes" : [
             "worker",
             "student",
             "homemaker"
          ],
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "Acceleration" : 1.25,
+         "MaxSpeed" : 1.5,
          "Deceleration" : 1.25,
+         "Name" : "Model I BLUE",
+         "Length" : 4.35,
          "AssetID" : {
             "ItemName" : "Model I BLUE",
             "ObjectName" : "Model I"
          },
-         "MinGap" : 2
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "Acceleration" : 1.25,
+         "MinGap" : 2,
+         "Sigma" : 0.5,
+         "Description" : "Van"
       },
       {
-         "Length" : 4.35,
          "Sigma" : 0.5,
-         "Description" : null,
-         "Name" : "Model I GRAY",
-         "MaxSpeed" : 0,
-         "Rate" : 10,
+         "Description" : "Van",
+         "AssetID" : {
+            "ItemName" : "Model I GRAY",
+            "ObjectName" : "Model I"
+         },
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
          "Acceleration" : 1.25,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
+         "MinGap" : 2,
+         "Rate" : 10,
+         "MaxSpeed" : 1.5,
+         "Deceleration" : 1.25,
          "ProfileTypes" : [
             "worker",
             "student",
             "homemaker"
          ],
+         "Name" : "Model I GRAY",
+         "Length" : 4.35
+      },
+      {
+         "Sigma" : 0.5,
+         "Description" : "Van",
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "Acceleration" : 1.25,
          "MinGap" : 2,
          "AssetID" : {
             "ObjectName" : "Model I",
-            "ItemName" : "Model I GRAY"
+            "ItemName" : "Model I GREEN"
          },
-         "Deceleration" : 1.25
-      },
-      {
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "Acceleration" : 1.25,
+         "Rate" : 10,
+         "Name" : "Model I GREEN",
+         "Length" : 4.35,
          "ProfileTypes" : [
             "worker",
             "student",
             "homemaker"
          ],
-         "AssetID" : {
-            "ItemName" : "Model I GREEN",
-            "ObjectName" : "Model I"
-         },
-         "MinGap" : 2,
-         "Deceleration" : 1.25,
-         "Sigma" : 0.5,
-         "Length" : 4.35,
-         "Description" : null,
-         "Name" : "Model I GREEN",
-         "MaxSpeed" : 0,
-         "Rate" : 10
+         "MaxSpeed" : 1.5,
+         "Deceleration" : 1.25
       },
       {
-         "Rate" : 10,
-         "MaxSpeed" : 0,
-         "Name" : "Model I ORANGE",
-         "Description" : null,
-         "Length" : 4.35,
-         "Sigma" : 0.5,
-         "Deceleration" : 1.25,
          "AssetID" : {
             "ObjectName" : "Model I",
             "ItemName" : "Model I ORANGE"
          },
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "Acceleration" : 1.25,
          "MinGap" : 2,
+         "Sigma" : 0.5,
+         "Description" : "Van",
          "ProfileTypes" : [
             "worker",
             "student",
             "homemaker"
          ],
-         "Acceleration" : 1.25,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }"
-      },
-      {
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "Acceleration" : 1.25,
-         "ProfileTypes" : [
-            "worker",
-            "student",
-            "homemaker"
-         ],
-         "AssetID" : {
-            "ItemName" : "Model I PURPLE",
-            "ObjectName" : "Model I"
-         },
-         "MinGap" : 2,
+         "MaxSpeed" : 1.5,
          "Deceleration" : 1.25,
          "Length" : 4.35,
-         "Sigma" : 0.5,
-         "Description" : null,
-         "Name" : "Model I PURPLE",
-         "MaxSpeed" : 0,
+         "Name" : "Model I ORANGE",
          "Rate" : 10
       },
       {
-         "Name" : "Model I RED",
          "Rate" : 10,
-         "MaxSpeed" : 0,
          "Length" : 4.35,
-         "Sigma" : 0.5,
-         "Description" : null,
-         "Deceleration" : 1.25,
-         "AssetID" : {
-            "ItemName" : "Model I RED",
-            "ObjectName" : "Model I"
-         },
-         "MinGap" : 2,
+         "Name" : "Model I PURPLE",
+         "MaxSpeed" : 1.5,
          "ProfileTypes" : [
             "worker",
             "student",
             "homemaker"
          ],
+         "Deceleration" : 1.25,
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "MinGap" : 2,
          "Acceleration" : 1.25,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }"
+         "AssetID" : {
+            "ObjectName" : "Model I",
+            "ItemName" : "Model I PURPLE"
+         },
+         "Sigma" : 0.5,
+         "Description" : "Van"
       },
       {
+         "Rate" : 10,
+         "MaxSpeed" : 1.5,
          "ProfileTypes" : [
             "worker",
             "student",
             "homemaker"
          ],
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "Acceleration" : 1.25,
          "Deceleration" : 1.25,
+         "Name" : "Model I RED",
+         "Length" : 4.35,
+         "AssetID" : {
+            "ObjectName" : "Model I",
+            "ItemName" : "Model I RED"
+         },
+         "Acceleration" : 1.25,
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "MinGap" : 2,
+         "Sigma" : 0.5,
+         "Description" : "Van"
+      },
+      {
+         "Rate" : 10,
+         "Name" : "Model I WHITE",
+         "Length" : 4.35,
+         "MaxSpeed" : 1.5,
+         "ProfileTypes" : [
+            "worker",
+            "student",
+            "homemaker"
+         ],
+         "Deceleration" : 1.25,
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "Acceleration" : 1.25,
          "MinGap" : 2,
          "AssetID" : {
             "ItemName" : "Model I WHITE",
             "ObjectName" : "Model I"
          },
          "Sigma" : 0.5,
-         "Length" : 4.35,
-         "Description" : null,
-         "Name" : "Model I WHITE",
-         "Rate" : 10,
-         "MaxSpeed" : 0
+         "Description" : "Van"
       },
       {
-         "MaxSpeed" : 0,
-         "Rate" : 10,
-         "Name" : "Model I YELLOW",
-         "Description" : null,
          "Length" : 4.35,
-         "Sigma" : 0.5,
+         "Name" : "Model I YELLOW",
+         "ProfileTypes" : [
+            "worker",
+            "student",
+            "homemaker"
+         ],
+         "MaxSpeed" : 1.5,
+         "Deceleration" : 1.25,
+         "Rate" : 10,
          "MinGap" : 2,
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "Acceleration" : 1.25,
          "AssetID" : {
             "ObjectName" : "Model I",
             "ItemName" : "Model I YELLOW"
          },
-         "Deceleration" : 1.25,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "Acceleration" : 1.25,
-         "ProfileTypes" : [
-            "worker",
-            "student",
-            "homemaker"
-         ]
+         "Sigma" : 0.5,
+         "Description" : "Van"
       },
       {
-         "Acceleration" : 1,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
+         "Rate" : 5,
+         "Length" : 4.35,
+         "Name" : "Model J BLACK",
+         "MaxSpeed" : 1.5,
+         "Deceleration" : 1,
          "ProfileTypes" : [
             "worker",
             "student",
             "homemaker"
          ],
+         "Sigma" : 0.5,
+         "Description" : "Cargo Van",
+         "MinGap" : 2,
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "Acceleration" : 1,
          "AssetID" : {
             "ObjectName" : "Model J",
             "ItemName" : "Model J BLACK"
-         },
-         "MinGap" : 2,
-         "Deceleration" : 1,
-         "Description" : null,
-         "Length" : 4.35,
-         "Sigma" : 0.5,
-         "MaxSpeed" : 0,
+         }
+      },
+      {
          "Rate" : 5,
-         "Name" : "Model J BLACK"
+         "Name" : "Model J BLUE",
+         "Length" : 4.35,
+         "ProfileTypes" : [
+            "worker",
+            "student",
+            "homemaker"
+         ],
+         "MaxSpeed" : 1.5,
+         "Deceleration" : 1,
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "MinGap" : 2,
+         "Acceleration" : 1,
+         "AssetID" : {
+            "ObjectName" : "Model J",
+            "ItemName" : "Model J BLUE"
+         },
+         "Sigma" : 0.5,
+         "Description" : "Cargo Van"
       },
       {
          "AssetID" : {
-            "ItemName" : "Model J BLUE",
+            "ItemName" : "Model J GRAY",
             "ObjectName" : "Model J"
          },
          "MinGap" : 2,
-         "Deceleration" : 1,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
          "Acceleration" : 1,
-         "ProfileTypes" : [
-            "worker",
-            "student",
-            "homemaker"
-         ],
-         "Name" : "Model J BLUE",
-         "MaxSpeed" : 0,
-         "Rate" : 5,
-         "Length" : 4.35,
          "Sigma" : 0.5,
-         "Description" : null
-      },
-      {
-         "MinGap" : 2,
-         "AssetID" : {
-            "ObjectName" : "Model J",
-            "ItemName" : "Model J GRAY"
-         },
-         "Deceleration" : 1,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "Acceleration" : 1,
+         "Description" : "Cargo Van",
          "ProfileTypes" : [
             "worker",
             "student",
             "homemaker"
          ],
-         "MaxSpeed" : 0,
-         "Rate" : 5,
+         "MaxSpeed" : 1.5,
+         "Deceleration" : 1,
+         "Length" : 4.35,
          "Name" : "Model J GRAY",
-         "Description" : null,
-         "Sigma" : 0.5,
-         "Length" : 4.35
+         "Rate" : 5
       },
       {
-         "Length" : 4.35,
          "Sigma" : 0.5,
-         "Description" : null,
-         "Name" : "Model J GREEN",
-         "MaxSpeed" : 0,
-         "Rate" : 5,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
+         "Description" : "Cargo Van",
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
          "Acceleration" : 1,
-         "ProfileTypes" : [
-            "worker",
-            "student",
-            "homemaker"
-         ],
          "MinGap" : 2,
          "AssetID" : {
             "ItemName" : "Model J GREEN",
             "ObjectName" : "Model J"
          },
-         "Deceleration" : 1
-      },
-      {
-         "AssetID" : {
-            "ItemName" : "Model J ORANGE",
-            "ObjectName" : "Model J"
-         },
-         "MinGap" : 2,
-         "Deceleration" : 1,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "Acceleration" : 1,
-         "ProfileTypes" : [
-            "worker",
-            "student",
-            "homemaker"
-         ],
-         "MaxSpeed" : 0,
-         "Rate" : 5,
-         "Name" : "Model J ORANGE",
-         "Description" : null,
-         "Sigma" : 0.5,
-         "Length" : 4.35
-      },
-      {
-         "Description" : null,
-         "Sigma" : 0.5,
          "Length" : 4.35,
-         "Rate" : 5,
-         "MaxSpeed" : 0,
-         "Name" : "Model J PURPLE",
+         "Name" : "Model J GREEN",
+         "MaxSpeed" : 1.5,
+         "Deceleration" : 1,
          "ProfileTypes" : [
             "worker",
             "student",
             "homemaker"
          ],
-         "Acceleration" : 1,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "Deceleration" : 1,
-         "AssetID" : {
-            "ItemName" : "Model J PURPLE",
-            "ObjectName" : "Model J"
-         },
-         "MinGap" : 2
-      },
-      {
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "Acceleration" : 1,
-         "ProfileTypes" : [
-            "worker",
-            "student",
-            "homemaker"
-         ],
-         "AssetID" : {
-            "ItemName" : "Model J RED",
-            "ObjectName" : "Model J"
-         },
-         "MinGap" : 2,
-         "Deceleration" : 1,
-         "Sigma" : 0.5,
-         "Length" : 4.35,
-         "Description" : null,
-         "Name" : "Model J RED",
-         "MaxSpeed" : 0,
          "Rate" : 5
       },
       {
+         "Rate" : 5,
+         "Length" : 4.35,
+         "Name" : "Model J ORANGE",
+         "MaxSpeed" : 1.5,
+         "ProfileTypes" : [
+            "worker",
+            "student",
+            "homemaker"
+         ],
+         "Deceleration" : 1,
+         "Sigma" : 0.5,
+         "Description" : "Cargo Van",
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "Acceleration" : 1,
+         "MinGap" : 2,
+         "AssetID" : {
+            "ObjectName" : "Model J",
+            "ItemName" : "Model J ORANGE"
+         }
+      },
+      {
+         "MaxSpeed" : 1.5,
+         "Deceleration" : 1,
+         "ProfileTypes" : [
+            "worker",
+            "student",
+            "homemaker"
+         ],
+         "Length" : 4.35,
+         "Name" : "Model J PURPLE",
+         "Rate" : 5,
+         "Sigma" : 0.5,
+         "Description" : "Cargo Van",
+         "AssetID" : {
+            "ObjectName" : "Model J",
+            "ItemName" : "Model J PURPLE"
+         },
+         "MinGap" : 2,
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "Acceleration" : 1
+      },
+      {
+         "Sigma" : 0.5,
+         "Description" : "Cargo Van",
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "Acceleration" : 1,
+         "MinGap" : 2,
+         "AssetID" : {
+            "ObjectName" : "Model J",
+            "ItemName" : "Model J RED"
+         },
+         "Rate" : 5,
+         "Name" : "Model J RED",
+         "Length" : 4.35,
+         "MaxSpeed" : 1.5,
+         "ProfileTypes" : [
+            "worker",
+            "student",
+            "homemaker"
+         ],
+         "Deceleration" : 1
+      },
+      {
+         "Sigma" : 0.5,
+         "Description" : "Cargo Van",
+         "Acceleration" : 1,
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "MinGap" : 2,
          "AssetID" : {
             "ObjectName" : "Model J",
             "ItemName" : "Model J WHITE"
          },
-         "MinGap" : 2,
-         "Deceleration" : 1,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "Acceleration" : 1,
+         "Rate" : 5,
+         "Length" : 4.35,
+         "Name" : "Model J WHITE",
+         "MaxSpeed" : 1.5,
          "ProfileTypes" : [
             "worker",
             "student",
             "homemaker"
          ],
-         "MaxSpeed" : 0,
-         "Rate" : 5,
-         "Name" : "Model J WHITE",
-         "Description" : null,
-         "Length" : 4.35,
-         "Sigma" : 0.5
+         "Deceleration" : 1
       },
       {
-         "Description" : null,
-         "Sigma" : 0.5,
-         "Length" : 4.35,
-         "MaxSpeed" : 0,
          "Rate" : 5,
+         "Length" : 4.35,
          "Name" : "Model J YELLOW",
-         "Acceleration" : 1,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
          "ProfileTypes" : [
             "worker",
             "student",
             "homemaker"
          ],
+         "MaxSpeed" : 1.5,
+         "Deceleration" : 1,
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "Acceleration" : 1,
+         "MinGap" : 2,
          "AssetID" : {
             "ObjectName" : "Model J",
             "ItemName" : "Model J YELLOW"
          },
-         "MinGap" : 2,
-         "Deceleration" : 1
+         "Sigma" : 0.5,
+         "Description" : "Cargo Van"
       },
       {
-         "Deceleration" : 2,
          "AssetID" : {
             "ObjectName" : "Model K",
             "ItemName" : "Model K BLACK"
          },
+         "Acceleration" : 1.5,
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
          "MinGap" : 2,
+         "Sigma" : 0.5,
+         "Description" : "Flatbed Pickup",
+         "Rate" : 5,
+         "MaxSpeed" : 2,
+         "Deceleration" : 2,
          "ProfileTypes" : [
             "worker",
             "student",
             "homemaker"
          ],
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "Acceleration" : 1.5,
          "Name" : "Model K BLACK",
-         "Rate" : 5,
-         "MaxSpeed" : 0,
-         "Length" : 4,
-         "Sigma" : 0.5,
-         "Description" : null
+         "Length" : 4
       },
       {
-         "Length" : 4,
-         "Sigma" : 0.5,
-         "Description" : null,
-         "Name" : "Model K BLUE",
          "Rate" : 5,
-         "MaxSpeed" : 0,
+         "Name" : "Model K BLUE",
+         "Length" : 4,
          "ProfileTypes" : [
             "worker",
             "student",
             "homemaker"
          ],
-         "Acceleration" : 1.5,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
+         "MaxSpeed" : 2,
          "Deceleration" : 2,
+         "Sigma" : 0.5,
+         "Description" : "Flatbed Pickup",
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "Acceleration" : 1.5,
          "MinGap" : 2,
          "AssetID" : {
             "ItemName" : "Model K BLUE",
@@ -1933,104 +1933,104 @@
          }
       },
       {
-         "MaxSpeed" : 0,
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "Acceleration" : 1.5,
+         "MinGap" : 2,
+         "AssetID" : {
+            "ItemName" : "Model K GRAY",
+            "ObjectName" : "Model K"
+         },
+         "Description" : "Flatbed Pickup",
+         "Sigma" : 0.5,
          "Rate" : 5,
          "Name" : "Model K GRAY",
-         "Description" : null,
-         "Sigma" : 0.5,
          "Length" : 4,
-         "AssetID" : {
-            "ObjectName" : "Model K",
-            "ItemName" : "Model K GRAY"
-         },
-         "MinGap" : 2,
-         "Deceleration" : 2,
-         "Acceleration" : 1.5,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
          "ProfileTypes" : [
             "worker",
             "student",
             "homemaker"
-         ]
+         ],
+         "MaxSpeed" : 2,
+         "Deceleration" : 2
       },
       {
-         "MinGap" : 2,
+         "Rate" : 5,
+         "MaxSpeed" : 2,
+         "Deceleration" : 2,
+         "ProfileTypes" : [
+            "worker",
+            "student",
+            "homemaker"
+         ],
+         "Length" : 4,
+         "Name" : "Model K GREEN",
          "AssetID" : {
             "ItemName" : "Model K GREEN",
             "ObjectName" : "Model K"
          },
-         "Deceleration" : 2,
-         "Acceleration" : 1.5,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "ProfileTypes" : [
-            "worker",
-            "student",
-            "homemaker"
-         ],
-         "MaxSpeed" : 0,
-         "Rate" : 5,
-         "Name" : "Model K GREEN",
-         "Description" : null,
-         "Length" : 4,
-         "Sigma" : 0.5
-      },
-      {
-         "ProfileTypes" : [
-            "worker",
-            "student",
-            "homemaker"
-         ],
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "Acceleration" : 1.5,
-         "Deceleration" : 2,
          "MinGap" : 2,
-         "AssetID" : {
-            "ObjectName" : "Model K",
-            "ItemName" : "Model K ORANGE"
-         },
-         "Description" : null,
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "Acceleration" : 1.5,
          "Sigma" : 0.5,
-         "Length" : 4,
-         "Rate" : 5,
-         "MaxSpeed" : 0,
-         "Name" : "Model K ORANGE"
+         "Description" : "Flatbed Pickup"
       },
       {
-         "Name" : "Model K PURPLE",
-         "Rate" : 5,
-         "MaxSpeed" : 0,
-         "Length" : 4,
          "Sigma" : 0.5,
-         "Description" : null,
+         "Description" : "Flatbed Pickup",
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "MinGap" : 2,
+         "Acceleration" : 1.5,
+         "AssetID" : {
+            "ItemName" : "Model K ORANGE",
+            "ObjectName" : "Model K"
+         },
+         "Name" : "Model K ORANGE",
+         "Length" : 4,
+         "MaxSpeed" : 2,
+         "ProfileTypes" : [
+            "worker",
+            "student",
+            "homemaker"
+         ],
          "Deceleration" : 2,
+         "Rate" : 5
+      },
+      {
+         "Sigma" : 0.5,
+         "Description" : "Flatbed Pickup",
          "AssetID" : {
             "ObjectName" : "Model K",
             "ItemName" : "Model K PURPLE"
          },
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "Acceleration" : 1.5,
          "MinGap" : 2,
+         "Rate" : 5,
          "ProfileTypes" : [
             "worker",
             "student",
             "homemaker"
          ],
-         "Acceleration" : 1.5,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }"
+         "MaxSpeed" : 2,
+         "Deceleration" : 2,
+         "Name" : "Model K PURPLE",
+         "Length" : 4
       },
       {
-         "MaxSpeed" : 0,
-         "Rate" : 5,
-         "Name" : "Model K RED",
-         "Description" : null,
-         "Length" : 4,
          "Sigma" : 0.5,
+         "Description" : "Flatbed Pickup",
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "MinGap" : 2,
+         "Acceleration" : 1.5,
          "AssetID" : {
             "ItemName" : "Model K RED",
             "ObjectName" : "Model K"
          },
-         "MinGap" : 2,
+         "Rate" : 5,
+         "Length" : 4,
+         "Name" : "Model K RED",
+         "MaxSpeed" : 2,
          "Deceleration" : 2,
-         "Acceleration" : 1.5,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
          "ProfileTypes" : [
             "worker",
             "student",
@@ -2038,24 +2038,108 @@
          ]
       },
       {
-         "Length" : 4,
-         "Sigma" : 0.5,
-         "Description" : null,
-         "Name" : "Model K WHITE",
          "Rate" : 5,
-         "MaxSpeed" : 0,
+         "Name" : "Model K WHITE",
+         "Length" : 4,
          "ProfileTypes" : [
             "worker",
             "student",
             "homemaker"
          ],
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "Acceleration" : 1.5,
+         "MaxSpeed" : 2,
          "Deceleration" : 2,
+         "Acceleration" : 1.5,
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
          "MinGap" : 2,
          "AssetID" : {
+            "ItemName" : "Model K WHITE",
+            "ObjectName" : "Model K"
+         },
+         "Sigma" : 0.5,
+         "Description" : "Flatbed Pickup"
+      },
+      {
+         "Rate" : 5,
+         "MaxSpeed" : 2,
+         "ProfileTypes" : [
+            "worker",
+            "student",
+            "homemaker"
+         ],
+         "Deceleration" : 2,
+         "Length" : 4,
+         "Name" : "Model K YELLOW",
+         "Sigma" : 0.5,
+         "Description" : "Flatbed Pickup",
+         "AssetID" : {
             "ObjectName" : "Model K",
-            "ItemName" : "Model K WHITE"
+            "ItemName" : "Model K YELLOW"
+         },
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "Acceleration" : 1.5,
+         "MinGap" : 2
+      },
+      {
+         "Rate" : 15,
+         "MaxSpeed" : 2.25,
+         "ProfileTypes" : [
+            "worker",
+            "student",
+            "homemaker"
+         ],
+         "Deceleration" : 2,
+         "Name" : "Model L BLACK",
+         "Length" : 3.85,
+         "Sigma" : 0.5,
+         "Description" : "Pickup",
+         "AssetID" : {
+            "ObjectName" : "Model L",
+            "ItemName" : "Model L BLACK"
+         },
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "Acceleration" : 1.5,
+         "MinGap" : 2
+      },
+      {
+         "Name" : "Model L BLUE",
+         "Length" : 3.85,
+         "Deceleration" : 2,
+         "MaxSpeed" : 2.25,
+         "ProfileTypes" : [
+            "worker",
+            "student",
+            "homemaker"
+         ],
+         "Rate" : 15,
+         "Sigma" : 0.5,
+         "Description" : "Pickup",
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "Acceleration" : 1.5,
+         "MinGap" : 2,
+         "AssetID" : {
+            "ObjectName" : "Model L",
+            "ItemName" : "Model L BLUE"
+         }
+      },
+      {
+         "Name" : "Model L GRAY",
+         "Length" : 3.85,
+         "MaxSpeed" : 2.25,
+         "ProfileTypes" : [
+            "worker",
+            "student",
+            "homemaker"
+         ],
+         "Deceleration" : 2,
+         "Rate" : 15,
+         "Sigma" : 0.5,
+         "Description" : "Pickup",
+         "MinGap" : 2,
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "Acceleration" : 1.5,
+         "AssetID" : {
+            "ItemName" : "Model L GRAY",
+            "ObjectName" : "Model L"
          }
       },
       {
@@ -2064,209 +2148,125 @@
             "student",
             "homemaker"
          ],
-         "Acceleration" : 1.5,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
+         "MaxSpeed" : 2.25,
          "Deceleration" : 2,
-         "MinGap" : 2,
-         "AssetID" : {
-            "ItemName" : "Model K YELLOW",
-            "ObjectName" : "Model K"
-         },
-         "Description" : null,
-         "Length" : 4,
-         "Sigma" : 0.5,
-         "Rate" : 5,
-         "MaxSpeed" : 0,
-         "Name" : "Model K YELLOW"
-      },
-      {
-         "ProfileTypes" : [
-            "worker",
-            "student",
-            "homemaker"
-         ],
-         "Acceleration" : 1.5,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "Deceleration" : 2,
-         "MinGap" : 2,
-         "AssetID" : {
-            "ItemName" : "Model L BLACK",
-            "ObjectName" : "Model L"
-         },
-         "Sigma" : 0.5,
+         "Name" : "Model L GREEN",
          "Length" : 3.85,
-         "Description" : null,
-         "Name" : "Model L BLACK",
          "Rate" : 15,
-         "MaxSpeed" : 0
-      },
-      {
-         "Name" : "Model L BLUE",
-         "MaxSpeed" : 0,
-         "Rate" : 15,
-         "Length" : 3.85,
          "Sigma" : 0.5,
-         "Description" : null,
-         "AssetID" : {
-            "ItemName" : "Model L BLUE",
-            "ObjectName" : "Model L"
-         },
-         "MinGap" : 2,
-         "Deceleration" : 2,
-         "Acceleration" : 1.5,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "ProfileTypes" : [
-            "worker",
-            "student",
-            "homemaker"
-         ]
-      },
-      {
-         "ProfileTypes" : [
-            "worker",
-            "student",
-            "homemaker"
-         ],
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "Acceleration" : 1.5,
-         "Deceleration" : 2,
+         "Description" : "Pickup",
          "AssetID" : {
             "ObjectName" : "Model L",
-            "ItemName" : "Model L GRAY"
+            "ItemName" : "Model L GREEN"
          },
          "MinGap" : 2,
-         "Length" : 3.85,
-         "Sigma" : 0.5,
-         "Description" : null,
-         "Name" : "Model L GRAY",
-         "Rate" : 15,
-         "MaxSpeed" : 0
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "Acceleration" : 1.5
       },
       {
-         "Length" : 3.85,
          "Sigma" : 0.5,
-         "Description" : null,
-         "Name" : "Model L GREEN",
-         "Rate" : 15,
-         "MaxSpeed" : 0,
-         "ProfileTypes" : [
-            "worker",
-            "student",
-            "homemaker"
-         ],
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "Acceleration" : 1.5,
-         "Deceleration" : 2,
-         "AssetID" : {
-            "ItemName" : "Model L GREEN",
-            "ObjectName" : "Model L"
-         },
-         "MinGap" : 2
-      },
-      {
-         "MinGap" : 2,
+         "Description" : "Pickup",
          "AssetID" : {
             "ObjectName" : "Model L",
             "ItemName" : "Model L ORANGE"
          },
-         "Deceleration" : 2,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
          "Acceleration" : 1.5,
+         "MinGap" : 2,
          "ProfileTypes" : [
             "worker",
             "student",
             "homemaker"
          ],
-         "MaxSpeed" : 0,
-         "Rate" : 15,
+         "MaxSpeed" : 2.25,
+         "Deceleration" : 2,
+         "Length" : 3.85,
          "Name" : "Model L ORANGE",
-         "Description" : null,
-         "Sigma" : 0.5,
-         "Length" : 3.85
+         "Rate" : 15
       },
       {
+         "Sigma" : 0.5,
+         "Description" : "Pickup",
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "Acceleration" : 1.5,
          "MinGap" : 2,
          "AssetID" : {
             "ItemName" : "Model L PURPLE",
             "ObjectName" : "Model L"
          },
-         "Deceleration" : 2,
-         "Acceleration" : 1.5,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "ProfileTypes" : [
-            "worker",
-            "student",
-            "homemaker"
-         ],
-         "MaxSpeed" : 0,
-         "Rate" : 15,
          "Name" : "Model L PURPLE",
-         "Description" : null,
-         "Sigma" : 0.5,
-         "Length" : 3.85
-      },
-      {
-         "MaxSpeed" : 0,
-         "Rate" : 15,
-         "Name" : "Model L RED",
-         "Description" : null,
-         "Sigma" : 0.5,
          "Length" : 3.85,
-         "MinGap" : 2,
-         "AssetID" : {
-            "ItemName" : "Model L RED",
-            "ObjectName" : "Model L"
-         },
-         "Deceleration" : 2,
-         "Acceleration" : 1.5,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "ProfileTypes" : [
-            "worker",
-            "student",
-            "homemaker"
-         ]
-      },
-      {
          "ProfileTypes" : [
             "worker",
             "student",
             "homemaker"
          ],
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "Acceleration" : 1.5,
+         "MaxSpeed" : 2.25,
          "Deceleration" : 2,
+         "Rate" : 15
+      },
+      {
+         "AssetID" : {
+            "ObjectName" : "Model L",
+            "ItemName" : "Model L RED"
+         },
          "MinGap" : 2,
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "Acceleration" : 1.5,
+         "Sigma" : 0.5,
+         "Description" : "Pickup",
+         "MaxSpeed" : 2.25,
+         "ProfileTypes" : [
+            "worker",
+            "student",
+            "homemaker"
+         ],
+         "Deceleration" : 2,
+         "Name" : "Model L RED",
+         "Length" : 3.85,
+         "Rate" : 15
+      },
+      {
+         "Sigma" : 0.5,
+         "Description" : "Pickup",
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "MinGap" : 2,
+         "Acceleration" : 1.5,
          "AssetID" : {
             "ItemName" : "Model L WHITE",
             "ObjectName" : "Model L"
          },
-         "Sigma" : 0.5,
+         "Rate" : 15,
          "Length" : 3.85,
-         "Description" : null,
          "Name" : "Model L WHITE",
-         "Rate" : 15,
-         "MaxSpeed" : 0
-      },
-      {
-         "Name" : "Model L YELLOW",
-         "MaxSpeed" : 0,
-         "Rate" : 15,
-         "Sigma" : 0.5,
-         "Length" : 3.85,
-         "Description" : null,
-         "MinGap" : 2,
-         "AssetID" : {
-            "ObjectName" : "Model L",
-            "ItemName" : "Model L YELLOW"
-         },
+         "MaxSpeed" : 2.25,
          "Deceleration" : 2,
-         "StartParameter" : "{ 'terminate' : 0, 'scale' : 0.5 }",
-         "Acceleration" : 1.5,
          "ProfileTypes" : [
             "worker",
             "student",
             "homemaker"
          ]
+      },
+      {
+         "MaxSpeed" : 2.25,
+         "Deceleration" : 2,
+         "ProfileTypes" : [
+            "worker",
+            "student",
+            "homemaker"
+         ],
+         "Length" : 3.85,
+         "Name" : "Model L YELLOW",
+         "Rate" : 15,
+         "Sigma" : 0.5,
+         "Description" : "Pickup",
+         "AssetID" : {
+            "ObjectName" : "Model L",
+            "ItemName" : "Model L YELLOW"
+         },
+         "MinGap" : 2,
+         "StartParameter" : "{ 'terminate' : 1, 'scale' : 0.5 }",
+         "Acceleration" : 1.5
       }
    ]
 }
