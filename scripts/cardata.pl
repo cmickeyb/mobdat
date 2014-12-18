@@ -3,7 +3,8 @@
 use JSON;
 use Text::CSV;
 
-my $scale = 0.6;
+my $scale = 0.55;
+my $accel = 0.2;
 
 my @cars = ();
 my @header = ();
@@ -40,8 +41,8 @@ while (<>)
     @profiles = split(/, */, $car{'ProfileTypes'});
     $data->{'ProfileTypes'} = \@profiles;
     $data->{'Rate'} = $car{'Rate'} + 0;
-    $data->{'Acceleration'} = $car{'Acceleration'} + 0.0;
-    $data->{'Deceleration'} = $car{'Deceleration'} + 0.0;
+    $data->{'Acceleration'} = $accel * ($car{'Acceleration'} + 0.0);
+    $data->{'Deceleration'} = $accel * ($car{'Deceleration'} + 0.0);
     $data->{'Sigma'} = $car{'Sigma'} + 0.0;
     $data->{'Length'} = $car{'Length'} + 0.0;
     $data->{'MinGap'} = $car{'MinGap'} + 0.0;
